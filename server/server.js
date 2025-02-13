@@ -5,6 +5,8 @@ const routes = require("./routes/routes");
 
 const PORT = process.env.PORT || 4000;
 
+app.use(express.json());
+
 app.use("/",routes)
 
 app.get("/",(req,res)=>{
