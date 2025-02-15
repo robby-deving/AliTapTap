@@ -1,11 +1,12 @@
-const bcrypt = require("bcrypt");
-//const jwt = require("jsonwebtoken");
-const User = require("../Models/user.model");
+const { register, login } = require("../controllers/auth.controller.js");
+
 const router = require("express").Router();
 
+router.post("/register", register) ;
 
-/*
-const register = async (req, res) => {
+router.post("/login", login);
+
+/*const register = async (req, res) => {
     try {
         const { username, first_name, last_name, email, password, phone_number, profile_picture, gender } = req.body;
 
@@ -82,11 +83,11 @@ const login = async (req, res) => {
             error: error.message
         });
     }
-};
+};*/
 
-module.exports = { register, login };
-*/
+module.exports = router;
 
+/*
 router.post("/register", async (req, res) => {
     try {
         const hashedPassword = bcrypt.hashSync(req.body.password, 10);
@@ -149,4 +150,4 @@ router.post("/login", async (req, res) => {
     }
 });
 
-module.exports = router;
+module.exports = router;*/
