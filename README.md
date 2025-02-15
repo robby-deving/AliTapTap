@@ -24,6 +24,7 @@ Clone the project from your GitHub repository:
 ```bash
  git clone https://github.com/robby-deving/AliTapTap.git
  cd AliTapTap
+ cd client
 ```
 
 ### **2️⃣ Set Up Your Environment**
@@ -37,7 +38,7 @@ Install the necessary dependencies:
 Start the development environment using Expo:
 
 ```bash
- expo start
+ npm expo start
 ```
 
 Scan the QR code using your mobile device to run the application.
