@@ -1,9 +1,16 @@
-const express = require('express');
-const router = express.Router();
-//do user functions here
+const { updateUser, deleteUser, getAdmin, getAllUsers, getUserStats } = require("../controllers/user.controller");
+const { verifyToken, verifyAdmin } = require("../middleware/verifyToken");
 
-router.get("/get-users",(req,res)=>{ 
-    res.send("User info has been fetch");
-})
+const router = require("express").Router();
+
+router.get("/get-users", (req, res) => {
+    res.send("User has been gotten");
+});
+
+router.put("/update/:id", verifyToken, updateUser);
+router.delete("/delete/:id", verifyAdmin, deleteUser );
+router.get("/get-admin/:id", verifyAdmin, getAdmin);
+router.get("/", verifyToken, getAllUsers);
+router.get("/stats", verifyAdmin, getUserStats);
 
 module.exports = router;

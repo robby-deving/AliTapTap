@@ -63,11 +63,13 @@ Add the following to the `package.json` file inside the `server` directory:
 }
 ```
 
-### **3️⃣ Load environment variables:**
-Add the following to `server.js` at the beginning of the file:
+### **3️⃣ Install Dependencies**
 
-```javascript
-require('dotenv').config();
+```bash
+npm i express mongoose dotenv nodemon
+npm i body-parser # For receiving JSON files
+npm i bcrypt # For encryption of passwords, etc.
+npm i jsonwebtoken # For authentication
 ```
 
 ### **4️⃣ Create a `.env` file**

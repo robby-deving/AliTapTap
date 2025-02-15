@@ -5,6 +5,10 @@ const routes = require("./routes/routes");
 
 const PORT = process.env.PORT || 4000;
 
+// ✅ Add this before defining routes:
+app.use(express.json()); 
+app.use(express.urlencoded({ extended: true }));
+
 app.use("/",routes)
 
 app.get("/",(req,res)=>{
