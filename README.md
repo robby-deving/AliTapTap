@@ -89,6 +89,7 @@ The database must be connected successfully for the application to function prop
 ---
 
 ## **Features**
+
 ✔ **Customizable NFC business cards** 🖌️
 
 ✔ **Seamless order processing** 📦
