@@ -4,24 +4,46 @@ const User = require("../Models/user.model.js");
 
 const register = async (req, res) => {
     try {
-        const hashedPassword = bcrypt.hashSync(req.body.password, 10);
+        const { 
+            username, first_name, last_name, email, password, phone_number, 
+            profile_picture, gender, isAdmin, address, payment_method 
+        } = req.body;
+
+        if (!username || !first_name || !last_name || !email || !password) {
+            return res.status(400).json({ message: "All required fields (username, first_name, last_name, email, password) must be provided." });
+        }
+
+        
+        const hashedPassword = bcrypt.hashSync(password, 10);
+
         const newUser = new User({
-            username: req.body.username,
-            email: req.body.email,
-            password: hashedPassword
-        })
+            username,
+            first_name,
+            last_name,
+            email,
+            password: hashedPassword,
+            phone_number: phone_number || null, 
+            profile_picture: profile_picture || null,  
+            gender: gender || "Other",  
+            isAdmin: isAdmin || false,  
+            address: address || [],  
+            payment_method: Array.isArray(payment_method) 
+                ? payment_method.map(pm => typeof pm === "object" ? pm.type : pm) 
+                : [] // Ensure it's an array of strings
+        });
 
         await newUser.save();
 
-        const {password, ...info} = newUser._doc;
-        res.status(200).json ({
-            message: "User created successfully",
-            data: info
+        const { password: _, ...userInfo } = newUser._doc;
+
+        res.status(201).json({
+            message: "User registered successfully",
+            data: userInfo
         });
     } catch (error) {
         console.log(error);
         res.status(500).json({
-            message: "User creation failed",
+            message: "User registration failed",
             error: error
         });
     }
