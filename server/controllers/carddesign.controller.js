@@ -1,11 +1,10 @@
 const CardDesign = require("../Models/carddesign.model");
-const User = require("../Models/user.model"); // Import User model
+const User = require("../Models/user.model");
 
 const createCardDesign = async (req, res) => {
   try {
     const { front_image, back_image, categories, created_by, details } = req.body;
 
-    // Ensure the user exists
     const userExists = await User.findById(created_by);
     if (!userExists) {
       return res.status(400).json({ message: "Invalid user ID, user not found" });
@@ -19,7 +18,6 @@ const createCardDesign = async (req, res) => {
       details,
     });
 
-    // Save the new card design
     await newCardDesign.save();
     res.status(201).json({
       message: "Card design created successfully",
@@ -73,7 +71,7 @@ const getCardDesignById = async (req, res) => {
 
 const updateCardDesign = async (req, res) => {
   try {
-    const { created_by, ...updateData } = req.body; // Prevent updating created_by
+    const { created_by, ...updateData } = req.body; 
 
     const updatedCardDesign = await CardDesign.findByIdAndUpdate(req.params.id, updateData, {
       new: true,
