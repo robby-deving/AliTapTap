@@ -70,30 +70,49 @@ const getCardDesignById = async (req, res) => {
 };
 
 const updateCardDesign = async (req, res) => {
-  try {
-    const { created_by, ...updateData } = req.body; 
-
-    const updatedCardDesign = await CardDesign.findByIdAndUpdate(req.params.id, updateData, {
-      new: true,
-    });
-
-    if (!updatedCardDesign) {
-      return res.status(404).json({ message: "Card design not found" });
+    try {
+      const { details } = req.body;
+  
+      const existingCardDesign = await CardDesign.findById(req.params.id);
+      if (!existingCardDesign) {
+        return res.status(404).json({ message: "Card design not found" });
+      }
+  
+      // Merge existing details with new ones (preserve other fields)
+      const updatedDetails = {
+        ...existingCardDesign.details,
+        ...details, 
+        front_info: {
+          ...existingCardDesign.details.front_info,
+          ...(details.front_info || {}) 
+        },
+        back_info: {
+          ...existingCardDesign.details.back_info,
+          ...(details.back_info || {}) 
+        }
+      };
+  
+      // Update the card design
+      const updatedCardDesign = await CardDesign.findByIdAndUpdate(
+        req.params.id,
+        { $set: { details: updatedDetails } }, 
+        { new: true }
+      );
+  
+      res.status(200).json({
+        message: "Card design updated successfully",
+        data: updatedCardDesign,
+      });
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({
+        message: "Card design update failed",
+        error: err,
+      });
     }
-
-    res.status(200).json({
-      message: "Card design updated successfully",
-      data: updatedCardDesign,
-    });
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({
-      message: "Card design update failed",
-      error: err,
-    });
-  }
-};
-
+  };
+  
+  
 const deleteCardDesign = async (req, res) => {
   try {
     const deletedCardDesign = await CardDesign.findByIdAndUpdate(
