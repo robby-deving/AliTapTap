@@ -76,8 +76,9 @@ npm i jsonwebtoken # For authentication
 Inside the `server` directory, create a `.env` file and add:
 
 ```
-DB_URL=mongodb+srv://admin2:newpassword@alitaptap.uu5j7.mongodb.net/AliTapTap
+DB_URL=mongodb+srv://admin2:newpassword@alitaptap.uu5j7.mongodb.net/AliTapTapdb
 PORT=4000
+JWT_KEY = crashout
 ```
 
 ### **5️⃣ Start the Server**
