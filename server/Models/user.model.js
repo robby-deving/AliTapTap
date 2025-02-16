@@ -50,7 +50,9 @@ const userModel = new Schema(
     ],
     payment_method: [
       {
-        type: { type: String },
+        type: String,
+        last4: String,
+        exp_date: String,
       },
     ],
     deleted_at: {
