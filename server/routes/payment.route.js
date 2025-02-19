@@ -22,7 +22,9 @@ router.post("/payment-intents", async (req, res) => {
                         currency: 'PHP',
                         description,
                         payment_method_allowed: ['card', 'gcash', 'grab_pay'],
-                        capture_type: 'automatic'
+                        capture_type: 'automatic',
+                        return_url: 'http://yourapp.com/success',
+                        cancel_url: 'http://yourapp.com/cancel'
                     }
                 }
             })
@@ -69,6 +71,9 @@ router.put("/payment-intents/:intentId/payment-methods/:methodId", async (req, r
             data: result.data
         });
 
+        console.log("Result:", result);
+        
+
     } catch (error) {
         res.status(500).json({
             success: false,
@@ -93,7 +98,7 @@ router.post("/payment-methods", async (req, res) => {
                 data: {
                     attributes: {
                         type,
-                        details
+                        details,
                     }
                 }
             })
