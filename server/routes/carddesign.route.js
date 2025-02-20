@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const cardDesignController = require('../controllers/carddesign.controller.js');
-const User = require('../Models/user.model'); 
 
 // Create a new card design
 router.post('/create', cardDesignController.createCardDesign);
