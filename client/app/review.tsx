@@ -42,13 +42,20 @@ export default function Review() {
 
   const handlePaymentMethod = async () => {
     try {
-      if (!parsedPaymentData?.cardDetails) {
-        throw new Error('No payment details found');
-      }
       setIsLoading(true);
-      const methodData = await createPaymentMethod(parsedPaymentData.cardDetails);
+  
+      let methodData;
+      if (parsedPaymentData?.paymentMethod === 'card') {
+        if (!parsedPaymentData?.cardDetails) {
+          throw new Error('No card details found');
+        }
+        methodData = await createPaymentMethod(parsedPaymentData.cardDetails);
+      } else {
+        methodData = await createPaymentMethod({ type: parsedPaymentData?.paymentMethod });
+      }
+  
       if (!methodData.success) throw new Error('Failed to create payment method');
-      
+  
       setPaymentMethodId(methodData.data.id);
       Alert.alert('Success', `Payment Method Created: ${methodData.data.id}`);
     } catch (error) {
@@ -57,6 +64,7 @@ export default function Review() {
       setIsLoading(false);
     }
   };
+  
 
   const handleAttachPayment = async () => {
     try {

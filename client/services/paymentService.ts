@@ -1,10 +1,15 @@
 import axios from "axios";
 
-interface PaymentMethodDetails {
+interface CardDetails {
   cardHolderName: string;
   cardNumber: string;
   expiryDate: string;
   cvv: string;
+}
+
+interface PaymentMethodDetails {
+  type: 'card' | 'gcash' | 'grab_pay';
+  cardDetails?: CardDetails;
 }
 
 // Replace localhost with your computer's IP address
@@ -24,20 +29,21 @@ export const createPaymentIntent = async (amount: number, description: string) =
   }
 };
 
-export const createPaymentMethod = async (cardDetails: PaymentMethodDetails) => {
+export const createPaymentMethod = async (paymentDetails: PaymentMethodDetails) => {
   console.log('Creating payment method');
 
   try {
-    const [month, year] = cardDetails.expiryDate.split('/');
-    const response = await axios.post(`${BASE_URL}/api/v1/pay/payment-methods`, {
-      type: 'card',
-      details: {
-        card_number: cardDetails.cardNumber.replace(/\s/g, ''),
+    let requestBody: any = { type: paymentDetails.type };
+
+    if (paymentDetails.type === 'card' && paymentDetails.cardDetails) {
+      const [month, year] = paymentDetails.cardDetails.expiryDate.split('/');
+      requestBody.details = {
+        card_number: paymentDetails.cardDetails.cardNumber.replace(/\s/g, ''),
         exp_month: parseInt(month),
-        exp_year: parseInt('20' + year), // Add '20' prefix for full year
-        cvc: cardDetails.cvv,
+        exp_year: parseInt('20' + year),
+        cvc: paymentDetails.cardDetails.cvv,
         billing: {
-          name: cardDetails.cardHolderName,
+          name: paymentDetails.cardDetails.cardHolderName,
           email: 'customer@example.com',
           phone: '09123456789',
           address: {
@@ -47,8 +53,10 @@ export const createPaymentMethod = async (cardDetails: PaymentMethodDetails) => 
             country: 'PH'
           }
         }
-      }
-    });
+      };
+    }
+
+    const response = await axios.post(`${BASE_URL}/api/v1/pay/payment-methods`, requestBody);
 
     console.log('Payment method created:', response.data);
     return response.data;
@@ -57,6 +65,7 @@ export const createPaymentMethod = async (cardDetails: PaymentMethodDetails) => 
     throw error;
   }
 };
+
 
 export const attachPaymentMethod = async (intentId: string, methodId: string) => {
   console.log('Attaching payment method:', { intentId, methodId });
