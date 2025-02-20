@@ -12,6 +12,7 @@ import { useRouter } from 'expo-router';
 import InputField from '../components/InputField';
 import StepperComponent from '../components/StepperComponent';
 import PaymentMethodSelect from '../components/PaymentMethodSelect';
+import { Header } from '../components/Header';
 
 export default function Payment() {
   const [cardHolderName, setCardHolderName] = useState('');
@@ -22,6 +23,35 @@ export default function Payment() {
 
   const [paymentMethod, setPaymentMethod] = useState('');
 
+  const handleContinue = () => {
+    if (paymentMethod === 'card') {
+      // Validate card inputs
+      if (!cardHolderName || !cardNumber || !expiryDate || !cvv) {
+        alert('Please fill in all card details');
+        return;
+      }
+    }
+
+    // Prepare payment data
+    const paymentData = {
+      paymentMethod,
+      cardDetails: paymentMethod === 'card' ? {
+        cardHolderName,
+        cardNumber,
+        expiryDate,
+        cvv
+      } : null
+    };
+
+    // Navigate to review with payment data
+    router.push({
+      pathname: '/review',
+      params: {
+        paymentData: JSON.stringify(paymentData)
+      }
+    });
+  };
+
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -29,19 +59,8 @@ export default function Payment() {
     >
       <View className="flex-1 relative bg-white">
         {/* Header */}
-        <View className="bg-[#231F20] w-full p-4 flex flex-row items-center pt-20">
-        <TouchableOpacity onPress={() => router.back()}>
-          <Image
-            source={require('../assets/images/backBTN.png')}
-            style={{ width: 20, height: 20 }}
-            className="mt-2 mr-[155]"
-          />
-        </TouchableOpacity>
-        <Image
-          source={require('../assets/images/logo.png')}
-          style={{ width: 27.61, height: 38 }}
-        />
-      </View>
+        <Header />
+
 
         {/* Scrollable Content */}
         <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
@@ -112,10 +131,13 @@ export default function Payment() {
         </ScrollView>
 
         {/* Fixed Bottom Button */}
-        <View className="absolute bottom-0 w-full p-10 mb-2 bg-white">
-          <TouchableOpacity className="bg-[#FDCB07] w-full p-4 rounded">
+        <View className="absolute bottom-0 w-full p-10  bg-white">
+          <TouchableOpacity 
+            className="bg-[#FDCB07] w-full p-4 rounded"
+            onPress={handleContinue}
+          >
             <Text className="text-white text-center text-xl font-semibold">
-              Continue
+              Continue to Review
             </Text>
           </TouchableOpacity>
         </View>

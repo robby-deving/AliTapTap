@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Image } from 'react-native';
+import { View, Text, Image, StyleSheet } from 'react-native';
 
 interface StepperProps {
   currentStep: 'shipping' | 'payment' | 'review';
@@ -39,21 +39,39 @@ const StepperComponent: React.FC<StepperProps> = ({ currentStep }) => {
               source={currentStep === step.id ? step.activeIcon : step.inactiveIcon}
               style={step.iconSize}
             />
-            <Text 
-              className={`text-base font-semibold ${
-                currentStep === step.id ? 'text-[#FDCB07]' : 'text-black'
-              }`}
-            >
+            <Text style={[
+              styles.stepText,
+              currentStep === step.id ? styles.activeText : styles.inactiveText
+            ]}>
               {step.title}
             </Text>
           </View>
           {index < steps.length - 1 && (
-            <View className="bg-[#FFE300] h-[0.125rem] w-[3rem] mt-4 mx-2" />
+            <View style={styles.line} />
           )}
         </React.Fragment>
       ))}
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  stepText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  activeText: {
+    color: '#FDCB07',
+  },
+  inactiveText: {
+    color: '#000000',
+  },
+  line: {
+    backgroundColor: '#FFE300',
+    height: 2,
+    width: 30, // equivalent to 3rem
+    marginHorizontal: 8,
+  },
+});
 
 export default StepperComponent;

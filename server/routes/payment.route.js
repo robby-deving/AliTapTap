@@ -1,8 +1,19 @@
 const express = require('express');
 const router = express.Router();
+const cors = require('cors');
 require('dotenv').config();
 
 const PAYMONGO_SECRET_KEY = process.env.PAYMONGO_SECRET_KEY;
+
+const corsOptions = {
+  origin: ['http://localhost:8081', 'http://localhost:19006'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+};
+
+// Apply CORS to payment routes
+router.use(cors(corsOptions));
 
 // Create payment intent
 router.post("/payment-intents", async (req, res) => {
