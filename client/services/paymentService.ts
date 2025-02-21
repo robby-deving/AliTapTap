@@ -34,6 +34,7 @@ export const createPaymentMethod = async (paymentDetails: PaymentMethodDetails) 
 
   try {
     let requestBody: any = { type: paymentDetails.type };
+console.log('paymentDetails',paymentDetails);
 
     if (paymentDetails.type === 'card' && paymentDetails.cardDetails) {
       const [month, year] = paymentDetails.cardDetails.expiryDate.split('/');
@@ -55,6 +56,7 @@ export const createPaymentMethod = async (paymentDetails: PaymentMethodDetails) 
         }
       };
     }
+console.log('requestBody',requestBody);
 
     const response = await axios.post(`${BASE_URL}/api/v1/pay/payment-methods`, requestBody);
 

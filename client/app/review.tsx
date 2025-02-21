@@ -4,10 +4,11 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import StepperComponent from '../components/StepperComponent';
 import { Header } from '../components/Header';
 import { createPaymentIntent, createPaymentMethod, attachPaymentMethod } from '../services/paymentService';
+import { WebView } from 'react-native-webview';
 
 interface PaymentData {
-  paymentMethod: string;
-  cardDetails: PaymentMethodDetails;
+  paymentMethod: 'card' | 'gcash' | 'grab_pay';
+  cardDetails?: PaymentMethodDetails;
 }
 
 interface PaymentMethodDetails {
@@ -22,66 +23,99 @@ export default function Review() {
   const { paymentData } = useLocalSearchParams();
   const parsedPaymentData: PaymentData | null = paymentData ? JSON.parse(paymentData as string) : null;
   const [isLoading, setIsLoading] = useState(false);
-  const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
-  const [paymentMethodId, setPaymentMethodId] = useState<string | null>(null);
+  const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
 
-  const handlePaymentIntent = async () => {
+  const handleCheckout = async () => {
     try {
       setIsLoading(true);
-      const intentData = await createPaymentIntent(10000,'test');
+
+      // Step 1: Create Payment Intent
+      const intentData = await createPaymentIntent(10000, 'test');
       if (!intentData.success) throw new Error('Failed to create payment intent');
       
-      setPaymentIntentId(intentData.data.paymentIntentId);
-      Alert.alert('Success', `Payment Intent Created: ${intentData.data.paymentIntentId}`);
-    } catch (error) {
-      Alert.alert('Error', error.message || 'Failed to create payment intent');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      const paymentIntentId = intentData.data.paymentIntentId;
+      console.log('Payment Intent Created:', paymentIntentId);
 
-  const handlePaymentMethod = async () => {
-    try {
-      setIsLoading(true);
-  
+      // Step 2: Create Payment Method
       let methodData;
       if (parsedPaymentData?.paymentMethod === 'card') {
         if (!parsedPaymentData?.cardDetails) {
           throw new Error('No card details found');
         }
-        methodData = await createPaymentMethod(parsedPaymentData.cardDetails);
+        methodData = await createPaymentMethod({
+          type: 'card',
+          cardDetails: parsedPaymentData.cardDetails
+        });
+      } else if (parsedPaymentData?.paymentMethod) {
+        methodData = await createPaymentMethod({
+          type: parsedPaymentData.paymentMethod
+        });
       } else {
-        methodData = await createPaymentMethod({ type: parsedPaymentData?.paymentMethod });
+        throw new Error('Invalid payment method');
       }
-  
-      if (!methodData.success) throw new Error('Failed to create payment method');
-  
-      setPaymentMethodId(methodData.data.id);
-      Alert.alert('Success', `Payment Method Created: ${methodData.data.id}`);
-    } catch (error) {
-      Alert.alert('Error', error.message || 'Failed to create payment method');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
 
-  const handleAttachPayment = async () => {
-    try {
-      if (!paymentIntentId || !paymentMethodId) {
-        throw new Error('Missing payment intent or method ID');
-      }
-      setIsLoading(true);
-      const attachData = await attachPaymentMethod(paymentIntentId, paymentMethodId);
-      if (!attachData.success) throw new Error('Failed to attach payment method');
+      if (!methodData.success) throw new Error('Failed to create payment method');
       
-      Alert.alert('Success', 'Payment method attached successfully!');
+      const paymentMethodId = methodData.data.id;
+      console.log('Payment Method Created:', paymentMethodId);
+
+      // Step 3: Attach Payment Method to Intent
+      const result = await attachPaymentMethod(paymentIntentId, paymentMethodId);
+      
+      if (result.data?.attributes?.status === 'awaiting_next_action' && 
+        result.data?.attributes?.next_action?.redirect?.url) {
+      // For e-wallets: redirect to payment page
+      setRedirectUrl(result.data.attributes.next_action.redirect.url);
+    } else if (result.data?.attributes?.status === 'succeeded') {
+      // For cards: direct success
+      router.push('/success');
+    } else {
+      throw new Error('Payment failed or invalid status received');
+    }
+
     } catch (error) {
-      Alert.alert('Error', error.message || 'Failed to attach payment method');
+      Alert.alert('Error', error.message || 'Payment process failed');
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (redirectUrl) {
+    return (
+      <View className="flex-1 bg-white">
+        <Header />
+        <View className="flex-1">
+          <WebView 
+            source={{ uri: redirectUrl }}
+            style={{ flex: 1 }}
+            startInLoadingState={true}
+            renderLoading={() => (
+              <View className="absolute inset-0 bg-white justify-center items-center">
+                <Text className="text-gray-600">Loading payment page...</Text>
+              </View>
+            )}
+            onNavigationStateChange={(navState) => {
+              // Handle return URL from payment
+              if (navState.url.includes('success')) {
+                setRedirectUrl(null);
+                router.push('/success');
+              } else if (navState.url.includes('cancel')) {
+                setRedirectUrl(null);
+                Alert.alert('Payment Cancelled', 'Your payment was cancelled');
+              }
+            }}
+            onError={() => {
+              Alert.alert(
+                'Error',
+                'Failed to load payment page',
+                [{ text: 'OK', onPress: () => setRedirectUrl(null) }]
+              );
+            }}
+          />
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 relative bg-white">
@@ -96,49 +130,28 @@ export default function Review() {
 
         <View className="mt-8">
           <Text className="text-lg font-semibold mb-4">Payment Details</Text>
-          <Text>Card Holder: {parsedPaymentData?.cardDetails?.cardHolderName}</Text>
-          <Text>Card Number: •••• •••• •••• {parsedPaymentData?.cardDetails?.cardNumber.slice(-4)}</Text>
-          <Text>Expiry Date: {parsedPaymentData?.cardDetails?.expiryDate}</Text>
+          {parsedPaymentData?.paymentMethod === 'card' ? (
+            <>
+              <Text>Card Holder: {parsedPaymentData?.cardDetails?.cardHolderName}</Text>
+              <Text>Card Number: •••• •••• •••• {parsedPaymentData?.cardDetails?.cardNumber.slice(-4)}</Text>
+              <Text>Expiry Date: {parsedPaymentData?.cardDetails?.expiryDate}</Text>
+            </>
+          ) : (
+            <Text className="capitalize">Payment Method: {parsedPaymentData?.paymentMethod}</Text>
+          )}
         </View>
       </View>
 
-      <View className="absolute bottom-0 w-full p-10 bg-white space-y-4">
+      <View className="absolute bottom-0 w-full p-10 bg-white">
         <TouchableOpacity
           className={`bg-[#FDCB07] w-full p-4 rounded ${isLoading ? 'opacity-50' : ''}`}
-          onPress={handlePaymentIntent}
+          onPress={handleCheckout}
           disabled={isLoading}
         >
           <Text className="text-white text-center text-xl font-semibold">
-            {isLoading ? 'Creating...' : 'Create Payment Intent'}
+            {isLoading ? 'Processing Payment...' : 'Checkout'}
           </Text>
         </TouchableOpacity>
-
-        <TouchableOpacity
-          className={`bg-[#FDCB07] w-full p-4 rounded ${isLoading ? 'opacity-50' : ''}`}
-          onPress={handlePaymentMethod}
-          disabled={isLoading}
-        >
-          <Text className="text-white text-center text-xl font-semibold">
-            {isLoading ? 'Creating...' : 'Create Payment Method'}
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          className={`bg-[#FDCB07] w-full p-4 rounded ${isLoading ? 'opacity-50' : ''}`}
-          onPress={handleAttachPayment}
-          disabled={isLoading || !paymentIntentId || !paymentMethodId}
-        >
-          <Text className="text-white text-center text-xl font-semibold">
-            {isLoading ? 'Attaching...' : 'Attach Payment Method'}
-          </Text>
-        </TouchableOpacity>
-
-        {paymentIntentId && (
-          <Text className="text-xs text-gray-600">Intent ID: {paymentIntentId}</Text>
-        )}
-        {paymentMethodId && (
-          <Text className="text-xs text-gray-600">Method ID: {paymentMethodId}</Text>
-        )}
       </View>
     </View>
   );
