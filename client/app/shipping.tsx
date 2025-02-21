@@ -84,14 +84,14 @@ export default function Shipping() {
 
         {/* Scrollable Content */}
         <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-          <View className="p-10 w-full items-center">
+          <View className="p-8 w-full items-center">
             <Text className="font-semibold text-3xl border-b-4 pb-2 border-[#FFE300]">
               Checkout
             </Text>
 
             <View className="w-full flex flex-col items-center mt-5">
               <StepperComponent currentStep="shipping" />
-              <Text className="mt-5 mb-5 text-[#696969]">
+              <Text className="mt-8 mb-6 text-[#696969]">
                 Enter Shipping Details
               </Text>
 
@@ -133,7 +133,7 @@ export default function Shipping() {
                     </View>
                   ))
                 ) : (
-                  <Text className="text-sm text-gray-400">
+                  <Text className="text-sm text-gray-400 mb-2">
                     No address added
                   </Text>
                 )}
