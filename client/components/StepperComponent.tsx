@@ -12,7 +12,7 @@ const StepperComponent: React.FC<StepperProps> = ({ currentStep }) => {
       title: 'Shipping',
       activeIcon: require('../assets/images/Tshipping.png'),
       inactiveIcon: require('../assets/images/Fshipping.png'),
-      iconSize: { width: 29, height: 20 }
+      iconSize: { width: 29, height: 20 },
     },
     {
       id: 'payment',
@@ -36,10 +36,12 @@ const StepperComponent: React.FC<StepperProps> = ({ currentStep }) => {
         <React.Fragment key={step.id}>
           <View className="flex flex-col items-center">
             <Image
+            className="mb-2"
               source={currentStep === step.id ? step.activeIcon : step.inactiveIcon}
               style={step.iconSize}
             />
-            <Text style={[
+            <Text
+            style={[
               styles.stepText,
               currentStep === step.id ? styles.activeText : styles.inactiveText
             ]}>
