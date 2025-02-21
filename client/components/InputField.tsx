@@ -50,10 +50,10 @@ const InputField: React.FC<InputFieldProps> = ({
   };
 
   return (
-    <View className="w-full mb-4">
+    <View className="w-full mb-2">
       <Text className="text-base font-semibold mb-2">{label}</Text>
       <TextInput
-        className="w-full p-5 border border-gray-300 rounded-lg bg-white"
+        className="w-full p-4 border border-gray-300 rounded-lg bg-white"
         placeholder={placeholder}
         placeholderTextColor="#9CA3AF"
         value={value}
