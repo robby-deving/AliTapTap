@@ -19,7 +19,7 @@ import { Asset } from "expo-asset";
 export default function Shipping() {
   const [fullName, setFullName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [shippingAddress, setShippingAddress] = useState("");
+  const [shippingAddresses, setShippingAddresses] = useState<string[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
 
   // Address fields
@@ -37,21 +37,30 @@ export default function Shipping() {
       return;
     }
 
-    const fullAddress = `${street}, ${barangay}, ${city}, ${province}, ${zipCode}`;
-    setShippingAddress(fullAddress);
+    const newAddress = `${street}, ${barangay}, ${city}, ${province}, ${zipCode}`;
+    setShippingAddresses((prevAddresses) => [...prevAddresses, newAddress]); // Correctly update state
+
+    // Reset fields
+    setStreet("");
+    setBarangay("");
+    setCity("");
+    setProvince("");
+    setZipCode("");
     setModalVisible(false);
   };
 
   const handleContinue = () => {
-    if (!fullName || !phoneNumber || !shippingAddress) {
-      alert("Please enter your full name, phone number, and shipping address");
+    if (!fullName || !phoneNumber || shippingAddresses.length === 0) {
+      alert(
+        "Please enter your full name, phone number, and at least one shipping address"
+      );
       return;
     }
 
     const shippingData = {
       fullName,
       phoneNumber,
-      shippingAddress,
+      shippingAddresses, // Pass the array instead of a single value
     };
 
     router.push({
@@ -113,33 +122,31 @@ export default function Shipping() {
                 <Text className="text-black font-semibold mb-2 text-base">
                   Shipping Address
                 </Text>
+
+                {shippingAddresses.length > 0 ? (
+                  shippingAddresses.map((address, index) => (
+                    <View
+                      key={index}
+                      className="border border-gray-200 p-4 rounded-lg bg-white mb-2"
+                    >
+                      <Text className="text-black text-sm">{address}</Text>
+                    </View>
+                  ))
+                ) : (
+                  <Text className="text-sm text-gray-400">
+                    No address added
+                  </Text>
+                )}
+
                 <TouchableOpacity
-                  className="border border-gray-200 p-4 rounded-lg bg-white flex-row justify-between items-center"
+                  className="border border-gray-200 p-4 rounded-lg w-full bg-white flex-row justify-center items-center"
                   onPress={() => setModalVisible(true)}
                 >
-                  <Text className="text-sm text-gray-400">
-                    {shippingAddress ? (
-                      <Text className="text-black">{shippingAddress}</Text>
-                    ) : (
-                      "Enter Shipping Address"
-                    )}
+                  <Text className="text-sm text-gray-500">
+                    + Add Another Address
                   </Text>
-                  <Image
-                    source={{ uri: groupIcon }}
-                    style={{ width: 18, height: 18 }}
-                  />
                 </TouchableOpacity>
               </View>
-
-              {/* Add Another Address Box */}
-              <TouchableOpacity
-                className="border border-gray-200 p-4 rounded-lg w-full bg-white flex-row justify-center items-center"
-                onPress={() => setModalVisible(true)}
-              >
-                <Text className="text-sm text-gray-500">
-                  + Add Address
-                </Text>
-              </TouchableOpacity>
             </View>
           </View>
 
