@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
   },
   line: {
     backgroundColor: '#FFE300',
-    height: 2,
+    height: 3,
     width: 30, // equivalent to 3rem
     marginHorizontal: 8,
   },
