@@ -72,7 +72,7 @@ router.put("/payment-intents/:intentId/payment-methods/:methodId", async (req, r
                 'Content-Type': 'application/json',
                 'Authorization': `Basic ${Buffer.from(PAYMONGO_SECRET_KEY).toString('base64')}`
             },
-            body: JSON.stringify({data: {attributes: {payment_method: methodId}}})
+            body: JSON.stringify({data: {attributes: {payment_method: methodId, return_url: 'http://yourapp.com/success'}}})
         });  
 
         const result = await response.json();
