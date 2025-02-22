@@ -19,7 +19,7 @@ export default function Index() {
         <Text className="text-2xl font-semibold mb-10">Welcome to AliTapTap</Text>
         <TouchableOpacity 
           className="bg-[#FDCB07] w-full p-4 rounded"
-          onPress={() => router.push('/payment')}
+          onPress={() => router.push('/edit')}
         >
           <Text className="text-white text-center text-xl font-semibold">
             Start Payment
