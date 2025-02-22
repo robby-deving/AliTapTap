@@ -168,14 +168,8 @@ export default function Shipping() {
 
       {/* Address Modal */}
       <Modal visible={modalVisible} transparent={true} animationType="slide">
-        <View
-          style={{
-            flex: 1,
-            justifyContent: "flex-end",
-            backgroundColor: "rgba(0, 0, 0, 0.3)", // Adjust the last value for transparency
-          }}
-        >
-          <View className="bg-white w-full h-4/6 p-6 rounded-t-2xl">
+      <View className="flex-1 justify-end bg-black/30">
+          <View className="bg-white w-full h-[600px] p-6 rounded-t-2xl">
             <Text className="text-base font-semibold mb-9 text-center">
               Add Address
             </Text>
