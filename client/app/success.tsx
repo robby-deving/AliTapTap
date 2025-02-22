@@ -32,6 +32,7 @@ const SuccessScreen: React.FC = () => {
                 <Image 
                     source={require('../assets/images/success.png')} 
                     style={styles.successImage}
+                    resizeMode="contain"
                 />
                 <Text style={styles.successText}>Order Success!</Text>
             </View>
@@ -96,17 +97,17 @@ const styles = StyleSheet.create({
     },
     successContainer: {
         alignItems: 'center',
-        marginTop: 20,
+        marginTop: 40,
     },
     successImage: {
-        width: 60,
-        height: 60,
-        marginBottom: 10,
+        width: 120,  // Increased image size
+        height: 120, // Increased image size
+        marginBottom: 15,
     },
     successText: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: 'bold',
-        color: '#FFC107',
+        color: '#FEE308', // Updated to requested color
     },
     detailsContainer: {
         width: '90%',
