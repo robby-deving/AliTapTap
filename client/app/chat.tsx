@@ -5,10 +5,10 @@ import io, { Socket } from "socket.io-client";
 export default function ChatScreen() {
   const [chatMessage, setChatMessage] = useState("");
   const [socket, setSocket] = useState<Socket | null>(null);
-  const [messages, setMessages] = useState<string[]>([]); // ✅ Store messages
+  const [messages, setMessages] = useState<string[]>([]);
 
   useEffect(() => {
-    const newSocket = io("http://192.168.1.7:3000"); // ✅ Make sure server is reachable
+    const newSocket = io("http://192.168.1.7:3000");
     setSocket(newSocket);
 
     newSocket.on("connect", () => {
@@ -16,7 +16,7 @@ export default function ChatScreen() {
     });
 
     newSocket.on("message", (msg) => {
-      setMessages((prevMessages) => [...prevMessages, msg]); // ✅ Update chat messages
+      setMessages((prevMessages) => [...prevMessages, msg]);
     });
 
     return () => {
@@ -26,7 +26,7 @@ export default function ChatScreen() {
 
   const submitChatMessage = () => {
     if (socket && chatMessage.trim() !== "") {
-      socket.emit("message", chatMessage); // ✅ Match event name
+      socket.emit("message", chatMessage);
       setChatMessage("");
     }
   };
