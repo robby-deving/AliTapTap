@@ -1,6 +1,6 @@
-import React from 'react';
-import { Text, View, Image, TouchableOpacity } from 'react-native';
-import { useRouter } from 'expo-router';
+import React from "react";
+import { Text, View, Image, TouchableOpacity } from "react-native";
+import { useRouter } from "expo-router";
 
 export default function Index() {
   const router = useRouter();
@@ -9,7 +9,7 @@ export default function Index() {
     <View className="flex-1 relative bg-white">
       <View className="bg-[#231F20] w-full p-4 flex flex-row items-center pt-20">
         <Image
-          source={require('../assets/images/logo.png')}
+          source={require("../assets/images/logo.png")}
           style={{ width: 27.61, height: 38 }}
           className="mx-auto"
         />
@@ -23,6 +23,16 @@ export default function Index() {
         >
           <Text className="text-white text-center text-xl font-semibold">
             Start Payment
+          </Text>
+        </TouchableOpacity>
+
+        {/* Go to Chat Button */}
+        <TouchableOpacity
+          className="bg-[#007AFF] w-full p-4 rounded"
+          onPress={() => router.push("/chat")} // Navigate to Chat
+        >
+          <Text className="text-white text-center text-xl font-semibold">
+            Go to Chat
           </Text>
         </TouchableOpacity>
       </View>
