@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require ("express");
 const dbConnection = require("./dbConnect/dbConnection");
 const cors = require('cors');
@@ -13,6 +14,10 @@ app.use(cors({
     credentials: true
   }));
 app.use(express.json());
+
+// ✅ Add this before defining routes:
+app.use(express.json()); 
+app.use(express.urlencoded({ extended: true }));
 
 app.use("/",routes)
 

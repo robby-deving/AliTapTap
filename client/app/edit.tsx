@@ -4,6 +4,8 @@ import { Header } from '@/components/Header';
 import * as ImagePicker from 'expo-image-picker';
 import { GestureHandlerRootView, PinchGestureHandler, State } from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
+
 
 interface SavedItem {
     id: number;
@@ -25,7 +27,7 @@ interface DraggableItem {
   selected: boolean;
 }
 
-export default function Edit() {  
+export default function backEdit() {  
     const [isPressed, setIsPressed] = useState(false);
     const [items, setItems] = useState<DraggableItem[]>([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -40,6 +42,8 @@ export default function Edit() {
     const image = 'https://static.vecteezy.com/system/resources/thumbnails/006/296/343/small/abstract-background-for-posters-banners-promotions-business-cards-etc-with-a-combination-of-green-and-yellow-gradient-vector.jpg'
 
     const { width, height } = Dimensions.get('window');
+
+    const router = useRouter();
     useEffect(() => {
         loadSavedItems();
       }, []);
@@ -371,7 +375,7 @@ export default function Edit() {
                         className={`${isPressed ? 'bg-white border border-[#FDCB07]' : 'bg-[#FDCB07]'} w-full p-4 rounded`}
                         onPressIn={() => setIsPressed(true)}
                         onPressOut={() => setIsPressed(false)}
-                        onPress={saveText}
+                        onPress={() => {saveText(); router.push('/backEdit')}}
                     >
                         <Text className={`${isPressed ? 'text-[#FDCB07]' : 'text-white'} text-center text-xl font-semibold`}>Next</Text>
                     </TouchableOpacity>
