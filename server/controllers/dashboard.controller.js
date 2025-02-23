@@ -181,6 +181,54 @@ const getUnverifiedOrders = async (req, res) => {
     }
 };
 
+const getMonthlySales = async (req, res) => {
+    try {
+        // Get the current year
+        const currentYear = new Date().getFullYear();
+
+        // Aggregate sales data grouped by month
+        const salesData = await Transaction.aggregate([
+            {
+                $match: {
+                    status: "Completed",
+                    transaction_date: {
+                        $gte: new Date(`${currentYear}-01-01`),
+                        $lte: new Date(`${currentYear}-12-31`)
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: { $month: "$transaction_date" }, // Group by month
+                    totalRevenue: { $sum: "$total_amount" } // Sum revenue per month
+                }
+            },
+            {
+                $sort: { _id: 1 } // Sort by month
+            }
+        ]);
+
+        // Define month names
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+        // Create an array for all 12 months with default revenue 0
+        const monthlySales = Array.from({ length: 12 }, (_, index) => ({
+            month: monthNames[index],
+            revenue: 0
+        }));
+
+        // Map the aggregated sales data to the array
+        salesData.forEach(data => {
+            monthlySales[data._id - 1].revenue = data.totalRevenue;
+        });
+
+        res.status(200).json({ success: true, data: monthlySales });
+    } catch (error) {
+        console.error("Error fetching sales data:", error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+};
+
 
 module.exports = {
     getTotalOrders,
@@ -188,5 +236,6 @@ module.exports = {
     getTotalUsers,
     getBestSellingMaterials,
     getRecentTransactions,
-    getUnverifiedOrders
+    getUnverifiedOrders,
+    getMonthlySales
 };

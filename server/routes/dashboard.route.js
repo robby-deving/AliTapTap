@@ -14,5 +14,7 @@ router.get("/best-selling-materials", dashboardController.getBestSellingMaterial
 router.get("/recent-transactions", dashboardController.getRecentTransactions);
 // Get unverified orders
 router.get("/unverified-orders", dashboardController.getUnverifiedOrders);
+// Get monthly sales for graph
+router.get("/sales-graph", dashboardController.getMonthlySales);
 
 module.exports = router;
