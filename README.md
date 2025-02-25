@@ -52,6 +52,17 @@ Windows (Command Prompt):
  ipconfig | findstr /i "IPv4 Address"
 ```
 
+Once you have your local IP address, update the `chat.tsx` file from client/app folder:
+
+```tsx
+useEffect(() => {
+    const newSocket = io("http://YOUR_LOCAL_IP:4000");
+    setSocket(newSocket);
+});
+```
+
+Replace `YOUR_LOCAL_IP` with the actual IP address from the command output.
+
 Start the development environment using Expo:
 
 ```bash
