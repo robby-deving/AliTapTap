@@ -8,7 +8,7 @@ export default function ChatScreen() {
   const [messages, setMessages] = useState<string[]>([]);
 
   useEffect(() => {
-    const newSocket = io("http://192.168.1.7:3000");
+    const newSocket = io("http://192.168.1.16:4000");
     setSocket(newSocket);
 
     newSocket.on("connect", () => {
