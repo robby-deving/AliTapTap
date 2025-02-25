@@ -9,17 +9,30 @@ const createCardDesign = async (req, res) => {
       return res.status(400).json({ message: "All fields are required." });
     }
 
+    // Validate if front_info and back_info are arrays
+    if (!Array.isArray(details.front_info) || !Array.isArray(details.back_info)) {
+      return res.status(400).json({ message: "front_info and back_info must be arrays." });
+    }
+
     const userExists = await User.findById(created_by);
     if (!userExists) {
       return res.status(400).json({ message: "Invalid user ID, user not found" });
     }
+
+    // Ensure `details` does not contain orientation
+    const { material, color, front_info, back_info } = details;
 
     const newCardDesign = new CardDesign({
       front_image,
       back_image,
       categories,
       created_by,
-      details,
+      details: {
+        material,
+        color,
+        front_info,
+        back_info
+      },
     });
 
     await newCardDesign.save();
@@ -82,18 +95,12 @@ const updateCardDesign = async (req, res) => {
       return res.status(404).json({ message: "Card design not found" });
     }
 
-    // Preserve existing details while updating only specified fields
+    // Merge existing details but replace front_info and back_info if provided
     const updatedDetails = {
       ...existingCardDesign.details,
       ...details,
-      front_info: {
-        ...existingCardDesign.details.front_info,
-        ...(details.front_info || {}),
-      },
-      back_info: {
-        ...existingCardDesign.details.back_info,
-        ...(details.back_info || {}),
-      },
+      front_info: details.front_info ? details.front_info : existingCardDesign.details.front_info,
+      back_info: details.back_info ? details.back_info : existingCardDesign.details.back_info,
     };
 
     const updatedCardDesign = await CardDesign.findByIdAndUpdate(

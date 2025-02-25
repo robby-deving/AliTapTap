@@ -100,8 +100,8 @@ const styles = StyleSheet.create({
         marginTop: 40,
     },
     successImage: {
-        width: 120,  // Increased image size
-        height: 120, // Increased image size
+        width: 100,  // Increased image size
+        height: 100, // Increased image size
         marginBottom: 15,
     },
     successText: {

@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, FlatList } from "react-native";
+import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, FlatList, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 const products = [
@@ -27,48 +27,58 @@ const ProductCatalogue: React.FC = () => {
         <Ionicons name="chatbubble-ellipses-outline" size={24} color="white" />
       </View>
 
-      {/* Search Bar with Filter */}
+      {/* 🔥 Updated Search Bar and Filter Layout */}
+      <View style={styles.searchSection}>
+      {/* Search Bar */}
       <View style={styles.searchContainer}>
-        <View style={styles.searchWrapper}>
-          <Ionicons name="search" size={20} color="#555" style={styles.searchIcon} />
-          <TextInput style={styles.searchInput} placeholder="Search Designs" />
-        </View>
-        <TouchableOpacity style={styles.filterButton}>
-          <Ionicons name="options-outline" size={24} color="#555" />
-        </TouchableOpacity>
+        <Ionicons name="search-outline" size={20} color="#696969" style={styles.searchIcon} />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search Designs"
+          placeholderTextColor="#BDBDBD"
+        />
       </View>
 
-      {/* Banner Image */}
-      <Image source={require("../assets/images/banner.png")} style={styles.banner} resizeMode="contain" />
+    {/* Filter Button */}
+    <TouchableOpacity style={styles.filterButton}>
+      <Ionicons name="options-outline" size={24} color="#696969" />
+    </TouchableOpacity>
+  </View>
 
-      {/* Product Grid */}
-      <FlatList
-        data={products}
-        keyExtractor={(item) => item.id}
-        numColumns={2}
-        contentContainerStyle={styles.productList}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.productCard}
-            activeOpacity={0.7} // Touch effect without visible hover
-          >
-            {item.isUploadOption ? (
-              <View style={styles.uploadContainer}>
-                <Ionicons name="cloud-upload-outline" size={50} color="gray" />
-                <Text style={styles.uploadText}>{item.name}</Text>
-              </View>
-            ) : (
-              <>
-                <Image source={item.image} style={styles.productImage} resizeMode="contain" />
-                <View style={styles.productInfo}>
-                  <Text style={styles.productName}>{item.name}</Text>
-                  <Text style={styles.productPrice}>{item.price}</Text>
+
+      {/* Scrollable Content */}
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        {/* Banner Image */}
+        <Image source={require("../assets/images/banner.png")} style={styles.banner} resizeMode="contain" />
+
+        {/* Product Grid */}
+        <FlatList
+          data={products}
+          keyExtractor={(item) => item.id}
+          numColumns={2}
+          contentContainerStyle={styles.productList}
+          scrollEnabled={false}
+          renderItem={({ item }) => (
+            <TouchableOpacity style={styles.productCard} activeOpacity={0.7}>
+              {item.isUploadOption ? (
+                <View style={styles.uploadContainer}>
+                  <Ionicons name="cloud-upload-outline" size={50} color="gray" />
+                  <Text style={styles.uploadText}>{item.name}</Text>
+                  <Text style={styles.productPrice}>{String(item.price)}</Text>
                 </View>
-              </>
-            )}
-          </TouchableOpacity>
-        )}
-      />
+              ) : (
+                <>
+                  <Image source={item.image} style={styles.productImage} resizeMode="contain" />
+                  <View style={styles.productInfo}>
+                    <Text style={styles.productName}>{item.name}</Text>
+                    <Text style={styles.productPrice}>{String(item.price)}</Text>
+                  </View>
+                </>
+              )}
+            </TouchableOpacity>
+          )}
+        />
+      </ScrollView>
     </View>
   );
 };
@@ -92,51 +102,62 @@ const styles = StyleSheet.create({
     height: 30,
     width: 30,
   },
+
+  /* 🔥 New Search Bar and Filter Layout */
+  searchSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginHorizontal: 10,
+    marginVertical: 10,
+  },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFF",
-    margin: 10,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
-  },
-  searchWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
     flex: 1,
     backgroundColor: "#FFF",
-    paddingHorizontal: 10,
-    borderRadius: 5,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+    height: 40,
+    borderWidth: 1,
+    borderColor: "#BDBDBD",
+  },
+  searchIcon: {
+    marginRight: 10,
   },
   searchInput: {
     flex: 1,
-    height: 40,
-    marginLeft: 5,
-  },
-  searchIcon: {
-    marginRight: 5,
+    fontSize: 14,
+    color: "#333",
   },
   filterButton: {
+    marginLeft: 10,
     padding: 8,
+    backgroundColor: "#FFF",
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#BDBDBD",
+    width: 44,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  scrollContainer: {
+    paddingBottom: 20,
   },
   banner: {
-    width: "90%",
-    height: 120,
+    width: "100%",
+    height: 150,
     alignSelf: "center",
     marginVertical: 10,
   },
   productList: {
-    paddingHorizontal: 15, // Increased space between items
-    paddingBottom: 20,
+    paddingHorizontal: 15,
   },
   productCard: {
     flex: 1,
     backgroundColor: "#FFF",
-    margin: 10, // More space between cards
+    margin: 10,
     borderRadius: 8,
     padding: 20,
     justifyContent: "center",
@@ -151,26 +172,26 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   uploadText: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: "bold",
     textAlign: "center",
     marginTop: 8,
   },
   productImage: {
     width: "100%",
-    height: 110, // Increased image size
+    height: 110,
     borderRadius: 8,
   },
   productInfo: {
     marginTop: 12,
   },
   productName: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "bold",
     textAlign: "left",
   },
   productPrice: {
-    fontSize: 14,
+    fontSize: 13,
     color: "#777",
     textAlign: "left",
     marginTop: 2,

@@ -6,16 +6,48 @@ const CardDesign = require("../Models/carddesign.model.js");
 // Create a new order
 const createOrder = async (req, res) => {
     try {
+        const { customer_id, design_id, product_id, front_image, back_image, details, quantity, total_price, order_status } = req.body;
+
+        if (!customer_id || !design_id || !product_id || !front_image || !back_image || !details || !quantity || !total_price) {
+            return res.status(400).json({ message: "All fields are required." });
+        }
+
+        // Validate if front_info and back_info are arrays
+        if (!Array.isArray(details.front_info) || !Array.isArray(details.back_info)) {
+            return res.status(400).json({ message: "front_info and back_info must be arrays." });
+        }
+
+        // Check if customer, design, and product exist
+        const customerExists = await User.findById(customer_id);
+        if (!customerExists) {
+            return res.status(400).json({ message: "Invalid customer ID, user not found." });
+        }
+
+        const designExists = await CardDesign.findById(design_id);
+        if (!designExists) {
+            return res.status(400).json({ message: "Invalid design ID, card design not found." });
+        }
+
+        const productExists = await Product.findById(product_id);
+        if (!productExists) {
+            return res.status(400).json({ message: "Invalid product ID, product not found." });
+        }
+
         const newOrder = new Order({
-            customer_id: req.body.customer_id,
-            design_id: req.body.design_id,
-            product_id: req.body.product_id,
-            front_image: req.body.front_image,
-            back_image: req.body.back_image,
-            details: req.body.details,
-            quantity: req.body.quantity,
-            total_price: req.body.total_price,
-            order_status: req.body.order_status || "Pending",
+            customer_id,
+            design_id,
+            product_id,
+            front_image,
+            back_image,
+            details: {
+                material: details.material,
+                color: details.color,
+                front_info: details.front_info,
+                back_info: details.back_info,
+            },
+            quantity,
+            total_price,
+            order_status: order_status || "Pending",
         });
 
         const savedOrder = await newOrder.save();
@@ -27,7 +59,7 @@ const createOrder = async (req, res) => {
         console.log(err);
         res.status(500).json({
             message: "Order creation failed",
-            error: err,
+            error: err.message,
         });
     }
 };
@@ -49,7 +81,7 @@ const getOrder = async (req, res) => {
         console.log(err);
         res.status(500).json({
             message: "Order retrieval failed",
-            error: err,
+            error: err.message,
         });
     }
 };
@@ -66,7 +98,7 @@ const getAllOrders = async (req, res) => {
         console.log(err);
         res.status(500).json({
             message: "Failed to retrieve orders",
-            error: err,
+            error: err.message,
         });
     }
 };
@@ -74,12 +106,27 @@ const getAllOrders = async (req, res) => {
 // Update an order by ID
 const updateOrder = async (req, res) => {
     try {
-        const updatedOrder = await Order.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        if (!updatedOrder) {
-            return res.status(404).json({
-                message: "Order not found",
-            });
+        const { details } = req.body;
+
+        const existingOrder = await Order.findById(req.params.id);
+        if (!existingOrder) {
+            return res.status(404).json({ message: "Order not found" });
         }
+
+        // Merge existing details while updating only specified fields
+        const updatedDetails = {
+            ...existingOrder.details,
+            ...details,
+            front_info: details.front_info ? details.front_info : existingOrder.details.front_info,
+            back_info: details.back_info ? details.back_info : existingOrder.details.back_info,
+        };
+
+        const updatedOrder = await Order.findByIdAndUpdate(
+            req.params.id,
+            { $set: { details: updatedDetails } },
+            { new: true }
+        );
+
         res.status(200).json({
             message: "Order updated successfully",
             data: updatedOrder,
@@ -88,37 +135,37 @@ const updateOrder = async (req, res) => {
         console.log(err);
         res.status(500).json({
             message: "Order update failed",
-            error: err,
+            error: err.message,
         });
     }
 };
 
+// Soft delete an order
 const deleteOrder = async (req, res) => {
     try {
-      const deletedOrder = await Order.findByIdAndUpdate(
-        req.params.id,
-        { deleted_at: new Date() }, 
-        { new: true } 
-      );
-  
-      if (!deletedOrder) {
-        return res.status(404).json({
-          message: "Order not found",
+        const deletedOrder = await Order.findByIdAndUpdate(
+            req.params.id,
+            { deleted_at: new Date() },
+            { new: true }
+        );
+
+        if (!deletedOrder) {
+            return res.status(404).json({
+                message: "Order not found",
+            });
+        }
+
+        res.status(200).json({
+            message: "Order marked as deleted",
         });
-      }
-  
-      res.status(200).json({
-        message: "Order marked as deleted",
-      });
     } catch (err) {
-      console.log(err);
-      res.status(500).json({
-        message: "Order soft delete failed",
-        error: err.message,
-      });
+        console.log(err);
+        res.status(500).json({
+            message: "Order soft delete failed",
+            error: err.message,
+        });
     }
-  };
-  
+};
 
 // Get orders for a specific customer
 const getOrdersByCustomer = async (req, res) => {
@@ -137,7 +184,7 @@ const getOrdersByCustomer = async (req, res) => {
         console.log(err);
         res.status(500).json({
             message: "Failed to retrieve orders for customer",
-            error: err,
+            error: err.message,
         });
     }
 };
