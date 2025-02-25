@@ -38,7 +38,7 @@ Install the necessary dependencies:
  npx expo install expo-router
 ```
 
-### **3️⃣ Find Your Local IP Address (Required for Chat Development) **
+### **3️⃣ Find Your Local IP Address (Required for Chat Development)**
 
 Mac/Linux:
 
