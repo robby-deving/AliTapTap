@@ -33,7 +33,35 @@ Install the necessary dependencies:
 
 ```bash
  npm install
+ npm install socket.io-client
+ npm install axios
+ npx expo install expo-router
 ```
+
+### **3️⃣ Find Your Local IP Address (Required for Chat Development)**
+
+Mac/Linux:
+
+```bash
+ ifconfig | grep "inet " | grep -v 127.0.0.1
+```
+
+Windows (Command Prompt):
+
+```bash
+ ipconfig | findstr /i "IPv4 Address"
+```
+
+Once you have your local IP address, update the `chat.tsx` file from client/app folder:
+
+```tsx
+useEffect(() => {
+    const newSocket = io("http://YOUR_LOCAL_IP:4000");
+    setSocket(newSocket);
+});
+```
+
+Replace `YOUR_LOCAL_IP` with the actual IP address from the command output.
 
 Start the development environment using Expo:
 
@@ -70,6 +98,8 @@ npm i express mongoose dotenv nodemon
 npm i body-parser # For receiving JSON files
 npm i bcrypt # For encryption of passwords, etc.
 npm i jsonwebtoken # For authentication
+npm install express@4 socket.io
+npm install express mongoose dotenv nodemon
 ```
 
 ### **4️⃣ Create a `.env` file**
