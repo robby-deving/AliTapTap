@@ -43,7 +43,7 @@ export default function ChatScreen() {
             data={messages}
             keyExtractor={(item, index) => index.toString()}
             renderItem={({ item }) => (
-              <Text className="bg-gray-100 py-3 rounded mb-2 min-h-12 text-xl px-4">{item}</Text>
+              <Text className="bg-yellow-200 py-3 rounded-2xl mb-2 min-h-12 text-xl px-4">{item}</Text>
             )}
             contentContainerStyle={{ flexGrow: 1, justifyContent: "flex-end" }} // Moves messages to the bottom
             keyboardShouldPersistTaps="handled"
