@@ -1,23 +1,63 @@
-import React from "react";
-import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, FlatList, ScrollView } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, FlatList, ScrollView, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
-const products = [
-  { id: "1", name: "Upload your own design", price: "₱ 1200.00", isUploadOption: true },
-  { id: "2", name: "Tap Basic - Black", price: "₱ 1200.00", image: require("../assets/images/card-black2.png") },
-  { id: "3", name: "Tap Premium - Gold", price: "₱ 1500.00", image: require("../assets/images/card-black1.png") },
-  { id: "4", name: "Tap Basic - Silver", price: "₱ 1300.00", image: require("../assets/images/card-black1.png") },
-  { id: "5", name: "Tap Basic - Black", price: "₱ 1200.00", image: require("../assets/images/card-black1.png") },
-  { id: "6", name: "Tap Basic - White", price: "₱ 1200.00", image: require("../assets/images/card-black1.png") },
-  { id: "7", name: "Tap Basic - Red", price: "₱ 1250.00", image: require("../assets/images/card-black1.png") },
-  { id: "8", name: "Tap Basic - Blue", price: "₱ 1250.00", image: require("../assets/images/card-black1.png") },
-  { id: "9", name: "Tap Premium - Platinum", price: "₱ 1800.00", image: require("../assets/images/card-black1.png") },
-  { id: "10", name: "Tap Premium - Rose Gold", price: "₱ 1700.00", image: require("../assets/images/card-black1.png") },
-  { id: "11", name: "Tap Basic - Green", price: "₱ 1250.00", image: require("../assets/images/card-black1.png") },
-  { id: "12", name: "Tap Exclusive - Matte Black", price: "₱ 2000.00", image: require("../assets/images/card-black1.png") },
-];
+import axios from "axios";
 
 const ProductCatalogue: React.FC = () => {
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchProducts = async () => {
+    try {
+      const response = await axios.get("http://192.168.105.87:4000/api/v1/card-designs/admin/get-card-products");
+      let fetchedProducts = response.data.data || [];
+
+      // Ensure "Upload your own design" option is included dynamically
+      const uploadOption = {
+        id: "upload",
+        name: "Upload your own design",
+        price: "₱ 1200.00",
+        isUploadOption: true
+      };
+
+      if (!fetchedProducts.find((p: any) => p.isUploadOption)) {
+        fetchedProducts = [uploadOption, ...fetchedProducts]; // Add upload option at the beginning
+      }
+
+      setProducts(fetchedProducts);
+      setLoading(false);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load products");
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const handleUploadPress = () => {
+    console.log("Upload button clicked"); // Placeholder for future upload implementation
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.centerContainer}>
+        <ActivityIndicator size="large" color="#000" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.centerContainer}>
+        <Text>{error}</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -27,28 +67,19 @@ const ProductCatalogue: React.FC = () => {
         <Ionicons name="chatbubble-ellipses-outline" size={24} color="white" />
       </View>
 
-      {/* 🔥 Updated Search Bar and Filter Layout */}
+      {/* Search and Filter */}
       <View style={styles.searchSection}>
-      {/* Search Bar */}
-      <View style={styles.searchContainer}>
-        <Ionicons name="search-outline" size={20} color="#696969" style={styles.searchIcon} />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search Designs"
-          placeholderTextColor="#BDBDBD"
-        />
+        <View style={styles.searchContainer}>
+          <Ionicons name="search-outline" size={20} color="#696969" style={styles.searchIcon} />
+          <TextInput style={styles.searchInput} placeholder="Search Designs" placeholderTextColor="#BDBDBD" />
+        </View>
+        <TouchableOpacity style={styles.filterButton}>
+          <Ionicons name="options-outline" size={24} color="#696969" />
+        </TouchableOpacity>
       </View>
-
-    {/* Filter Button */}
-    <TouchableOpacity style={styles.filterButton}>
-      <Ionicons name="options-outline" size={24} color="#696969" />
-    </TouchableOpacity>
-  </View>
-
 
       {/* Scrollable Content */}
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* Banner Image */}
         <Image source={require("../assets/images/banner.png")} style={styles.banner} resizeMode="contain" />
 
         {/* Product Grid */}
@@ -59,19 +90,25 @@ const ProductCatalogue: React.FC = () => {
           contentContainerStyle={styles.productList}
           scrollEnabled={false}
           renderItem={({ item }) => (
-            <TouchableOpacity style={styles.productCard} activeOpacity={0.7}>
+            <TouchableOpacity
+              style={[styles.productCard, item.isUploadOption && styles.uploadCard]}
+              activeOpacity={0.7}
+              onPress={() => item.isUploadOption ? handleUploadPress() : null}
+            >
               {item.isUploadOption ? (
                 <View style={styles.uploadContainer}>
                   <Ionicons name="cloud-upload-outline" size={50} color="gray" />
                   <Text style={styles.uploadText}>{item.name}</Text>
-                  <Text style={styles.productPrice}>{String(item.price)}</Text>
+                  <Text style={styles.productPrice}>{item.price}</Text>
                 </View>
               ) : (
                 <>
-                  <Image source={item.image} style={styles.productImage} resizeMode="contain" />
+                  <Image source={{ uri: item.front_image }} style={styles.productImage} resizeMode="contain" />
                   <View style={styles.productInfo}>
                     <Text style={styles.productName}>{item.name}</Text>
-                    <Text style={styles.productPrice}>{String(item.price)}</Text>
+                    <Text style={styles.productPrice}>
+                      {item.materials?.PVC?.price_per_unit ? `₱${item.materials.PVC.price_per_unit}` : "Price not available"}
+                    </Text>
                   </View>
                 </>
               )}
@@ -88,6 +125,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F5F5F5",
   },
+  centerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   header: {
     width: "100%",
     height: 80,
@@ -102,8 +144,6 @@ const styles = StyleSheet.create({
     height: 30,
     width: 30,
   },
-
-  /* 🔥 New Search Bar and Filter Layout */
   searchSection: {
     flexDirection: "row",
     alignItems: "center",
@@ -161,6 +201,19 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 20,
     justifyContent: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  uploadCard: {
+    flex: 1,
+    backgroundColor: "#FFF",
+    margin: 10,
+    borderRadius: 8,
+    padding: 20,
+    justifyContent: "center",
+    alignItems: "center",
     shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 2 },
