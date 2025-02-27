@@ -5,6 +5,7 @@ import Chats from './pages/Chats';
 import Dashboard from './pages/Dashboard';
 import Orders from './pages/Orders';
 import Products from './pages/Products';
+import Topbar from './components/Topbar';
 
 function App() {
     return (
@@ -12,12 +13,16 @@ function App() {
             <div className="flex flex-row h-screen">
                 <Sidebar />
                 <div className="flex-grow">
+                  <Topbar />
+                  <div>
                     <Routes>
-                        <Route path="/dashboard" element={<Dashboard />} />
-                        <Route path="/orders" element={<Orders />} />
-                        <Route path="/products" element={<Products />} />
-                        <Route path="/chats" element={<Chats />} />
-                    </Routes>
+                          <Route path="/dashboard" element={<Dashboard />} />
+                          <Route path="/orders" element={<Orders />} />
+                          <Route path="/products" element={<Products />} />
+                          <Route path="/chats" element={<Chats />} />
+                      </Routes>
+                  </div>
+
                 </div>
             </div>
         </Router>
