@@ -7,6 +7,7 @@ export default function Index() {
 
   return (
     <View className="flex-1 relative bg-white">
+      {/* Header */}
       <View className="bg-[#231F20] w-full p-4 flex flex-row items-center pt-20">
         <Image
           source={require("../assets/images/logo.png")}
@@ -15,14 +16,19 @@ export default function Index() {
         />
       </View>
 
+      {/* Main Content */}
       <View className="flex-1 justify-center items-center p-10">
         <Text className="text-2xl font-semibold mb-10">Welcome to AliTapTap</Text>
         <TouchableOpacity 
           className="bg-[#FDCB07] w-full p-4 rounded"
+<<<<<<< HEAD
           onPress={() => router.push('/edit')}
+=======
+          onPress={() => router.push("/productcatalogue")} // Redirect to Product Catalogue
+>>>>>>> origin/f/checkout-and-success
         >
           <Text className="text-white text-center text-xl font-semibold">
-            Start Payment
+            Browse Products
           </Text>
         </TouchableOpacity>
 
