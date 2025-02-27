@@ -29,7 +29,7 @@ export default function Index() {
         {/* Go to Chat Button */}
         <TouchableOpacity
           className="bg-[#007AFF] w-full p-4 rounded"
-          onPress={() => router.push("/chat")} // Navigate to Chat
+          onPress={() => router.push("/reviewDesign")} // Navigate to Chat
         >
           <Text className="text-white text-center text-xl font-semibold">
             Go to Chat
