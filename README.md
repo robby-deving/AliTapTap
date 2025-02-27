@@ -94,6 +94,10 @@ Add the following to the `package.json` file inside the `server` directory:
 ### **3️⃣ Install Dependencies**
 
 ```bash
+npm i express mongoose dotenv nodemon
+npm i body-parser # For receiving JSON files
+npm i bcrypt # For encryption of passwords, etc.
+npm i jsonwebtoken # For authentication
 npm install express@4 socket.io
 npm install express mongoose dotenv nodemon
 ```
