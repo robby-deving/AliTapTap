@@ -66,7 +66,7 @@ Replace `YOUR_LOCAL_IP` with the actual IP address from the command output.
 Start the development environment using Expo:
 
 ```bash
- npm expo start
+ npx expo start
 ```
 
 Scan the QR code using your mobile device to run the application.
@@ -99,7 +99,6 @@ npm i body-parser # For receiving JSON files
 npm i bcrypt # For encryption of passwords, etc.
 npm i jsonwebtoken # For authentication
 npm install express@4 socket.io
-npm install express mongoose dotenv nodemon
 ```
 
 ### **4️⃣ Create a `.env` file**
