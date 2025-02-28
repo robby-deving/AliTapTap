@@ -18,27 +18,15 @@ export default function Index() {
 
       {/* Main Content */}
       <View className="flex-1 justify-center items-center p-10">
-        <Text className="text-2xl font-semibold mb-10">Welcome to AliTapTap</Text>
-        <TouchableOpacity 
+        <Text className="text-2xl font-semibold mb-10">
+          Welcome to AliTapTap
+        </Text>
+        <TouchableOpacity
           className="bg-[#FDCB07] w-full p-4 rounded"
-<<<<<<< HEAD
-          onPress={() => router.push('/edit')}
-=======
           onPress={() => router.push("/productcatalogue")} // Redirect to Product Catalogue
->>>>>>> origin/f/checkout-and-success
         >
           <Text className="text-white text-center text-xl font-semibold">
             Browse Products
-          </Text>
-        </TouchableOpacity>
-
-        {/* Go to Chat Button */}
-        <TouchableOpacity
-          className="bg-[#007AFF] w-full p-4 rounded"
-          onPress={() => router.push("/reviewDesign")} // Navigate to Chat
-        >
-          <Text className="text-white text-center text-xl font-semibold">
-            Go to Chat
           </Text>
         </TouchableOpacity>
       </View>

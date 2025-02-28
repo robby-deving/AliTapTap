@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, FlatList, S
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import { useRouter } from "expo-router"; // ✅ Use Expo Router for navigation
+import { HomePageHeader } from "../components/HomePageHeader"; // Import the new header component
 
 const ProductCatalogue: React.FC = () => {
   const [products, setProducts] = useState<any[]>([]);
@@ -101,12 +102,8 @@ const ProductCatalogue: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Ionicons name="person-circle-outline" size={24} color="white" />
-        <Image source={require("../assets/images/logo.png")} style={styles.logo} resizeMode="contain" />
-        <Ionicons name="chatbubble-ellipses-outline" size={24} color="white" />
-      </View>
+      {/* Use HomePageHeader here */}
+      <HomePageHeader />
 
       {/* Search and Filter */}
       <View style={styles.searchSection}>
@@ -299,6 +296,5 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 });
-
 
 export default ProductCatalogue;
