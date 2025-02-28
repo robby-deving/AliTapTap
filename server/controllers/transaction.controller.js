@@ -1,6 +1,7 @@
 const Transaction = require("../Models/transaction.model.js");
-const User = require("../Models/user.model");
+const User = require("../Models/user.model.js");
 
+// Create a new transaction
 const createTransaction = async (req, res) => {
     try {
         const transactionNumber = `TX${Date.now()}${Math.floor(Math.random() * 1000)}`;
@@ -25,12 +26,12 @@ const createTransaction = async (req, res) => {
         console.log(err);
         res.status(500).json({
             message: "Transaction creation failed",
-            error: err,
+            error: err.message,
         });
     }
 };
 
-
+// Update an existing transaction
 const updateTransaction = async (req, res) => {
     try {
         const updatedTransaction = await Transaction.findByIdAndUpdate(
@@ -53,17 +54,18 @@ const updateTransaction = async (req, res) => {
         console.log(err);
         res.status(500).json({
             message: "Transaction update failed",
-            error: err,
+            error: err.message,
         });
     }
 };
 
+// Soft delete a transaction (mark as deleted)
 const deleteTransaction = async (req, res) => {
     try {
         const updatedTransaction = await Transaction.findByIdAndUpdate(
             req.params.id,
             { deleted_at: new Date() },
-            { new: true } 
+            { new: true }
         );
 
         if (!updatedTransaction) {
@@ -84,7 +86,7 @@ const deleteTransaction = async (req, res) => {
     }
 };
 
-
+// Get a single transaction
 const getTransaction = async (req, res) => {
     try {
         const transaction = await Transaction.findById(req.params.id);
@@ -101,11 +103,12 @@ const getTransaction = async (req, res) => {
         console.log(error);
         res.status(500).json({
             message: "Transaction query failed",
-            error: error,
+            error: error.message,
         });
     }
 };
 
+// Get all transactions, with optional filter for the latest transactions
 const getAllTransactions = async (req, res) => {
     const query = req.query.latest;
     try {
@@ -121,7 +124,7 @@ const getAllTransactions = async (req, res) => {
         console.log(error);
         res.status(500).json({
             message: "Transactions query failed",
-            error: error,
+            error: error.message,
         });
     }
 };
