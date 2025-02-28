@@ -80,9 +80,11 @@ const CardDetails = ({ product }: CardDetailsProps) => {
           </View>
 
           {/* Edit Design Button */}
-          <TouchableOpacity style={styles.editButton}>
-            <Text style={styles.editButtonText}>Edit Design</Text>
-          </TouchableOpacity>
+          <View style={styles.editButtonContainer}>
+            <TouchableOpacity style={styles.editButton}>
+              <Text style={styles.editButtonText}>Edit Design</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
     </View>
@@ -95,21 +97,23 @@ const styles = StyleSheet.create({
     backgroundColor: "#F5F5F5" 
   },
   content: {
-    flexGrow: 1, // Ensures it takes up remaining space
-    justifyContent: "space-between", // Distribute content across the available space
-    paddingBottom: 5, // Adjusted to prevent overlap with button
+    flexGrow: 1, 
+    justifyContent: "space-between", 
+    paddingBottom: 1, 
   },
 
   /* Product Image */
   imageContainer: { 
-    alignItems: "center", 
-    justifyContent: "center", 
-    marginVertical: 40, // Adjusted margin to position the image lower
+    alignItems: "center",  // Center image horizontally
+    justifyContent: "center", // Center image vertically
+    marginVertical: 50, 
+    height: 220, // Set a fixed height for the container if necessary
+    width: "100%",  // Ensure the container takes full width
   },
 
   productImage: { 
-    width: "90%", 
-    height: 220, 
+    width: "100%",  // Ensure the image takes up full width of the container
+    height: "100%",  // Image scales to the container's height
     borderRadius: 12,
   },
 
@@ -179,7 +183,7 @@ const styles = StyleSheet.create({
 quantityContainer: {
   flexDirection: "row",
   alignItems: "center",
-  justifyContent: "flex-start",  // Align to the left
+  justifyContent: "flex-start", 
   marginTop: 13,
 },
 
@@ -188,25 +192,30 @@ quantityButton: {
   paddingVertical: 7,
   paddingHorizontal: 11,
   borderRadius: 5,
-  backgroundColor: "#FFFFFF",  // White background
-  borderWidth: 0.8,  // Black border
-  borderColor: "#000000",  // Black border color
+  backgroundColor: "#FFFFFF",  
+  borderWidth: 0.8,  
+  borderColor: "#000000", 
   alignItems: "center",
   justifyContent: "center",
 },
 
 
 quantityText: { 
-  fontSize: 16,  // You can adjust this if you want to make the text larger as well
+  fontSize: 16,  
   fontWeight: "bold", 
-  minWidth: 60,  // Increased the width to make the box larger
+  minWidth: 60,  
   textAlign: "center",
-  backgroundColor: "#F7F7F7",  // Off-white, light and soft
-  paddingVertical: 8,  // Increased vertical padding for height
-  paddingHorizontal: 15,  // Adjusted horizontal padding
+  backgroundColor: "#F7F7F7",  
+  paddingVertical: 8,  
+  paddingHorizontal: 15,  
   borderRadius: 5,
 },
 
+/* Edit Button Container */
+editButtonContainer: {
+  alignItems: "center", // Center the button horizontally
+  marginTop: 45,  // Space from previous elements
+},
 
   /* Edit Design Button */
   editButton: {
@@ -214,11 +223,9 @@ quantityText: {
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: "center",
-    width: 325,  // Set the width to 325
-    height: 50,  // Set the height to 50
-    marginTop: 50, // Added margin to create space above the button
+    width: 325,
+    height: 50,
   },
-
 
   editButtonText: {
     fontSize: 16,

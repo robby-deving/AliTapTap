@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, FlatList, ScrollView, ActivityIndicator, Modal } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import axios from "axios";
 import { useRouter } from "expo-router"; // ✅ Use Expo Router for navigation
 import { HomePageHeader } from "../components/HomePageHeader"; // Import the new header component
+import { fetchProducts } from "../services/productService"; // Import the service
 
 const ProductCatalogue: React.FC = () => {
   const [products, setProducts] = useState<any[]>([]);
@@ -13,34 +13,20 @@ const ProductCatalogue: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<string>("lowest-highest"); // Default sorting by lowest to highest
   const router = useRouter(); // ✅ Fix: Use Expo Router
 
-  const fetchProducts = async () => {
+  // Use the service to fetch products
+  const fetchData = async () => {
     try {
-      const response = await axios.get("http://192.168.105.87:4000/api/v1/card-designs/admin/get-card-products");
-      let fetchedProducts = response.data.data || [];
-
-      // Ensure "Upload your own design" option is included dynamically
-      const uploadOption = {
-        id: "upload",
-        name: "Upload your own design",
-        price: "₱ 1200.00",
-        isUploadOption: true,
-      };
-
-      if (!fetchedProducts.find((p: any) => p.isUploadOption)) {
-        fetchedProducts = [uploadOption, ...fetchedProducts]; // Add upload option at the beginning
-      }
-
+      const fetchedProducts = await fetchProducts(); // Call the service
       setProducts(fetchedProducts);
       setLoading(false);
     } catch (err) {
-      console.error(err);
       setError("Failed to load products");
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchProducts();
+    fetchData(); // Fetch products when the component mounts
   }, []);
 
   const handleUploadPress = () => {
@@ -123,7 +109,7 @@ const ProductCatalogue: React.FC = () => {
         {/* Product Grid */}
         <FlatList
           data={finalProducts}
-          keyExtractor={(item, index) => `${item.id}-${index}`} // ✅ Ensures unique keys
+          keyExtractor={(item, index) => `${item.id}-${index}`}  // Corrected here
           numColumns={2}
           contentContainerStyle={styles.productList}
           scrollEnabled={false}
@@ -131,10 +117,10 @@ const ProductCatalogue: React.FC = () => {
             <TouchableOpacity
               style={styles.productCard}
               activeOpacity={0.7}
-              onPress={() => 
-                item.isUploadOption 
-                  ? handleUploadPress() 
-                  : router.push({ pathname: "/CardDetails", params: { product: JSON.stringify(item) } }) // ✅ Fix navigation
+              onPress={() =>
+                item.isUploadOption
+                  ? handleUploadPress()
+                  : router.push({ pathname: "/CardDetails", params: { product: JSON.stringify(item) } })
               }
             >
               {item.isUploadOption ? (
@@ -148,6 +134,12 @@ const ProductCatalogue: React.FC = () => {
                   <Image source={{ uri: item.front_image }} style={styles.productImage} resizeMode="contain" />
                   <View style={styles.productInfo}>
                     <Text style={styles.productName}>{item.name}</Text>
+                    <View style={styles.ratingContainer}>
+                      {/* Display 4 stars as a static example */}
+                      {[...Array(5)].map((_, index) => (
+                        <Ionicons key={index} name="star" size={14} color="#FFD700" />
+                      ))}
+                    </View>
                     <Text style={styles.productPrice}>
                       {item.materials?.PVC?.price_per_unit ? `₱${item.materials.PVC.price_per_unit}` : "Price not available"}
                     </Text>
@@ -160,12 +152,7 @@ const ProductCatalogue: React.FC = () => {
       </ScrollView>
 
       {/* Filter Modal */}
-      <Modal
-        visible={filterVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={handleCloseFilter}
-      >
+      <Modal visible={filterVisible} animationType="slide" transparent={true} onRequestClose={handleCloseFilter}>
         <View style={styles.modalBackground}>
           <View style={styles.filterModal}>
             <Text style={styles.filterTitle}>Sort by Price</Text>
@@ -184,7 +171,6 @@ const ProductCatalogue: React.FC = () => {
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F5F5F5" },
   centerContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
@@ -248,13 +234,10 @@ const styles = StyleSheet.create({
   },
   uploadContainer: { height: 100, justifyContent: "center", alignItems: "center" },
   uploadText: { fontSize: 15, fontWeight: "bold", textAlign: "center", marginTop: 8 },
-  productImage: { 
-    width: "100%", 
-    height: 110, 
-    borderRadius: 12, 
-  },
+  productImage: { width: "100%", height: 110, borderRadius: 12 },
   productInfo: { marginTop: 12 },
   productName: { fontSize: 15, fontWeight: "bold", textAlign: "left" },
+  ratingContainer: { flexDirection: "row", marginTop: 4 }, // For star rating display
   productPrice: { fontSize: 13, color: "#777", textAlign: "left", marginTop: 2 },
 
   /* Modal Styles */

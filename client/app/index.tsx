@@ -23,7 +23,7 @@ export default function Index() {
         </Text>
         <TouchableOpacity
           className="bg-[#FDCB07] w-full p-4 rounded"
-          onPress={() => router.push("/productcatalogue")} // Redirect to Product Catalogue
+          onPress={() => router.push("/productcatalogue")} 
         >
           <Text className="text-white text-center text-xl font-semibold">
             Browse Products
