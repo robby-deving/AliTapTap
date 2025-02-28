@@ -1,4 +1,5 @@
 import React from 'react';
+import SalesChart from "@/components/SalesChart"
 
 export default function Dashboard() {
     return (
@@ -142,7 +143,7 @@ export default function Dashboard() {
                         <div>
                             <h1 className='text-xl font-semibold text-[#FDDF05]'>Sales</h1>
                             <div className='border border-gray-300 rounded-md p-7 my-5'>
-                                
+                                <SalesChart />
                             </div>
                         </div>
 
