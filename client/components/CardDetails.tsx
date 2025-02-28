@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router"; // Import useRouter for navigation
 
 type Product = {
   front_image?: string;
@@ -12,6 +13,7 @@ type CardDetailsProps = {
 };
 
 const CardDetails = ({ product }: CardDetailsProps) => {
+  const router = useRouter(); // Initialize the router for navigation
   const materialOptions = product?.materials ? Object.keys(product.materials) : ["PVC", "Metal", "Wood"];
 
   const [selectedMaterial, setSelectedMaterial] = useState(materialOptions[0]);
@@ -81,7 +83,10 @@ const CardDetails = ({ product }: CardDetailsProps) => {
 
           {/* Edit Design Button */}
           <View style={styles.editButtonContainer}>
-            <TouchableOpacity style={styles.editButton}>
+            <TouchableOpacity 
+              style={styles.editButton} 
+              onPress={() => router.push("/edit")} // Navigate to the edit page when clicked
+            >
               <Text style={styles.editButtonText}>Edit Design</Text>
             </TouchableOpacity>
           </View>
@@ -104,16 +109,16 @@ const styles = StyleSheet.create({
 
   /* Product Image */
   imageContainer: { 
-    alignItems: "center",  // Center image horizontally
-    justifyContent: "center", // Center image vertically
+    alignItems: "center", 
+    justifyContent: "center", 
     marginVertical: 50, 
-    height: 220, // Set a fixed height for the container if necessary
-    width: "100%",  // Ensure the container takes full width
+    height: 220, 
+    width: "100%",  
   },
 
   productImage: { 
-    width: "100%",  // Ensure the image takes up full width of the container
-    height: "100%",  // Image scales to the container's height
+    width: "100%",  
+    height: "100%",  
     borderRadius: 12,
   },
 
@@ -179,43 +184,41 @@ const styles = StyleSheet.create({
     color: "white" 
   },
 
- /* Quantity Selector */
-quantityContainer: {
-  flexDirection: "row",
-  alignItems: "center",
-  justifyContent: "flex-start", 
-  marginTop: 13,
-},
+  /* Quantity Selector */
+  quantityContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-start", 
+    marginTop: 13,
+  },
 
+  quantityButton: {
+    paddingVertical: 7,
+    paddingHorizontal: 11,
+    borderRadius: 5,
+    backgroundColor: "#FFFFFF",  
+    borderWidth: 0.8,  
+    borderColor: "#000000", 
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
-quantityButton: {
-  paddingVertical: 7,
-  paddingHorizontal: 11,
-  borderRadius: 5,
-  backgroundColor: "#FFFFFF",  
-  borderWidth: 0.8,  
-  borderColor: "#000000", 
-  alignItems: "center",
-  justifyContent: "center",
-},
+  quantityText: { 
+    fontSize: 16,  
+    fontWeight: "bold", 
+    minWidth: 60,  
+    textAlign: "center",
+    backgroundColor: "#F7F7F7",  
+    paddingVertical: 8,  
+    paddingHorizontal: 15,  
+    borderRadius: 5,
+  },
 
-
-quantityText: { 
-  fontSize: 16,  
-  fontWeight: "bold", 
-  minWidth: 60,  
-  textAlign: "center",
-  backgroundColor: "#F7F7F7",  
-  paddingVertical: 8,  
-  paddingHorizontal: 15,  
-  borderRadius: 5,
-},
-
-/* Edit Button Container */
-editButtonContainer: {
-  alignItems: "center", // Center the button horizontally
-  marginTop: 45,  // Space from previous elements
-},
+  /* Edit Button Container */
+  editButtonContainer: {
+    alignItems: "center",
+    marginTop: 45,  
+  },
 
   /* Edit Design Button */
   editButton: {
