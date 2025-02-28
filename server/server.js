@@ -4,6 +4,7 @@ const http = require("http");
 const socketIo = require("socket.io");
 const dbConnection = require("./dbConnect/dbConnection");
 const routes = require("./routes/routes");
+const chatRoutes = require("./routes/chat.route"); // ✅ Import chat routes
 
 const app = express();
 const server = http.createServer(app);
@@ -18,16 +19,14 @@ const io = socketIo(server, {
 
 const PORT = process.env.PORT || 4000;
 
-// ✅ Add this before defining routes:
+// ✅ Middleware
 app.use(express.json()); 
 app.use(express.urlencoded({ extended: true }));
-
-app.use("/",routes)
-
-// ✅ Middleware
 app.use(cors());
-app.use(express.json());
+
+// ✅ Define routes
 app.use("/", routes);
+app.use("/api/chat", chatRoutes); // ✅ Mount chat routes
 
 // ✅ WebSocket Handling
 io.on("connection", (socket) => {

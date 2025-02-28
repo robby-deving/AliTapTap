@@ -7,8 +7,8 @@ const dashboardRoutes = require("./dashboard.route");
 const productRoutes = require('./product.route');  
 const transactionRoutes = require('./transaction.route');  
 const orderRoutes = require('./order.route');
-
 const paymentRoutes = require('./payment.route');
+const chatRoutes = require('./chat.route');
 
 const base = "/api/v1";
 
@@ -19,7 +19,7 @@ router.use(`${base}/dashboard`, dashboardRoutes);
 router.use(`${base}/products`, productRoutes);  
 router.use(`${base}/transactions`, transactionRoutes);  
 router.use(`${base}/orders`, orderRoutes);
-
 router.use(`${base}/pay`, paymentRoutes); 
+router.use(`${base}/chat`, chatRoutes);
 
 module.exports = router;
