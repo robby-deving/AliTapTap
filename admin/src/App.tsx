@@ -10,11 +10,11 @@ import Topbar from './components/Topbar';
 function App() {
     return (
         <Router>
-            <div className="flex flex-row h-screen">
+            <div className="flex flex-row h-screen overflow-hidden">
                 <Sidebar />
-                <div className="flex-grow">
+                <div className="flex-grow flex flex-col">
                   <Topbar />
-                  <div>
+                  <div className=' flex-grow overflow-hidden'>
                     <Routes>
                           <Route path="/dashboard" element={<Dashboard />} />
                           <Route path="/orders" element={<Orders />} />
@@ -22,7 +22,6 @@ function App() {
                           <Route path="/chats" element={<Chats />} />
                       </Routes>
                   </div>
-
                 </div>
             </div>
         </Router>
