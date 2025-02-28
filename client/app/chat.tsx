@@ -34,7 +34,9 @@ export default function ChatScreen() {
 
   return (
     <View className="flex-1 relative bg-white">
-      <Header />
+      <View className="bg-[#231F20]">
+        <Header />
+      </View>
 
       <View className="flex-1 bg-white p-5">
         {/* Messages List (Appears Just Above Input Box) */}
