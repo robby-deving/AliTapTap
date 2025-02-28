@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { View, TextInput, Text, FlatList, Image, TouchableOpacity } from "react-native";
+import {
+  View,
+  TextInput,
+  Text,
+  FlatList,
+  Image,
+  TouchableOpacity,
+} from "react-native";
 import io, { Socket } from "socket.io-client";
 import { Header } from "../components/Header";
 
@@ -45,7 +52,11 @@ export default function ChatScreen() {
             data={messages}
             keyExtractor={(item, index) => index.toString()}
             renderItem={({ item }) => (
-              <Text className="bg-yellow-200 py-3 rounded-2xl mb-2 min-h-12 text-xl px-4">{item}</Text>
+              <View className="flex-row justify-end mb-2">
+                <Text className="bg-yellow-200 py-3 rounded-2xl min-h-12 text-xl px-4 max-w-[75%] text-black">
+                  {item}
+                </Text>
+              </View>
             )}
             contentContainerStyle={{ flexGrow: 1, justifyContent: "flex-end" }} // Moves messages to the bottom
             keyboardShouldPersistTaps="handled"
@@ -63,7 +74,10 @@ export default function ChatScreen() {
             onSubmitEditing={submitChatMessage}
           />
           <TouchableOpacity onPress={submitChatMessage} className="ml-2">
-            <Image source={require("../assets/images/Vector.png")} style={{ width: 24, height: 20 }} />
+            <Image
+              source={require("../assets/images/Vector.png")}
+              style={{ width: 24, height: 20 }}
+            />
           </TouchableOpacity>
         </View>
       </View>
