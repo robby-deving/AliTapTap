@@ -5,8 +5,11 @@ import { useRouter } from "expo-router"; // Import useRouter for navigation
 
 type Product = {
   front_image?: string;
+  back_image?: string;  // Add this field
   materials?: { [key: string]: { price_per_unit: number } };
+  details?: { front_info: any[]; back_info: any[] };  // Add this field, assuming details are arrays
 };
+
 
 type CardDetailsProps = {
   product: Product;
@@ -17,22 +20,22 @@ const CardDetails = ({ product }: CardDetailsProps) => {
   const materialOptions = product?.materials ? Object.keys(product.materials) : ["PVC", "Metal", "Wood"];
 
   const [selectedMaterial, setSelectedMaterial] = useState(materialOptions[0]);
-  const [quantity, setQuantity] = useState(1); // Default quantity is 1
+  const [quantity, setQuantity] = useState(1); 
 
   const handleIncrease = () => {
-    setQuantity((prevQuantity) => prevQuantity + 1); // Increase quantity by 1
+    setQuantity((prevQuantity) => prevQuantity + 1); 
   };
 
   const handleDecrease = () => {
     if (quantity > 1) {
-      setQuantity((prevQuantity) => prevQuantity - 1); // Prevent going below 1
+      setQuantity((prevQuantity) => prevQuantity - 1); 
     }
   };
 
   const getPrice = () => {
     const unitPrice = product?.materials?.[selectedMaterial]?.price_per_unit || 1200;
     const totalPrice = unitPrice * quantity;
-    return totalPrice.toLocaleString(); // Formats the number with commas
+    return totalPrice.toLocaleString(); 
   };
 
   return (
@@ -83,12 +86,20 @@ const CardDetails = ({ product }: CardDetailsProps) => {
 
           {/* Edit Design Button */}
           <View style={styles.editButtonContainer}>
-            <TouchableOpacity 
-              style={styles.editButton} 
-              onPress={() => router.push("/edit")} // Navigate to the edit page when clicked
-            >
-              <Text style={styles.editButtonText}>Edit Design</Text>
-            </TouchableOpacity>
+          <TouchableOpacity 
+                style={styles.editButton} 
+                onPress={() => router.push({
+                  pathname: "/edit",  
+                  params: {  
+                    frontImage: product.front_image,
+                    backImage: product.back_image,
+                    materials: JSON.stringify(product.materials), 
+                    details: JSON.stringify(product.details), 
+                  }
+                })}
+              >
+                <Text style={styles.editButtonText}>Edit Design</Text>
+              </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
@@ -214,13 +225,11 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
 
-  /* Edit Button Container */
   editButtonContainer: {
     alignItems: "center",
     marginTop: 45,  
   },
 
-  /* Edit Design Button */
   editButton: {
     backgroundColor: "#FFC107",
     paddingVertical: 12,

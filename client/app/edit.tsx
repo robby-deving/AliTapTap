@@ -26,6 +26,7 @@ interface DraggableItem {
   pan: Animated.ValueXY;
   size: Animated.Value;
   selected: boolean;
+  position: { x: number; y: number }; // Add position property
 }
 
 interface CardData {
@@ -68,6 +69,7 @@ export default function BackEdit() {
           pan: new Animated.ValueXY({ x: item.position.x * width, y: item.position.y * height }),
           size: new Animated.Value(item.size),
           selected: false,
+          position: item.position, // Ensure position is included
         }));
 
         setItems(loadedItems);
@@ -86,8 +88,8 @@ export default function BackEdit() {
         id: item.id,
         text: item.text,
         uri: item.uri,
-        position: { x: item.pan.x._value / width, y: item.pan.y._value / height },
-        size: item.size._value,
+        position: { x: item.pan.x.value / width, y: item.pan.y.value / height }, // Access .value for Animated.Value
+        size: item.size.value, // Access .value for Animated.Value
       }));
 
       const updatedCardData: CardData = {
@@ -113,6 +115,7 @@ export default function BackEdit() {
         pan: new Animated.ValueXY({ x: width * 0.1, y: height * 0.1 }),
         size: new Animated.Value(16),
         selected: false,
+        position: { x: width * 0.1, y: height * 0.1 }, // Add position
       },
     ];
     setItems(newItems);
@@ -136,6 +139,7 @@ export default function BackEdit() {
           pan: new Animated.ValueXY({ x: width * 0.1, y: height * 0.1 }),
           size: new Animated.Value(100),
           selected: false,
+          position: { x: width * 0.1, y: height * 0.1 }, // Add position
         },
       ];
       setItems(newItems);
@@ -185,8 +189,8 @@ export default function BackEdit() {
       onStartShouldSetPanResponder: () => true,
       onPanResponderGrant: () => {
         item.pan.setOffset({
-          x: item.pan.x._value,
-          y: item.pan.y._value,
+          x: item.pan.x.value,
+          y: item.pan.y.value,
         });
         item.pan.setValue({ x: 0, y: 0 });
         toggleSelectItem(item.id);
@@ -200,7 +204,7 @@ export default function BackEdit() {
     const resizeResponder = PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onPanResponderMove: (evt, gestureState) => {
-        let newSize = Math.max(14, item.size._value + gestureState.dx / 10);
+        let newSize = Math.max(14, item.size.value + gestureState.dx / 10);
         item.size.setValue(newSize);
       },
       onPanResponderRelease: () => {
@@ -220,9 +224,9 @@ export default function BackEdit() {
         }}
       >
         {item.text ? (
-          <Animated.Text style={{ fontSize: item.size, minHeight: 14 }}>{item.text}</Animated.Text>
+          <Animated.Text style={{ fontSize: item.size.value, minHeight: 14 }}>{item.text}</Animated.Text>
         ) : (
-          <Animated.Image source={{ uri: item.uri }} style={{ width: item.size, height: item.size }} />
+          <Animated.Image source={{ uri: item.uri }} style={{ width: item.size.value, height: item.size.value }} />
         )}
 
         {item.selected && (

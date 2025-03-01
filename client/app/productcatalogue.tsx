@@ -108,47 +108,49 @@ const ProductCatalogue: React.FC = () => {
 
         {/* Product Grid */}
         <FlatList
-          data={finalProducts}
-          keyExtractor={(item, index) => `${item.id}-${index}`}  // Corrected here
-          numColumns={2}
-          contentContainerStyle={styles.productList}
-          scrollEnabled={false}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={styles.productCard}
-              activeOpacity={0.7}
-              onPress={() =>
-                item.isUploadOption
-                  ? handleUploadPress()
-                  : router.push({ pathname: "/CardDetails", params: { product: JSON.stringify(item) } })
-              }
-            >
-              {item.isUploadOption ? (
-                <View style={styles.uploadContainer}>
-                  <Ionicons name="cloud-upload-outline" size={50} color="gray" />
-                  <Text style={styles.uploadText}>{item.name}</Text>
-                  <Text style={styles.productPrice}>{item.price}</Text>
-                </View>
-              ) : (
-                <>
-                  <Image source={{ uri: item.front_image }} style={styles.productImage} resizeMode="contain" />
-                  <View style={styles.productInfo}>
-                    <Text style={styles.productName}>{item.name}</Text>
-                    <View style={styles.ratingContainer}>
-                      {/* Display 4 stars as a static example */}
-                      {[...Array(5)].map((_, index) => (
-                        <Ionicons key={index} name="star" size={14} color="#FFD700" />
-                      ))}
-                    </View>
-                    <Text style={styles.productPrice}>
-                      {item.materials?.PVC?.price_per_unit ? `₱${item.materials.PVC.price_per_unit}` : "Price not available"}
-                    </Text>
-                  </View>
-                </>
-              )}
-            </TouchableOpacity>
-          )}
-        />
+  data={finalProducts}
+  keyExtractor={(item, index) => `${item.id}-${index}`}
+  numColumns={2}
+  contentContainerStyle={styles.productList}
+  scrollEnabled={false}
+  renderItem={({ item }) => (
+    <TouchableOpacity
+      style={styles.productCard}
+      activeOpacity={0.7}
+      onPress={() =>
+        item.isUploadOption
+          ? handleUploadPress()
+          : router.push({ pathname: "/CardDetails", params: { product: JSON.stringify(item) } })
+      }
+    >
+      {item.isUploadOption ? (
+        <View style={styles.uploadContainer}>
+          <Ionicons name="cloud-upload-outline" size={50} color="gray" />
+          <Text style={styles.uploadText}>{item.name}</Text>
+          <Text style={styles.productPrice}>{item.price}</Text>
+        </View>
+      ) : (
+        <>
+          {/* Render only the front image */}
+          <Image source={{ uri: item.front_image }} style={styles.productImage} resizeMode="contain" />
+          <View style={styles.productInfo}>
+            <Text style={styles.productName}>{item.name}</Text>
+            <View style={styles.ratingContainer}>
+              {/* Display 4 stars as a static example */}
+              {[...Array(5)].map((_, index) => (
+                <Ionicons key={index} name="star" size={14} color="#FFD700" />
+              ))}
+            </View>
+            <Text style={styles.productPrice}>
+              {item.materials?.PVC?.price_per_unit ? `₱${item.materials.PVC.price_per_unit}` : "Price not available"}
+            </Text>
+          </View>
+        </>
+      )}
+    </TouchableOpacity>
+  )}
+/>
+
       </ScrollView>
 
       {/* Filter Modal */}

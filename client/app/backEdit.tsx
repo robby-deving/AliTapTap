@@ -1,11 +1,8 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Image, Animated, PanResponder, Pressable, Modal, TextInput, Dimensions, ImageBackground } from 'react-native';
-import { captureRef } from 'react-native-view-shot';
-import { Header } from '@/components/Header';
-import * as ImagePicker from 'expo-image-picker';
-import { GestureHandlerRootView, PinchGestureHandler, State } from 'react-native-gesture-handler';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { saveCardAsImage } from '@/services/helperFunctions';
 
 interface SavedItem {
@@ -28,9 +25,15 @@ interface DraggableItem {
   selected: boolean;
 }
 
-export default function backEdit() {
-  const [isPressed, setIsPressed] = useState(false);
+interface CardData {
+  frontImage: string;
+  backImage: string;
+  items: DraggableItem[];
+}
+
+export default function BackEdit() {
   const [items, setItems] = useState<DraggableItem[]>([]);
+  const [cardData, setCardData] = useState<CardData | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState<DraggableItem | null>(null);
   const [newText, setNewText] = useState('');
@@ -40,196 +43,69 @@ export default function backEdit() {
   const pan = useRef(new Animated.ValueXY()).current;
   const lastPan = useRef({ x: 0, y: 0 });
 
-  const image = 'https://static.vecteezy.com/system/resources/thumbnails/006/296/343/small/abstract-background-for-posters-banners-promotions-business-cards-etc-with-a-combination-of-green-and-yellow-gradient-vector.jpg';
-
   const { width, height } = Dimensions.get('window');
-
   const router = useRouter();
 
   useEffect(() => {
-    saveInitialData();
-    loadSavedItems();
+    loadCardData();
   }, []);
 
-  const initialData: SavedItem[] = [
-    {
-      id: 1,
-      text: "This is back data",
-      uri: "",
-      position: { x: 0.09, y: 0.16 },
-      size: 14
-    }
+  const loadCardData = async () => {
+    const { frontImage, backImage, materials, details } = router.query;
 
-  ];
+    // Parse the materials and details if they are passed as stringified JSON
+    const parsedMaterials = materials ? JSON.parse(materials as string) : {};
+    const parsedDetails = details ? JSON.parse(details as string) : {};
 
-  const saveInitialData = async () => {
-    try {
-      await AsyncStorage.setItem('backSavedItems', JSON.stringify(initialData));
-      console.log('Initial data saved successfully');
-    } catch (error) {
-      console.error('Error saving initial data:', error);
-    }
-  };
+    // Initialize the card data
+    const newCardData: CardData = {
+      frontImage: frontImage as string,
+      backImage: backImage as string,
+      items: parsedDetails?.back_info || [],
+    };
 
-  const loadSavedItems = async () => {
-    try {
-      const savedItemsString = await AsyncStorage.getItem('backSavedItems');
-      if (savedItemsString) {
-        const savedItems: SavedItem[] = JSON.parse(savedItemsString);
-        console.log('Loading saved items:', savedItems);
+    setCardData(newCardData);
 
-        // Convert saved items back to DraggableItems with denormalized positions
-        const loadedItems: DraggableItem[] = savedItems.map(item => ({
-          id: item.id,
-          text: item.text,
-          uri: item.uri,
-          pan: new Animated.ValueXY({ x: item.position.x * 525, y: item.position.y * 300 }),
-          size: new Animated.Value(item.size),
-          selected: false,
-        }));
+    const loadedItems: DraggableItem[] = newCardData.items.map((item: any) => ({
+      id: item.id,
+      text: item.text,
+      uri: item.uri,
+      pan: new Animated.ValueXY({ x: item.position.x * width, y: item.position.y * height }),
+      size: new Animated.Value(item.size),
+      selected: false,
+    }));
 
-        setItems(loadedItems);
-        // Update the itemIdRef to be higher than any existing ID
-        itemIdRef.current = Math.max(...savedItems.map(item => item.id), 0);
-        console.log('Items loaded successfully');
-      } else {
-        console.log('No saved items found');
-      }
-    } catch (error) {
-      console.error('Error loading saved items:', error);
-    }
+    setItems(loadedItems);
   };
 
   const saveItems = async () => {
     try {
-      // Convert DraggableItems to SavedItems format with normalized positions
-      const itemsToSave: SavedItem[] = items.map(item => ({
+      const itemsToSave: SavedItem[] = items.map((item) => ({
         id: item.id,
         text: item.text,
         uri: item.uri,
-        position: {
-          x: item.pan.x._value / 525,
-          y: item.pan.y._value / 300,
-        },
+        position: { x: item.pan.x._value / width, y: item.pan.y._value / height },
         size: item.size._value,
       }));
 
-      console.log('Saving items:', itemsToSave);
       await AsyncStorage.setItem('backSavedItems', JSON.stringify(itemsToSave));
       console.log('Items saved successfully');
-
-      // Verify the save by reading it back
-      const savedItemsString = await AsyncStorage.getItem('backSavedItems');
-      const savedItems = JSON.parse(savedItemsString || '[]');
-      console.log('Verified saved items:', savedItems);
     } catch (error) {
       console.error('Error saving items:', error);
     }
-  };
-
-  // Modify addText function to save after adding
-  const addText = () => {
-    itemIdRef.current += 1;
-    const newItems = [...items, {
-      id: itemIdRef.current,
-      text: "New Text",
-      pan: new Animated.ValueXY({ x: 50, y: 50 }),
-      size: new Animated.Value(16),
-      selected: false,
-    }];
-    console.log('Adding new text item:', newItems[newItems.length - 1]);
-    setItems(newItems);
-    saveItems();
-  };
-
-  // Modify addImage function to save after adding
-  const addImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      itemIdRef.current += 1;
-      const newItems = [...items, {
-        id: itemIdRef.current,
-        uri: result.assets[0].uri,
-        pan: new Animated.ValueXY({ x: 50, y: 50 }),
-        size: new Animated.Value(100),
-        selected: false,
-      }];
-      console.log('Adding new image item:', newItems[newItems.length - 1]);
-      setItems(newItems);
-      saveItems();
-    }
-  };
-
-  const deleteItem = (id: number) => {
-    console.log('Deleting item with id:', id);
-    const newItems = items.filter(item => item.id !== id);
-    setItems(newItems);
-    saveItems();
-  };
-
-  const toggleSelectItem = (id: number) => {
-    setItems(items.map(item => ({ ...item, selected: item.id === id })));
-  };
-
-  const deselectAll = () => {
-    setItems(items.map(item => ({ ...item, selected: false })));
-  };
-
-  const openEditModal = (item: DraggableItem) => {
-    setSelectedItem(item);
-    setNewText(item.text || '');
-    setIsModalVisible(true);
-  };
-
-  const saveText = () => {
-    if (selectedItem) {
-      console.log('Updating text for item:', selectedItem.id, 'New text:', newText);
-      const newItems = items.map(item =>
-        item.id === selectedItem.id ? { ...item, text: newText } : item
-      );
-      setItems(newItems);
-      setIsModalVisible(false);
-      saveItems();
-    }
-  };
-
-  const saveBackCardAsImage = async () => {
-    await saveCardAsImage(cardRef, 'back');
   };
 
   const renderDraggableItem = (item: DraggableItem) => {
     const panResponder = PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onPanResponderGrant: () => {
-        item.pan.setOffset({
-          x: item.pan.x._value,
-          y: item.pan.y._value,
-        });
+        item.pan.setOffset({ x: item.pan.x._value, y: item.pan.y._value });
         item.pan.setValue({ x: 0, y: 0 });
-        toggleSelectItem(item.id);
       },
-      onPanResponderMove: Animated.event([
-        null, { dx: item.pan.x, dy: item.pan.y }
-      ], { useNativeDriver: false }),
+      onPanResponderMove: Animated.event([null, { dx: item.pan.x, dy: item.pan.y }], { useNativeDriver: false }),
       onPanResponderRelease: () => {
         item.pan.flattenOffset();
-      },
-    });
-
-    const resizeResponder = PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onPanResponderMove: (evt, gestureState) => {
-        let newSize = Math.max(14, item.size._value + gestureState.dx / 10);
-        item.size.setValue(newSize);
-      },
-      onPanResponderRelease: () => {
-        console.log('Item resized:', item.id, 'New size:', item.size._value);
-        saveItems();
+        saveItems();  // Save data after dragging
       },
     });
 
@@ -238,7 +114,7 @@ export default function backEdit() {
         key={item.id}
         {...panResponder.panHandlers}
         style={{
-          position: "absolute",
+          position: 'absolute',
           transform: item.pan.getTranslateTransform(),
           borderWidth: item.selected ? 2 : 0,
           borderColor: item.selected ? '#FFDE01' : 'transparent',
@@ -249,190 +125,42 @@ export default function backEdit() {
         ) : (
           <Animated.Image source={{ uri: item.uri }} style={{ width: item.size, height: item.size }} />
         )}
-
-        {item.selected && (
-          <>
-            <TouchableOpacity
-              onPress={() => deleteItem(item.id)}
-              style={{
-                position: 'absolute',
-                top: -10,
-                right: -10,
-                width: 20,
-                height: 20,
-                backgroundColor: 'white',
-                borderRadius: 10,
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              <Image source={require('../assets/images/delete.png')} className='h-[18px] w-[18px]' />
-            </TouchableOpacity>
-            {item.text && (
-              <TouchableOpacity
-                onPress={() => openEditModal(item)}
-                style={{
-                  position: 'absolute',
-                  top: -10,
-                  left: -10,
-                  width: 22,
-                  height: 22,
-                  backgroundColor: '#FFDE01',
-                  borderRadius: 5,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}
-              >
-                <Image source={require('../assets/images/edit.png')} className='h-[15px] w-[15px]' />
-              </TouchableOpacity>
-            )}
-            <Animated.View
-              {...resizeResponder.panHandlers}
-              style={{
-                position: 'absolute',
-                bottom: -10,
-                right: -10,
-                width: 20,
-                height: 20,
-                backgroundColor: '#FFDE01',
-                borderRadius: 5,
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              <Image source={require('../assets/images/resize.png')} className='h-[15px] w-[15px]' />
-            </Animated.View>
-          </>
-        )}
       </Animated.View>
     );
   };
 
-  const onPinchEvent = Animated.event(
-    [{ nativeEvent: { scale: scale } }],
-    { useNativeDriver: true }
-  );
-
-  const onPinchStateChange = (event: any) => {
-    if (event.nativeEvent.oldState === State.ACTIVE) {
-      lastScale.current *= event.nativeEvent.scale;
-      scale.setValue(lastScale.current);
-    }
-  };
-
-  const panResponder = PanResponder.create({
-    onStartShouldSetPanResponder: () => true,
-    onPanResponderGrant: () => {
-      pan.setOffset({
-        x: lastPan.current.x,
-        y: lastPan.current.y,
-      });
-      pan.setValue({ x: 0, y: 0 });
-    },
-    onPanResponderMove: Animated.event([
-      null, { dx: pan.x, dy: pan.y }
-    ], { useNativeDriver: false }),
-    onPanResponderRelease: () => {
-      lastPan.current = {
-        x: lastPan.current.x + pan.x._value,
-        y: lastPan.current.y + pan.y._value,
-      };
-      pan.flattenOffset();
-    },
-  });
-
-  const cardRef = useRef(null);
-
   return (
-    <GestureHandlerRootView className='h-full bg-white'>
-      <Header />
-
-      <Pressable onPress={deselectAll} className='flex-1'>
-        <View className='flex-1 bg-[#F5F5F5] rounded-b-[40px] mb-5'>
-          <View className='flex flex-col items-center p-10'>
-            <Text className="font-semibold text-3xl border-b-4 pb-2 border-[#FFE300]">Back Design</Text>
-          </View>
-          <PinchGestureHandler onGestureEvent={onPinchEvent} onHandlerStateChange={onPinchStateChange}>
-
-            <Animated.View
-              ref={cardRef}
-              {...panResponder.panHandlers}
-              className='relative bg-white shadow rounded-lg'
-              style={{
-                width: 525,
-                height: 300,
-                transform: [
-                  { scale: scale },
-                  { translateX: pan.x },
-                  { translateY: pan.y }
-                ],
-                alignSelf: 'center', // Center horizontally
-                justifyContent: 'center', // Center vertically
-                marginTop: 'auto', // Center vertically
-                marginBottom: 'auto' // Center vertically
-              }}
-            >
-              <ImageBackground
-                source={{ uri: image }}
-                style={{ width: 525, height: 300 }} // Ensures the image is exactly 525x300
-                resizeMode="cover" // Covers the entire area while maintaining aspect ratio
-              >
-                {items.map((item) => renderDraggableItem(item))}
+    <GestureHandlerRootView>
+      <View style={{ flex: 1 }}>
+        <Pressable style={{ flex: 1 }} onPress={() => setItems(items.map(item => ({ ...item, selected: false })))}>
+          <View style={{ flex: 1, position: 'relative' }}>
+            {cardData?.backImage && (
+              <ImageBackground source={{ uri: cardData?.backImage }} style={{ flex: 1 }}>
+                {items.map(renderDraggableItem)}
               </ImageBackground>
-            </Animated.View>
-          </PinchGestureHandler>
-
-        </View>
-
-      </Pressable>
-
-      <View className='flex flex-row gap-10 px-10 mb-10'>
-        <View className='flex flex-row gap-5'>
-          <TouchableOpacity className='flex flex-col items-center' onPress={addText}>
-            <Image source={require('../assets/images/text-icon.png')} className='w-[25px] h-[25px] mb-2' />
-            <Text className='font-semibold'>Add Text</Text>
-          </TouchableOpacity>
-          <TouchableOpacity className='flex flex-col items-center' onPress={addImage}>
-            <Image source={require('../assets/images/img-icon.png')} className='w-[25px] h-[25px] mb-2' />
-            <Text className='font-semibold'>Add Image</Text>
-          </TouchableOpacity>
-        </View>
-        <View className='flex-1'>
-          <TouchableOpacity
-            className={`${isPressed ? 'bg-white border border-[#FDCB07]' : 'bg-[#FDCB07]'} w-full p-4 rounded`}
-            onPressIn={() => setIsPressed(true)}
-            onPressOut={() => setIsPressed(false)}
-            onPress={async () => {
-              await saveBackCardAsImage();
-              saveText();
-              deselectAll();
-              router.push('/reviewDesign');
-            }}
-          >
-            <Text className={`${isPressed ? 'text-[#FDCB07]' : 'text-white'} text-center text-xl font-semibold`}>Next</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={isModalVisible}
-        onRequestClose={() => setIsModalVisible(false)}
-      >
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <View style={{ width: 300, padding: 20, backgroundColor: 'white', borderRadius: 10 }}>
-            <Text style={{ fontSize: 18, marginBottom: 10 }}>Edit Text</Text>
-            <TextInput
-              value={newText}
-              onChangeText={setNewText}
-              style={{ borderWidth: 1, borderColor: '#ccc', padding: 10, marginBottom: 20 }}
-            />
-            <TouchableOpacity onPress={saveText} style={{ backgroundColor: '#FDCB07', padding: 10, borderRadius: 5 }}>
-              <Text style={{ color: 'white', textAlign: 'center' }}>Save</Text>
-            </TouchableOpacity>
+            )}
           </View>
-        </View>
-      </Modal>
+        </Pressable>
+
+        <Modal visible={isModalVisible} transparent={true}>
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+            <View style={{ width: 300, padding: 20, backgroundColor: 'white', borderRadius: 10 }}>
+              <Text style={{ fontSize: 18, marginBottom: 10 }}>Edit Text</Text>
+              <TextInput
+                value={newText}
+                onChangeText={setNewText}
+                style={{ borderBottomWidth: 1, marginBottom: 10 }}
+              />
+              <TouchableOpacity onPress={() => setIsModalVisible(false)}>
+                <Text>Save</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setIsModalVisible(false)}>
+                <Text>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      </View>
     </GestureHandlerRootView>
   );
 }
