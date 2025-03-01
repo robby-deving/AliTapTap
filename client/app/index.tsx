@@ -59,7 +59,7 @@ export default function Index() {
   
       await AsyncStorage.setItem("token", token);
       setIsAuthenticated(true);
-      Alert.alert("Login Successful", "You can now access the chat.");
+      Alert.alert("Login Successful", "You can now access the chat and shipping.");
     } catch (error) {
       console.error("❌ Login Error:", error);
     
@@ -106,6 +106,10 @@ export default function Index() {
 
       <TouchableOpacity className="bg-[#34C759] w-full p-4 rounded" onPress={() => router.push("/reviewDesign")}>
         <Text className="text-white text-center text-xl font-semibold">Review Design</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity className={`w-full p-4 rounded mt-4 ${isAuthenticated ? "bg-[#FF9500]" : "bg-gray-400"}`} onPress={() => isAuthenticated ? router.push("/shipping") : Alert.alert("Access Denied", "Please log in first.")}>
+        <Text className="text-white text-center text-xl font-semibold">Go to Shipping</Text>
       </TouchableOpacity>
 
       {/* Logout Button */}
