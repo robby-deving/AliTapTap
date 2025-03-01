@@ -1,8 +1,17 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Image, Animated, PanResponder, Pressable, Modal, TextInput, Dimensions, ImageBackground } from 'react-native';
+<<<<<<< HEAD
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+=======
+import { captureRef } from 'react-native-view-shot';
+import { Header } from '@/components/Header';
+import * as ImagePicker from 'expo-image-picker';
+import { GestureHandlerRootView, PinchGestureHandler, State } from 'react-native-gesture-handler';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+>>>>>>> origin/f/dynamicDataCustom
 import { saveCardAsImage } from '@/services/helperFunctions';
 
 interface SavedItem {
@@ -43,19 +52,37 @@ export default function BackEdit() {
   const pan = useRef(new Animated.ValueXY()).current;
   const lastPan = useRef({ x: 0, y: 0 });
 
+<<<<<<< HEAD
   const { width, height } = Dimensions.get('window');
+=======
+  const { product } = useLocalSearchParams();
+  const parsedProduct = typeof product === "string" ? JSON.parse(product) : product;
+  const image = parsedProduct.front_image
+
+
+>>>>>>> origin/f/dynamicDataCustom
   const router = useRouter();
 
   useEffect(() => {
     loadCardData();
   }, []);
 
+<<<<<<< HEAD
   const loadCardData = async () => {
     const { frontImage, backImage, materials, details } = router.query;
 
     // Parse the materials and details if they are passed as stringified JSON
     const parsedMaterials = materials ? JSON.parse(materials as string) : {};
     const parsedDetails = details ? JSON.parse(details as string) : {};
+=======
+  const initialData: SavedItem[] = parsedProduct.details.front_info.map((info: any, index: number) => ({
+    id: index + 1,
+    text: info.text || "",
+    uri: info.uri || "",
+    position: info.position || { x: 0, y: 0 },
+    size: info.size || 14,
+  }));
+>>>>>>> origin/f/dynamicDataCustom
 
     // Initialize the card data
     const newCardData: CardData = {

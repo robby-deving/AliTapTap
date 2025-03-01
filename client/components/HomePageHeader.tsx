@@ -1,6 +1,6 @@
 // components/HomePageHeader.tsx
 import React from "react";
-import { View, TouchableOpacity, Image } from "react-native";
+import { View, TouchableOpacity, Image, SafeAreaView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router"; // For navigation
 
@@ -18,19 +18,21 @@ export const HomePageHeader = () => {
   };
 
   return (
-    <View style={{ width: "100%", height: 80, backgroundColor: "#1C1C1C", flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, paddingTop: 40 }}>
-      {/* Profile Icon */}
-      <TouchableOpacity onPress={handleProfilePress}>
-        <Ionicons name="person-circle-outline" size={24} color="white" />
-      </TouchableOpacity>
+    <SafeAreaView style={{ backgroundColor: "#1C1C1C" }}>
+      <View style={{ width: "100%",  backgroundColor: "#1C1C1C", flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding:16 }}>
+        {/* Profile Icon */}
+        <TouchableOpacity onPress={handleProfilePress}>
+          <Ionicons name="person-circle-outline" size={24} color="white" />
+        </TouchableOpacity>
 
-      {/* Logo */}
-      <Image source={require("../assets/images/logo.png")} style={{ width: 27.61, height: 38 }} resizeMode="contain" />
+        {/* Logo */}
+        <Image source={require("../assets/images/logo.png")} style={{ width: 27.61, height: 38 }} resizeMode="contain" />
 
-      {/* Chat Icon */}
-      <TouchableOpacity onPress={handleChatPress}>
-        <Ionicons name="chatbubble-ellipses-outline" size={24} color="white" />
-      </TouchableOpacity>
-    </View>
+        {/* Chat Icon */}
+        <TouchableOpacity onPress={handleChatPress}>
+          <Ionicons name="chatbubble-ellipses-outline" size={24} color="white" />
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 };

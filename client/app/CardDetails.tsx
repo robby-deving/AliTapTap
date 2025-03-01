@@ -7,6 +7,8 @@ import CardDetails from "../components/CardDetails";
 const CardDetailsScreen = () => {
   const { product } = useLocalSearchParams();
   const parsedProduct = typeof product === "string" ? JSON.parse(product) : product;
+  console.log('Parsed Product:', parsedProduct);
+
 
   return (
     <View style={styles.container}>

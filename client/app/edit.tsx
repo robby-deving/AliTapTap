@@ -5,7 +5,7 @@ import { Header } from '@/components/Header';
 import * as ImagePicker from 'expo-image-picker';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { saveCardAsImage } from '@/services/helperFunctions';
 
 interface SavedItem {
@@ -46,16 +46,37 @@ export default function BackEdit() {
   const lastScale = useRef(1);
   const pan = useRef(new Animated.ValueXY()).current;
   const lastPan = useRef({ x: 0, y: 0 });
+<<<<<<< HEAD
   const [cardData, setCardData] = useState<CardData | null>(null);
 
   const { width, height } = Dimensions.get('window');
+=======
+>>>>>>> origin/f/dynamicDataCustom
   const router = useRouter();
+
+  const { product } = useLocalSearchParams();
+  const parsedProduct = typeof product === "string" ? JSON.parse(product) : product;
+  const image = parsedProduct.front_image
+
+  
 
   useEffect(() => {
     loadCardData();
   }, []);
 
+<<<<<<< HEAD
   const loadCardData = async () => {
+=======
+  const initialData: SavedItem[] = parsedProduct.details.front_info.map((info: any, index: number) => ({
+    id: index + 1,
+    text: info.text || "",
+    uri: info.uri || "",
+    position: info.position || { x: 0, y: 0 },
+    size: info.size || 14,
+  }));
+
+  const saveInitialData = async () => {
+>>>>>>> origin/f/dynamicDataCustom
     try {
       const savedCardData = await AsyncStorage.getItem('cardData');
       if (savedCardData) {
@@ -298,7 +319,61 @@ export default function BackEdit() {
               >
                 {items.map(renderDraggableItem)}
               </ImageBackground>
+<<<<<<< HEAD
             )}
+=======
+            </Animated.View>
+          </PinchGestureHandler>
+
+        </View>
+
+      </Pressable>
+
+      <View className='flex flex-row gap-10 px-10 mb-10'>
+        <View className='flex flex-row gap-5'>
+          <TouchableOpacity className='flex flex-col items-center' onPress={addText}>
+            <Image source={require('../assets/images/text-icon.png')} className='w-[25px] h-[25px] mb-2' />
+            <Text className='font-semibold'>Add Text</Text>
+          </TouchableOpacity>
+          <TouchableOpacity className='flex flex-col items-center' onPress={addImage}>
+            <Image source={require('../assets/images/img-icon.png')} className='w-[25px] h-[25px] mb-2' />
+            <Text className='font-semibold'>Add Image</Text>
+          </TouchableOpacity>
+        </View>
+        <View className='flex-1'>
+          <TouchableOpacity
+            className={`${isPressed ? 'bg-white border border-[#FDCB07]' : 'bg-[#FDCB07]'} w-full p-4 rounded`}
+            onPressIn={() => setIsPressed(true)}
+            onPressOut={() => setIsPressed(false)}
+            onPress={async () => {
+              await saveFrontCardAsImage();
+              saveText();
+              deselectAll();
+              router.push({ pathname: "/backEdit", params: { product: JSON.stringify(parsedProduct) } });
+            }}
+          >
+            <Text className={`${isPressed ? 'text-[#FDCB07]' : 'text-white'} text-center text-xl font-semibold`}>Next</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isModalVisible}
+        onRequestClose={() => setIsModalVisible(false)}
+      >
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <View style={{ width: 300, padding: 20, backgroundColor: 'white', borderRadius: 10 }}>
+            <Text style={{ fontSize: 18, marginBottom: 10 }}>Edit Text</Text>
+            <TextInput
+              value={newText}
+              onChangeText={setNewText}
+              style={{ borderWidth: 1, borderColor: '#ccc', padding: 10, marginBottom: 20 }}
+            />
+            <TouchableOpacity onPress={saveText} style={{ backgroundColor: '#FDCB07', padding: 10, borderRadius: 5 }}>
+              <Text style={{ color: 'white', textAlign: 'center' }}>Save</Text>
+            </TouchableOpacity>
+>>>>>>> origin/f/dynamicDataCustom
           </View>
         </Pressable>
 

@@ -1,7 +1,11 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+<<<<<<< HEAD
 import { useRouter } from "expo-router"; // Import useRouter for navigation
+=======
+import { useRouter } from "expo-router";
+>>>>>>> origin/f/dynamicDataCustom
 
 type Product = {
   front_image?: string;
@@ -20,7 +24,12 @@ const CardDetails = ({ product }: CardDetailsProps) => {
   const materialOptions = product?.materials ? Object.keys(product.materials) : ["PVC", "Metal", "Wood"];
 
   const [selectedMaterial, setSelectedMaterial] = useState(materialOptions[0]);
+<<<<<<< HEAD
   const [quantity, setQuantity] = useState(1); 
+=======
+  const [quantity, setQuantity] = useState(1); // Default quantity is 1
+  const router = useRouter();
+>>>>>>> origin/f/dynamicDataCustom
 
   const handleIncrease = () => {
     setQuantity((prevQuantity) => prevQuantity + 1); 
@@ -36,6 +45,10 @@ const CardDetails = ({ product }: CardDetailsProps) => {
     const unitPrice = product?.materials?.[selectedMaterial]?.price_per_unit || 1200;
     const totalPrice = unitPrice * quantity;
     return totalPrice.toLocaleString(); 
+  };
+
+  const handleEditPress = () => {
+    router.push({ pathname: "/edit", params: { product: JSON.stringify(product) } });
   };
 
   return (
@@ -86,6 +99,7 @@ const CardDetails = ({ product }: CardDetailsProps) => {
 
           {/* Edit Design Button */}
           <View style={styles.editButtonContainer}>
+<<<<<<< HEAD
           <TouchableOpacity 
                 style={styles.editButton} 
                 onPress={() => router.push({
@@ -100,6 +114,11 @@ const CardDetails = ({ product }: CardDetailsProps) => {
               >
                 <Text style={styles.editButtonText}>Edit Design</Text>
               </TouchableOpacity>
+=======
+            <TouchableOpacity onPress={handleEditPress} style={styles.editButton}>
+              <Text style={styles.editButtonText}>Edit Design</Text>
+            </TouchableOpacity>
+>>>>>>> origin/f/dynamicDataCustom
           </View>
         </View>
       </ScrollView>
