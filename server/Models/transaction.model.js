@@ -5,12 +5,12 @@ const transactionModel = new Schema(
     {
         order_id: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Order",
+            ref: "Order",  // Referencing the updated Order model
             required: true,
         },
         customer_id: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
+            ref: "User",  // Referencing the User model
             required: true,
         },
         merchandise_subtotal: {
@@ -27,7 +27,7 @@ const transactionModel = new Schema(
         },
         payment_method: {
             type: String,
-            required: true, 
+            required: true,
         },
         status: {
             type: String,
@@ -41,7 +41,7 @@ const transactionModel = new Schema(
         transaction_number: {
             type: String,
             required: true,
-            unique: true, 
+            unique: true,
         },
         deleted_at: {
             type: Date,

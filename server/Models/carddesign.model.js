@@ -2,79 +2,67 @@ const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 const positionSchema = new Schema({
-  x: { type: Number, required: true },
-  y: { type: Number, required: true },
+  x: { type: Number, required: false },
+  y: { type: Number, required: false },
 });
 
-const textElementSchema = new Schema({
-  default_text: { type: String, required: true },
-  position: { type: positionSchema, required: true },
-  font: { type: String, required: true },
-  font_size: { type: Number, required: true },
-});
-
-const logoElementSchema = new Schema({
-  default_url: { type: String, required: true },
-  position: { type: positionSchema, required: true },
+const elementSchema = new Schema({
+  id: { type: Number, required: false },
+  text: { type: String, default: "" },
+  uri: { type: String, default: "" },
+  position: { type: positionSchema, required: false },
+  size: { type: Number, required: false },
 });
 
 const cardDesignModel = new Schema(
   {
+    name: {
+      type: String,
+      required: true,  // This is required for admin when creating a product
+    },
     front_image: {
       type: String,
-      required: true,
+      required: true,  // Admin needs to upload the front image
     },
     back_image: {
       type: String,
-      required: true,
-    },
-    categories: {
-      type: [String],
-      required: true,
+      required: true,  // Admin needs to upload the back image
     },
     created_by: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      required: true,  // Admin creating the product (should be a valid user)
     },
     details: {
-      orientation: {
-        type: String,
-        enum: ["Landscape", "Portrait"],
-        required: true,
-      },
-      material: {
-        type: String,
-        enum: ["PVC", "Metal", "Wood"],
-        required: true,
-      },
-      color: {
-        type: String,
-        required: true,
-      },
       front_info: {
-        company_name: { type: textElementSchema, required: true },
-        full_name: { type: textElementSchema, required: true },
-        email: { type: textElementSchema, required: true },
-        phone: { type: textElementSchema, required: true },
-        logo: { type: logoElementSchema, required: true },
+        type: [elementSchema],  // This stays for user customization
+        required: false,  
       },
       back_info: {
-        company_name: { type: textElementSchema, required: true },
-        email: { type: textElementSchema, required: true },
-        phone: { type: textElementSchema, required: true },
-        logo: { type: logoElementSchema, required: true },
+        type: [elementSchema],  // This stays for user customization
+        required: false,  
+      },
+    },
+    materials: {
+      PVC: {
+        price_per_unit: { type: Number, required: true },  // Admin sets pricing for PVC
+      },
+      Metal: {
+        price_per_unit: { type: Number, required: true },  // Admin sets pricing for Metal
+      },
+      Wood: {
+        price_per_unit: { type: Number, required: true },  // Admin sets pricing for Wood
       },
     },
     deleted_at: {
       type: Date,
-      default: null,
+      default: null,  // Default value for "deleted" flag
     },
   },
   {
     timestamps: {
-      createdAt: "created_at",
-      updatedAt: "modified_at",
+      createdAt: "created_at",  
+      updatedAt: "modified_at", 
     },
   }
 );
