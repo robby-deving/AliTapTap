@@ -5,7 +5,7 @@ import { Header } from '@/components/Header';
 import * as ImagePicker from 'expo-image-picker';
 import { GestureHandlerRootView, PinchGestureHandler, State } from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { saveCardAsImage } from '@/services/helperFunctions';
 
 interface SavedItem {
@@ -40,9 +40,10 @@ export default function backEdit() {
   const pan = useRef(new Animated.ValueXY()).current;
   const lastPan = useRef({ x: 0, y: 0 });
 
-  const image = 'https://static.vecteezy.com/system/resources/thumbnails/006/296/343/small/abstract-background-for-posters-banners-promotions-business-cards-etc-with-a-combination-of-green-and-yellow-gradient-vector.jpg';
+  const { product } = useLocalSearchParams();
+  const parsedProduct = typeof product === "string" ? JSON.parse(product) : product;
+  const image = parsedProduct.front_image
 
-  const { width, height } = Dimensions.get('window');
 
   const router = useRouter();
 

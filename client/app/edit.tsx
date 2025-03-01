@@ -5,7 +5,7 @@ import { Header } from '@/components/Header';
 import * as ImagePicker from 'expo-image-picker';
 import { GestureHandlerRootView, PinchGestureHandler, State } from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { saveCardAsImage } from '@/services/helperFunctions';
 
 interface SavedItem {
@@ -39,41 +39,26 @@ export default function backEdit() {
   const lastScale = useRef(1);
   const pan = useRef(new Animated.ValueXY()).current;
   const lastPan = useRef({ x: 0, y: 0 });
-
-  const image = 'https://static.vecteezy.com/system/resources/thumbnails/006/296/343/small/abstract-background-for-posters-banners-promotions-business-cards-etc-with-a-combination-of-green-and-yellow-gradient-vector.jpg';
-
-  const { width, height } = Dimensions.get('window');
-
   const router = useRouter();
+
+  const { product } = useLocalSearchParams();
+  const parsedProduct = typeof product === "string" ? JSON.parse(product) : product;
+  const image = parsedProduct.front_image
+
+  
 
   useEffect(() => {
     saveInitialData();
     loadSavedItems();
   }, []);
 
-  const initialData: SavedItem[] = [
-    {
-      id: 1,
-      text: "Tech Corp",
-      uri: "",
-      position: { x: 0.09, y: 0.16 },
-      size: 14
-    },
-    {
-      id: 2,
-      text: "John Doe",
-      uri: "",
-      position: { x: 0.09, y: 0.16 },
-      size: 12
-    },
-    {
-      id: 3,
-      text: "",
-      uri: "https://example.com/images/logo.png",
-      position: {x: 0.09, y: 0.16},
-      size: 100
-    }
-  ];
+  const initialData: SavedItem[] = parsedProduct.details.front_info.map((info: any, index: number) => ({
+    id: index + 1,
+    text: info.text || "",
+    uri: info.uri || "",
+    position: info.position || { x: 0, y: 0 },
+    size: info.size || 14,
+  }));
 
   const saveInitialData = async () => {
     try {
@@ -419,7 +404,7 @@ export default function backEdit() {
               await saveFrontCardAsImage();
               saveText();
               deselectAll();
-              router.push('/backEdit');
+              router.push({ pathname: "/backEdit", params: { product: JSON.stringify(parsedProduct) } });
             }}
           >
             <Text className={`${isPressed ? 'text-[#FDCB07]' : 'text-white'} text-center text-xl font-semibold`}>Next</Text>

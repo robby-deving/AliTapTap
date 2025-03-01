@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 
 type Product = {
   front_image?: string;
@@ -16,6 +17,7 @@ const CardDetails = ({ product }: CardDetailsProps) => {
 
   const [selectedMaterial, setSelectedMaterial] = useState(materialOptions[0]);
   const [quantity, setQuantity] = useState(1); // Default quantity is 1
+  const router = useRouter();
 
   const handleIncrease = () => {
     setQuantity((prevQuantity) => prevQuantity + 1); // Increase quantity by 1
@@ -31,6 +33,10 @@ const CardDetails = ({ product }: CardDetailsProps) => {
     const unitPrice = product?.materials?.[selectedMaterial]?.price_per_unit || 1200;
     const totalPrice = unitPrice * quantity;
     return totalPrice.toLocaleString(); // Formats the number with commas
+  };
+
+  const handleEditPress = () => {
+    router.push({ pathname: "/edit", params: { product: JSON.stringify(product) } });
   };
 
   return (
@@ -81,7 +87,7 @@ const CardDetails = ({ product }: CardDetailsProps) => {
 
           {/* Edit Design Button */}
           <View style={styles.editButtonContainer}>
-            <TouchableOpacity style={styles.editButton}>
+            <TouchableOpacity onPress={handleEditPress} style={styles.editButton}>
               <Text style={styles.editButtonText}>Edit Design</Text>
             </TouchableOpacity>
           </View>
