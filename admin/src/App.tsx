@@ -14,7 +14,7 @@ function App() {
                 <Sidebar />
                 <div className="flex-grow flex flex-col">
                   <Topbar />
-                  <div className=' flex-grow overflow-hidden'>
+                  <div className=' flex-grow overflow-auto h-full'>
                     <Routes>
                           <Route path="/dashboard" element={<Dashboard />} />
                           <Route path="/orders" element={<Orders />} />

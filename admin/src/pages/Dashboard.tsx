@@ -1,9 +1,18 @@
 import React from 'react';
 import SalesChart from "@/components/SalesChart"
+import useFetchData from "../hooks/useFetchData";
 
 export default function Dashboard() {
+    const totalUsersData = useFetchData<{ totalUsers: number }>("total-users");
+    const totalOrdersData = useFetchData<{ totalOrders: number }>("total-orders");
+    const revenueData = useFetchData<{ dailyRevenue: number; monthlyRevenue: number; yearlyRevenue: number }>("revenue");
+    const unverifiedOrdersData = useFetchData<{ formattedOrders: { order_id: string; name: string; transaction_number: string }[] }>("unverified-orders");
+    const recentTransactionsData = useFetchData<{ recentTransactions: { transaction_number: string; total_amount: number; transaction_date: string; customer_id: { first_name: string; last_name: string } }[] }>("recent-transactions");
+    const bestSellingData = useFetchData<{ _id: string; totalSold: number }[]>("best-selling");
+
     return (
-        <div className='overflow-auto h-full flex p-10 gap-10'>
+
+        <div className='overflow-auto w-full flex p-10 gap-10'>
             <div className='flex-1 '>
                 {/* Top Section */}
                 <div className="flex justify-between items-center">
@@ -27,24 +36,24 @@ export default function Dashboard() {
                                 </svg>
                             </div>
                                 
-                            <div className='flex justify-between gap-5 mt-5'>
+                            <div className='flex gap-10 mt-5 justify-evenly items-center'>
                                 <div>
-                                    <h3 className='text-sm text-gray-400'>Today</h3>
-                                    <p className='font-bold text-2xl'>P 1,300.00</p>
+                                    <h3 className='text-sm text-gray-400'>Daily</h3>
+                                    <p className='font-bold text-2xl'>{revenueData.loading ? "Loading..." : `₱ ${revenueData.data?.dailyRevenue.toLocaleString()}.00`}</p>
                                 </div>
 
-                                <div className=' w-[2px] bg-[#FDDF05]'></div>
+                                <div className=' w-[2px] h-10 bg-[#FDDF05]'></div>
 
                                 <div>
                                     <h3 className='text-sm text-gray-400'>Monthly</h3>
-                                    <p className='font-bold text-2xl'>P 1,300.00</p>
+                                    <p className='font-bold text-2xl'>{revenueData.loading ? "Loading..." : `₱ ${revenueData.data?.monthlyRevenue.toLocaleString()}.00`}</p>
                                 </div>
 
-                                <div className=' w-[2px] bg-[#FDDF05]'></div>
+                                <div className=' w-[2px] h-10 bg-[#FDDF05]'></div>
 
                                 <div>
                                     <h3 className='text-sm text-gray-400'>Yearly</h3>
-                                    <p className='font-bold text-2xl'>P 1,300.00</p>
+                                    <p className='font-bold text-2xl'>{revenueData.loading ? "Loading..." : `₱ ${revenueData.data?.yearlyRevenue.toLocaleString()}.00`}</p>
                                 </div>
                                 
                             </div>
@@ -61,7 +70,9 @@ export default function Dashboard() {
                                             <path d="M4.61108 11.2888H10.3889" stroke="#FFDF62" stroke-width="1.75" stroke-linecap="square" stroke-linejoin="round"/>
                                         </svg>
                                     </div>
-                                    <p className='font-bold text-2xl mt-5'>P 1,000.00</p>
+                                    <p className='font-bold text-2xl mt-5'>
+                                        {totalOrdersData.loading ? "Loading..." : `${totalOrdersData.data?.totalOrders.toLocaleString()}`}
+                                    </p>
                                 </div>
 
                                 <div className='bg-white border border-gray-300 rounded-md p-7 mt-5'>
@@ -74,7 +85,9 @@ export default function Dashboard() {
                                         </svg>
                                     </div>
 
-                                    <p className='font-bold text-2xl mt-5'>143</p>
+                                    <p className='font-bold text-2xl mt-5'>
+                                        {totalUsersData.loading ? "Loading..." : totalUsersData.data?.totalUsers ?? "Error"}
+                                    </p>
                                 </div>
 
                             </div>
@@ -86,7 +99,19 @@ export default function Dashboard() {
                                     </svg>
                                 </div>
                                 <div className="space-y-2">
-                                    <div className="flex justify-between items-center text-base font-bold pt-3">
+                                    {bestSellingData.loading ? (
+                                        <div className="text-center p-3">Loading...</div>
+                                    ) : bestSellingData.data?.length ? (
+                                        bestSellingData.data.map((design, index) => (
+                                            <div key={index} className="flex justify-between items-center text-base font-bold pt-3">
+                                                <span className="text-black">{design._id}</span>
+                                                <span className="text-[#FDDF05]">{design.totalSold}</span>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="text-center p-3">No best-selling designs</div>
+                                    )}
+                                    {/* <div className="flex justify-between items-center text-base font-bold pt-3">
                                         <span className="text-black">Design 1</span>
                                         <span className="text-[#FDDF05]">30</span>
                                     </div>
@@ -105,7 +130,7 @@ export default function Dashboard() {
                                     <div className="flex justify-between items-center text-base font-bold pt-3">
                                         <span className="text-black">Design 5</span>
                                         <span className="text-[#FDDF05]">15</span>
-                                    </div>
+                                    </div> */}
                                 </div>
                             </div>
                         </div>
@@ -117,21 +142,38 @@ export default function Dashboard() {
                                     {/* Table Header */}
                                     <thead>
                                     <tr className="text-gray-400 text-center">
-                                        <th className="p-3 w-1/3">Order ID</th>
-                                        <th className="p-3 w-1/3">Name</th>
-                                        <th className="p-3 w-1/3">Transaction ID</th>
+                                        <th className="p-3 text-sm">Order ID</th>
+                                        <th className="p-3 text-sm">Name</th>
+                                        <th className="p-3 text-sm">Transaction ID</th>
                                     </tr>
                                     </thead>
 
                                     {/* Table Body */}
                                     <tbody>
-                                    {[...Array(5)].map((_, index) => (
-                                        <tr key={index} className="border-t border-gray-300 text-center">
-                                        <td className="p-3 w-1/3">00000001</td>
-                                        <td className="p-3 w-1/3">Archie Onoya</td>
-                                        <td className="p-3 w-1/3">00000001</td>
+                                    {unverifiedOrdersData.loading ? (
+                                        <tr>
+                                            <td colSpan={3} className="text-center p-3">Loading...</td>
                                         </tr>
-                                    ))}
+                                    ) : unverifiedOrdersData.data?.formattedOrders.length ? (
+                                        unverifiedOrdersData.data.formattedOrders.map((order) => (
+                                            <tr key={order.order_id} className="border-t border-gray-300 text-center">
+                                                <td className="p-3 text-[13px]">{order.order_id}</td>
+                                                <td className="p-3 text-[13px]">{order.name}</td>
+                                                <td className="p-3 text-[13px]">{order.transaction_number}</td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan={3} className="text-center p-3">No unverified orders</td>
+                                        </tr>
+                                    )}
+                                    {/* {[...Array(5)].map((_, index) => (
+                                        <tr key={index} className="border-t border-gray-300 text-center">
+                                        <td className="p-3 w-1/3 text-sm">00000001</td>
+                                        <td className="p-3 w-1/3 text-sm">Archie Onoya</td>
+                                        <td className="p-3 w-1/3 text-sm">00000001</td>
+                                        </tr>
+                                    ))} */}
                                     </tbody>
                                 </table>
                             </div>
@@ -148,7 +190,7 @@ export default function Dashboard() {
                         </div>
 
                         <div className='bg-white mt-5'>
-                            <h1 className='text-xl font-semibold text-[#FDDF05]'>Unverified Orders</h1>
+                            <h1 className='text-xl font-semibold text-[#FDDF05]'>Recent Transactions</h1>
                             <div className="border border-gray-300 rounded-md mt-3">
                                 <table className="w-full border-collapse">
                                     {/* Table Header */}
@@ -163,14 +205,32 @@ export default function Dashboard() {
 
                                     {/* Table Body */}
                                     <tbody>
-                                    {[...Array(5)].map((_, index) => (
-                                        <tr key={index} className="border-t border-gray-300 text-center">
-                                        <td className="p-3">00000001</td>
-                                        <td className="p-3">Design 1</td>
-                                        <td className="p-3">P1,200.00</td>
-                                        <td className="p-3">02-21-2025</td>
+                                    {recentTransactionsData.loading ? (
+                                        <tr>
+                                            <td colSpan={4} className="text-center p-3">Loading...</td>
                                         </tr>
-                                    ))}
+                                    ) : recentTransactionsData.data?.recentTransactions.length ? (
+                                        recentTransactionsData.data.recentTransactions.map((transaction) => (
+                                            <tr key={transaction.transaction_number} className="border-t border-gray-300 text-center">
+                                                <td className="p-3 text-[13px]">{transaction.transaction_number}</td>
+                                                <td className="p-3 text-[13px]">{transaction.customer_id.first_name} {transaction.customer_id.last_name}</td>
+                                                <td className="p-3 text-[13px]">₱{transaction.total_amount.toLocaleString()}.00</td>
+                                                <td className="p-3 text-[13px]">{new Date(transaction.transaction_date).toLocaleDateString()}</td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan={4} className="text-center p-3">No recent transactions</td>
+                                        </tr>
+                                    )}
+                                    {/* {[...Array(5)].map((_, index) => (
+                                        <tr key={index} className="border-t border-gray-300 text-center">
+                                        <td className="p-3 text-sm">00000001</td>
+                                        <td className="p-3 text-sm">Design 1</td>
+                                        <td className="p-3 text-sm">P1,200.00</td>
+                                        <td className="p-3 text-sm">02-21-2025</td>
+                                        </tr>
+                                    ))} */}
                                     </tbody>
                                 </table>
                             </div>

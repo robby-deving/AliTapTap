@@ -1,5 +1,7 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import axios from "axios";
 import { TrendingUp } from "lucide-react";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import {
@@ -17,20 +19,25 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 
-// Sample sales data
-const chartData = [
-  { month: "January", sales: 29618 },
-  { month: "February", sales: 23407 },
-  { month: "March", sales: 8384 },
-  { month: "April", sales: 35684 },
-  { month: "May", sales: 38524 },
-  { month: "June", sales: 32408 },
-  { month: "July", sales: 33322 },
-  { month: "August", sales: 38842 },
-  { month: "September", sales: 1249 },
-  { month: "October", sales: 10657 },
-  { month: "November", sales: 3767 },
-  { month: "December", sales: 32058 },
+type SalesData = {
+  month: string;
+  sales: number | null;
+};
+
+// Months
+const allMonths = [
+  { month: "January", sales: 0 },
+  { month: "February", sales: 0 },
+  { month: "March", sales: 0 },
+  { month: "April", sales: 0 },
+  { month: "May", sales: 0 },
+  { month: "June", sales: 0 },
+  { month: "July", sales: 0 },
+  { month: "August", sales: 0 },
+  { month: "September", sales: 0 },
+  { month: "October", sales: 0 },
+  { month: "November", sales: 0 },
+  { month: "December", sales: 0 },
 ];
 
 // Chart configuration
@@ -42,7 +49,37 @@ const chartConfig: ChartConfig = {
 };
 
 const SalesLineChart = () => {
+  const [chartData, setChartData] = useState<SalesData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchSalesData = async () => {
+      try {
+        const response = await axios.get<SalesData[]>("http://localhost:4000/api/v1/dashboard/sales");
+        const fetchedData = response.data;
+  
+        // Merge fetched data with default months, setting sales to null if missing
+        const updatedChartData: SalesData[] = allMonths.map((monthData) => {
+          const found = fetchedData.find((data) => data.month === monthData.month);
+          return found ? found : { ...monthData, sales: null }; // Use null to break the line
+        });
+  
+        setChartData(updatedChartData);
+      } catch (error) {
+        console.error("Error fetching sales data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    fetchSalesData();
+  }, []);
+
   return (
+    <CardContent>
+        {loading ? (
+          <p className="text-center">Loading...</p>
+        ) : (
         <ChartContainer config={chartConfig}>
           <LineChart
             accessibilityLayer
@@ -61,11 +98,11 @@ const SalesLineChart = () => {
               tickFormatter={(value) => value.slice(0, 3)}
             />
             <YAxis
-            domain={[0, 40000]} // Set Y-axis range
-            tickFormatter={(value) => `₱${value.toLocaleString()}`} // Format as pesos
-            tickMargin={8}
-            axisLine={false}
-            tickLine={false}
+              domain={[0, "auto"]} // Auto adjust Y-axis
+              tickFormatter={(value) => `₱${value.toLocaleString()}`} // Format currency
+              tickMargin={8}
+              axisLine={false}
+              tickLine={false}
             />
             <ChartTooltip
               cursor={false}
@@ -73,13 +110,16 @@ const SalesLineChart = () => {
             />
             <Line
               dataKey="sales"
-              type="linear"
+              type="monotone"
               stroke="#FDDF05"
               strokeWidth={2}
               dot={false}
+              connectNulls={false} // This ensures missing months create a gap in the line
             />
           </LineChart>
         </ChartContainer>
+      )}
+    </CardContent>
   );
 };
 
