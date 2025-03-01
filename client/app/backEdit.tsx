@@ -52,16 +52,13 @@ export default function backEdit() {
     loadSavedItems();
   }, []);
 
-  const initialData: SavedItem[] = [
-    {
-      id: 1,
-      text: "This is back data",
-      uri: "",
-      position: { x: 0.09, y: 0.16 },
-      size: 14
-    }
-
-  ];
+  const initialData: SavedItem[] = parsedProduct.details.front_info.map((info: any, index: number) => ({
+    id: index + 1,
+    text: info.text || "",
+    uri: info.uri || "",
+    position: info.position || { x: 0, y: 0 },
+    size: info.size || 14,
+  }));
 
   const saveInitialData = async () => {
     try {
