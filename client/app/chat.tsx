@@ -9,6 +9,8 @@ import {
 } from "react-native";
 import io, { Socket } from "socket.io-client";
 import { Header } from "../components/Header";
+import { Alert } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function ChatScreen() {
   const [chatMessage, setChatMessage] = useState("");
@@ -32,10 +34,41 @@ export default function ChatScreen() {
     };
   }, []);
 
-  const submitChatMessage = () => {
-    if (socket && chatMessage.trim() !== "") {
-      socket.emit("message", chatMessage);
-      setChatMessage("");
+  const submitChatMessage = async () => {
+    if (!chatMessage.trim()) return; // Prevent sending empty messages
+
+    try {
+      const senderId = await AsyncStorage.getItem("userId");
+      if (!senderId) {
+        Alert.alert("Error", "User ID not found. Please log in again.");
+        return;
+      }
+
+      const receiverId = "67b14d4255dbde56064ce4a5"; // Fixed receiver ID
+
+      const response = await fetch("http://192.168.1.8:4000/api/v1/chat/send", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ senderId, receiverId, message: chatMessage }),
+      });
+
+      const data = await response.json();
+      if (!response.ok)
+        throw new Error(data.message || "Message sending failed");
+
+      // ✅ Message Sent Successfully, Now Update UI
+      setMessages((prevMessages) => [...prevMessages, chatMessage]); // Add to state
+      setChatMessage(""); // Clear input field
+    } catch (error) {
+      console.error("❌ Message Sending Error:", error);
+
+      if (error instanceof Error) {
+        Alert.alert("Error", error.message);
+      } else {
+        Alert.alert("Error", "An unexpected error occurred.");
+      }
     }
   };
 
@@ -71,7 +104,7 @@ export default function ChatScreen() {
             onChangeText={setChatMessage}
             placeholder="Type a message..."
             className="flex-1 border border-gray-300 p-2 rounded h-12 text-gray-700"
-            onSubmitEditing={submitChatMessage}
+            onSubmitEditing={submitChatMessage} // ⬅️ Press Enter to send
           />
           <TouchableOpacity onPress={submitChatMessage} className="ml-2">
             <Image

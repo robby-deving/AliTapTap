@@ -45,24 +45,36 @@ export default function Index() {
         body: JSON.stringify({ email, password }),
       });
   
-      const data = await response.json();
+      const text = await response.text();
+      console.log("🔍 Raw Server Response:", text);
+  
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (err) {
+        throw new Error("Invalid JSON response from server");
+      }
+  
       if (!response.ok) throw new Error(data.message || "Login failed");
   
-      const { token, isAdmin } = data.data;
-      if (!token) throw new Error("Token missing from response");
+      const { token, _id, isAdmin } = data.data || {}; // Use `_id` instead of `userId`
+      if (!token || !_id) throw new Error("Invalid response from server");
   
-      // ✅ Check if the user is an admin
+      // ✅ Prevent admin login
       if (isAdmin) {
         Alert.alert("Access Denied", "Admin accounts are not allowed to log in.");
         return;
       }
   
+      // ✅ Store both token and userId in AsyncStorage
       await AsyncStorage.setItem("token", token);
+      await AsyncStorage.setItem("userId", _id); // Store `_id` as userId
+  
       setIsAuthenticated(true);
       Alert.alert("Login Successful", "You can now access the chat.");
     } catch (error) {
       console.error("❌ Login Error:", error);
-    
+  
       if (error instanceof Error) {
         Alert.alert("Login Failed", error.message);
       } else {
