@@ -1,19 +1,6 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
-const positionSchema = new Schema({
-  x: { type: Number, required: true },
-  y: { type: Number, required: true },
-});
-
-const elementSchema = new Schema({
-  id: { type: Number, required: true },
-  text: { type: String, default: "" }, 
-  uri: { type: String, default: "" }, 
-  position: { type: positionSchema, required: true },
-  size: { type: Number, required: true },
-});
-
 const orderModel = new Schema(
   {
     customer_id: {
@@ -40,16 +27,8 @@ const orderModel = new Schema(
         enum: ["PVC", "Metal", "Wood"],
         required: true,
       },
-      color: {
-        type: String,
-        required: true,
-      },
-      front_info: {
-        type: [elementSchema], 
-        required: true,
-      },
-      back_info: {
-        type: [elementSchema], 
+      price_per_unit: {
+        type: Number,
         required: true,
       },
     },
