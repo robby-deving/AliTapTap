@@ -27,6 +27,16 @@ export default function Index() {
             Start Payment
           </Text>
         </TouchableOpacity>
+
+
+        <TouchableOpacity
+          className="bg-[#0759fd] w-full p-4 rounded"
+          onPress={() => router.push("/login")} // Navigate to login
+        >
+          <Text className="text-white text-center text-xl font-semibold">
+            Start Login
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
