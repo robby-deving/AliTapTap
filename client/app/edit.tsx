@@ -6,7 +6,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { GestureHandlerRootView, PinchGestureHandler, State } from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { saveCardAsImage } from '@/services/helperFunctions';
+import { saveCardAsImage , updateOrderDetails } from '@/services/helperFunctions';
 
 interface SavedItem {
   id: number;
@@ -45,7 +45,7 @@ export default function backEdit() {
   const parsedProduct = typeof product === "string" ? JSON.parse(product) : product;
   const image = parsedProduct.front_image
 
-  
+
 
   useEffect(() => {
     saveInitialData();

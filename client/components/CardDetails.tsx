@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { updateOrderDetails } from "@/services/helperFunctions";
 
 type Product = {
   front_image?: string;
@@ -14,10 +15,17 @@ type CardDetailsProps = {
 
 const CardDetails = ({ product }: CardDetailsProps) => {
   const materialOptions = product?.materials ? Object.keys(product.materials) : ["PVC", "Metal", "Wood"];
-
   const [selectedMaterial, setSelectedMaterial] = useState(materialOptions[0]);
-  const [quantity, setQuantity] = useState(1); // Default quantity is 1
+  const [quantity, setQuantity] = useState(1);
+  const [totalPrice, setTotalPrice] = useState(0);
   const router = useRouter();
+
+  // Calculate total price when quantity or material changes
+  React.useEffect(() => {
+    const unitPrice = product?.materials?.[selectedMaterial]?.price_per_unit || 1200;
+    const calculatedTotal = unitPrice * quantity;
+    setTotalPrice(calculatedTotal);
+  }, [quantity, selectedMaterial, product]);
 
   const handleIncrease = () => {
     setQuantity((prevQuantity) => prevQuantity + 1); // Increase quantity by 1
@@ -29,13 +37,9 @@ const CardDetails = ({ product }: CardDetailsProps) => {
     }
   };
 
-  const getPrice = () => {
-    const unitPrice = product?.materials?.[selectedMaterial]?.price_per_unit || 1200;
-    const totalPrice = unitPrice * quantity;
-    return totalPrice.toLocaleString(); // Formats the number with commas
-  };
-
   const handleEditPress = () => {
+    updateOrderDetails('quantity', quantity);
+    updateOrderDetails('total_price', totalPrice);
     router.push({ pathname: "/edit", params: { product: JSON.stringify(product) } });
   };
 
@@ -54,13 +58,13 @@ const CardDetails = ({ product }: CardDetailsProps) => {
 
         {/* Product Details */}
         <View style={styles.detailsContainer}>
-          <Text style={styles.price}>₱ {getPrice()}</Text>
+          <Text style={styles.price}>₱ {totalPrice.toLocaleString()}</Text>
           <View style={styles.separator} />
 
           {/* Material Selection */}
           <Text style={styles.label}>Material</Text>
           <View style={styles.materialContainer}>
-            {["PVC", "Metal", "Wood"].map((material) => (
+            {["PVC", "Metal", "Wood"].map((material) => (   
               <TouchableOpacity
                 key={material}
                 style={[styles.materialButton, selectedMaterial === material && styles.materialSelected]}

@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import StepperComponent from '../components/StepperComponent';
 import { Header } from '../components/Header';
 import { createPaymentIntent, createPaymentMethod, attachPaymentMethod } from '../services/paymentService';
 import { WebView } from 'react-native-webview';
+import { uploadImageToCloudinary, updateOrderDetails } from '@/services/helperFunctions';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface PaymentData {
   paymentMethod: 'card' | 'gcash' | 'grab_pay';
@@ -24,16 +26,86 @@ export default function Review() {
   const parsedPaymentData: PaymentData | null = paymentData ? JSON.parse(paymentData as string) : null;
   const [isLoading, setIsLoading] = useState(false);
   const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
+  const [cardImage, setCardImage] = useState({ front: '', back: '' });
+  const [paymentIntentIds, setPaymentIntentId] = useState<string | ''>('');
+  const [totalAmount, setTotalAmount] = useState<number>(0);
+
+  useEffect(() => {
+    const fetchCardImage = async () => {
+      try {
+        const image = await AsyncStorage.getItem('card_image');
+        if (image !== null) {
+          console.log('Card Image:', image); // Log the content of card_image
+          setCardImage(JSON.parse(image));
+        }
+      } catch (error) {
+        console.error('Failed to load image from AsyncStorage', error);
+      }
+    };
+// later-on update with description or name of the product
+    const fetchTotalAmount = async () => {
+      try {
+        const orderDetails = await AsyncStorage.getItem('orderDetails');
+        if (orderDetails) {
+          const parsedDetails = JSON.parse(orderDetails);
+          const total = parsedDetails.total_price || 0;
+          setTotalAmount(total);
+          console.log('Total Amount:', total);
+        }
+      } catch (error) {
+        console.error('Failed to fetch total amount:', error);
+      }
+    };
+
+    fetchCardImage();
+    fetchTotalAmount();
+  }, []);
+
+  const logAsyncStorageContent = async () => {
+    try {
+      const keys = await AsyncStorage.getAllKeys();
+      const result = await AsyncStorage.multiGet(keys);
+      result.forEach(([key, value]) => {
+        console.log(`AsyncStorage ${key}: ${value}`);
+      });
+    } catch (error) {
+      console.error('Failed to log AsyncStorage content', error);
+    }
+  };
+
+  const handleUpload = async () => {
+    setIsLoading(true);
+    if (cardImage.front) {
+      const frontImageUrl = await uploadImageToCloudinary(cardImage.front, paymentIntentIds);
+      console.log('Front Image URL:', frontImageUrl);
+      updateOrderDetails('front_image', frontImageUrl);
+      console.log('saved url: ', frontImageUrl);
+      
+
+    }
+    if (cardImage.back) {
+      const backImageUrl = await uploadImageToCloudinary(cardImage.back,paymentIntentIds);
+      console.log('Back Image URL:', backImageUrl);
+      updateOrderDetails('back_image', backImageUrl);
+      console.log('saved back url: ', backImageUrl);
+    }
+
+    console.log('Order Details Updated' ); 
+    await logAsyncStorageContent();
+    
+    setIsLoading(false);
+  };
 
   const handleCheckout = async () => {
     try {
       setIsLoading(true);
 
-      // Step 1: Create Payment Intent
-      const intentData = await createPaymentIntent(10000, 'test');
+      // Step 1: Create Payment Intent with totalAmount instead of hardcoded value
+      const intentData = await createPaymentIntent(totalAmount, 'test');
       if (!intentData.success) throw new Error('Failed to create payment intent');
       
       const paymentIntentId = intentData.data.paymentIntentId;
+      setPaymentIntentId(paymentIntentId);
       console.log('Payment Intent Created:', paymentIntentId);
 
       // Step 2: Create Payment Method
@@ -67,7 +139,9 @@ export default function Review() {
       // For e-wallets: redirect to payment page
       setRedirectUrl(result.data.attributes.next_action.redirect.url);
     } else if (result.data?.attributes?.status === 'succeeded') {
-      // For cards: direct success
+
+      handleUpload();
+
       router.push('/success');
     } else {
       throw new Error('Payment failed or invalid status received');
@@ -94,10 +168,11 @@ export default function Review() {
                 <Text className="text-gray-600">Loading payment page...</Text>
               </View>
             )}
-            onNavigationStateChange={(navState) => {
+            onNavigationStateChange={async (navState) => {
               // Handle return URL from payment
               if (navState.url.includes('success')) {
                 setRedirectUrl(null);
+                await handleUpload(); 
                 router.push('/success');
               } else if (navState.url.includes('cancel')) {
                 setRedirectUrl(null);
