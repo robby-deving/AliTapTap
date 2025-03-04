@@ -4,14 +4,9 @@ import {
   View,
   Image,
   TouchableOpacity,
-  KeyboardAvoidingView,
-  ScrollView,
-  Platform,
-  Modal,
-  TextInput,
   } from 'react-native';
-import { useRouter } from "expo-router";
-import InputField from "../components/InputField";
+
+  import InputField from "../components/InputField";
 
 
 export default function LoginScreen() {
@@ -28,12 +23,13 @@ export default function LoginScreen() {
 
   return (
     <View className="h-full bg-[#2C2C2C]">
-      <View className="w-full h-[95vh] justify-self-center pt-10 rounded-b-3xl bg-white">
-        <View className="flex-1 justify-center px-8">
+      <View className="w-full h-[99vh] justify-self-center pt-10 rounded-b-3xl bg-white ">
+        <View className="flex-1 justify-center px-8 ">
           {/* Logo and Title */}
           <Image source={require('../assets/images/logo_b.png')} style={{ width: 105, height: 150 }} className="self-center" />
-          <Text className="text-4xl font-semibold text-center mt-2 mb-10">AliTapTap</Text>
+          <Text className="text-5xl font-semibold text-center mt-2 mb-10">AliTapTap</Text>
 
+          <View>
           {/* Email Input */}
           <InputField
             label='Email'
@@ -42,7 +38,6 @@ export default function LoginScreen() {
             onChangeText={setEmail}
             keyboardType="email-address"
           />
-
           {/* Password Input */}
           <InputField
             label='Password'
@@ -50,8 +45,9 @@ export default function LoginScreen() {
             value={password}
             onChangeText={setPassword}
             secureTextEntry
-          />
-
+            />
+          </View>
+        
           <TouchableOpacity className="self-end mt-4">
             <Text className="text-gray-500">Forgot Password?</Text>
           </TouchableOpacity>
@@ -68,18 +64,20 @@ export default function LoginScreen() {
             <View className="flex-1 h-px bg-gray-300" />
           </View>
 
-          <TouchableOpacity className="border border-gray-300 p-4 rounded-lg mt-4 flex-row justify-center items-center">
+          <TouchableOpacity className="border border-gray-300 p-4 rounded-lg mt-6 flex-row justify-center items-center">
           <Image source={require('../assets/images/google-icon.png')} className="w-5 h-5 mr-2" />
             <Text className="text-gray-500">Sign in with Google</Text>
           </TouchableOpacity>
-
         </View>
       </View>
 
-      <View className="absolute bottom-0 w-full">
+      <View className=" bottom-0 w-full">
         {/* Sign-Up Link */}
         <Text className="text-center text-white p-4">
-          Don’t have an account? <Text className="text-white font-bold">Sign Up</Text>
+          Don’t have an account?
+          <TouchableOpacity>
+            <Text className="text-white font-semibold"> Sign Up</Text>
+          </TouchableOpacity>
         </Text>
       </View>
     </View>
