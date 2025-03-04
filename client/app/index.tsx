@@ -39,7 +39,7 @@ export default function Index() {
   const handleLogin = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://192.168.1.8:4000/api/v1/auth/login", {
+      const response = await fetch("http://192.168.1.19:4000/api/v1/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

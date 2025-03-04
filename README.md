@@ -91,9 +91,9 @@ Add the following to the `package.json` file inside the `server` directory:
 ### **3️⃣ Install Dependencies**
 ```bash
 npm install express mongoose dotenv nodemon
-npm install body-parser  # For receiving JSON files
-npm install bcrypt       # For encryption of passwords, etc.
-npm install jsonwebtoken # For authentication
+npm install body-parser  
+npm install bcrypt      
+npm install jsonwebtoken 
 npm install express@4 socket.io
 ```
 
@@ -133,10 +133,7 @@ npm install socket.io-client
 Once you have your local IP address, update the `Chats.tsx` file from the `admin/src/pages` folder:
 
 ```tsx
-useEffect(() => {
-    const newSocket = io("http://YOUR_LOCAL_IP:4000");
-    setSocket(newSocket);
-});
+const socket = io("http://localhost:4000");
 ```
 
 ### **3️⃣ Start the Admin Panel**

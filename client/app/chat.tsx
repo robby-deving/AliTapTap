@@ -9,7 +9,6 @@ import {
 } from "react-native";
 import io, { Socket } from "socket.io-client";
 import { Header } from "../components/Header";
-import { Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function ChatScreen() {
@@ -18,7 +17,7 @@ export default function ChatScreen() {
   const [messages, setMessages] = useState<string[]>([]);
 
   useEffect(() => {
-    const newSocket = io("http://192.168.1.8:4000");
+    const newSocket = io("http://192.168.1.19:4000");
     setSocket(newSocket);
 
     newSocket.on("connect", () => {
@@ -35,40 +34,42 @@ export default function ChatScreen() {
   }, []);
 
   const submitChatMessage = async () => {
-    if (!chatMessage.trim()) return; // Prevent sending empty messages
-
+    if (!socket || chatMessage.trim() === "") return;
+  
     try {
-      const senderId = await AsyncStorage.getItem("userId");
+      // Retrieve the senderId from AsyncStorage (or wherever you store auth data)
+      const senderId = await AsyncStorage.getItem("userId"); // Ensure this is set when user logs in
+      const receiverId = "67b14d4255dbde56064ce4a5"; // Fixed receiverId
+  
       if (!senderId) {
-        Alert.alert("Error", "User ID not found. Please log in again.");
+        console.error("User ID not found. Make sure the user is logged in.");
         return;
       }
-
-      const receiverId = "67b14d4255dbde56064ce4a5"; // Fixed receiver ID
-
-      const response = await fetch("http://192.168.1.8:4000/api/v1/chat/send", {
+  
+      const response = await fetch("http://192.168.1.19:4000/api/v1/chat/send", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ senderId, receiverId, message: chatMessage }),
+        body: JSON.stringify({
+          senderId,
+          receiverId,
+          message: chatMessage,
+        }),
       });
-
+  
       const data = await response.json();
-      if (!response.ok)
-        throw new Error(data.message || "Message sending failed");
-
-      // ✅ Message Sent Successfully, Now Update UI
-      setMessages((prevMessages) => [...prevMessages, chatMessage]); // Add to state
-      setChatMessage(""); // Clear input field
-    } catch (error) {
-      console.error("❌ Message Sending Error:", error);
-
-      if (error instanceof Error) {
-        Alert.alert("Error", error.message);
-      } else {
-        Alert.alert("Error", "An unexpected error occurred.");
+      console.log("Response from backend:", data);
+  
+      if (!response.ok) {
+        console.error("Failed to send message to backend:", data);
+        return;
       }
+  
+      socket.emit("message", data.message);
+      setChatMessage("");
+    } catch (error) {
+      console.error("Error sending message:", error);
     }
   };
 
