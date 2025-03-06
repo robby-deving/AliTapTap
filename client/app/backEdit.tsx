@@ -7,6 +7,7 @@ import { GestureHandlerRootView, PinchGestureHandler, State } from 'react-native
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { saveCardAsImage ,updateOrderDetails } from '@/services/helperFunctions';
+import { TextEditorModal } from '@/components/TextEditorModal';
 
 interface SavedItem {
   id: number;
@@ -17,8 +18,13 @@ interface SavedItem {
     y: number;
   };
   size: number;
+  textStyle?: {
+    bold: boolean;
+    italic: boolean;
+    underline: boolean;
+    color: string;
+  };
 }
-
 interface DraggableItem {
   id: number;
   text?: string;
@@ -26,6 +32,12 @@ interface DraggableItem {
   pan: Animated.ValueXY;
   size: Animated.Value;
   selected: boolean;
+  textStyle?: {
+    bold: boolean;
+    italic: boolean;
+    underline: boolean;
+    color: string;
+  };
 }
 
 export default function backEdit() {
@@ -50,35 +62,33 @@ export default function backEdit() {
   const router = useRouter();
 
   useEffect(() => {
-    saveInitialData();
+    // saveInitialData();
     loadSavedItems();
   }, []);
 
-  const initialData: SavedItem[] = parsedProduct.details.front_info.map((info: any, index: number) => ({
-    id: index + 1,
-    text: info.text || "",
-    uri: info.uri || "",
-    position: info.position || { x: 0, y: 0 },
-    size: info.size || 14,
-  }));
+  // const initialData: SavedItem[] = parsedProduct.details.front_info.map((info: any, index: number) => ({
+  //   id: index + 1,
+  //   text: info.text || "",
+  //   uri: info.uri || "",
+  //   position: info.position || { x: 0, y: 0 },
+  //   size: info.size || 14,
+  // }));
 
-  const saveInitialData = async () => {
-    try {
-      await AsyncStorage.setItem('backSavedItems', JSON.stringify(initialData));
-      console.log('Initial data saved successfully');
-    } catch (error) {
-      console.error('Error saving initial data:', error);
-    }
-  };
+  // const saveInitialData = async () => {
+  //   try {
+  //     await AsyncStorage.setItem('backSavedItems', JSON.stringify(initialData));
+  //     console.log('Initial data saved successfully');
+  //   } catch (error) {
+  //     console.error('Error saving initial data:', error);
+  //   }
+  // };
 
   const loadSavedItems = async () => {
     try {
       const savedItemsString = await AsyncStorage.getItem('backSavedItems');
       if (savedItemsString) {
         const savedItems: SavedItem[] = JSON.parse(savedItemsString);
-        console.log('Loading saved items:', savedItems);
-
-        // Convert saved items back to DraggableItems with denormalized positions
+  
         const loadedItems: DraggableItem[] = savedItems.map(item => ({
           id: item.id,
           text: item.text,
@@ -86,14 +96,16 @@ export default function backEdit() {
           pan: new Animated.ValueXY({ x: item.position.x * 525, y: item.position.y * 300 }),
           size: new Animated.Value(item.size),
           selected: false,
+          textStyle: item.textStyle || {
+            bold: false,
+            italic: false,
+            underline: false,
+            color: '#000000'
+          }
         }));
-
+  
         setItems(loadedItems);
-        // Update the itemIdRef to be higher than any existing ID
         itemIdRef.current = Math.max(...savedItems.map(item => item.id), 0);
-        console.log('Items loaded successfully');
-      } else {
-        console.log('No saved items found');
       }
     } catch (error) {
       console.error('Error loading saved items:', error);
@@ -102,7 +114,6 @@ export default function backEdit() {
 
   const saveItems = async () => {
     try {
-      // Convert DraggableItems to SavedItems format with normalized positions
       const itemsToSave: SavedItem[] = items.map(item => ({
         id: item.id,
         text: item.text,
@@ -112,16 +123,11 @@ export default function backEdit() {
           y: item.pan.y._value / 300,
         },
         size: item.size._value,
+        textStyle: item.textStyle
       }));
-
-      console.log('Saving items:', itemsToSave);
-      await AsyncStorage.setItem('backSavedItems', JSON.stringify(itemsToSave));
+  
+      await AsyncStorage.setItem('frontSavedItems', JSON.stringify(itemsToSave));
       console.log('Items saved successfully');
-
-      // Verify the save by reading it back
-      const savedItemsString = await AsyncStorage.getItem('backSavedItems');
-      const savedItems = JSON.parse(savedItemsString || '[]');
-      console.log('Verified saved items:', savedItems);
     } catch (error) {
       console.error('Error saving items:', error);
     }
@@ -135,7 +141,7 @@ export default function backEdit() {
       text: "New Text",
       pan: new Animated.ValueXY({ x: 50, y: 50 }),
       size: new Animated.Value(16),
-      selected: false,
+      selected: true,
     }];
     console.log('Adding new text item:', newItems[newItems.length - 1]);
     setItems(newItems);
@@ -245,7 +251,20 @@ export default function backEdit() {
         }}
       >
         {item.text ? (
-          <Animated.Text style={{ fontSize: item.size, minHeight: 14 }}>{item.text}</Animated.Text>
+           <Animated.Text 
+           style={[
+             { 
+               fontSize: item.size,
+               minHeight: 14,
+               fontWeight: item.textStyle?.bold ? 'bold' : 'normal',
+               fontStyle: item.textStyle?.italic ? 'italic' : 'normal',
+               textDecorationLine: item.textStyle?.underline ? 'underline' : 'none',
+               color: item.textStyle?.color || '#000000'
+             }
+           ]}
+         >
+           {item.text}
+         </Animated.Text>
         ) : (
           <Animated.Image source={{ uri: item.uri }} style={{ width: item.size, height: item.size }} />
         )}
@@ -415,26 +434,28 @@ export default function backEdit() {
           </TouchableOpacity>
         </View>
       </View>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={isModalVisible}
-        onRequestClose={() => setIsModalVisible(false)}
-      >
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <View style={{ width: 300, padding: 20, backgroundColor: 'white', borderRadius: 10 }}>
-            <Text style={{ fontSize: 18, marginBottom: 10 }}>Edit Text</Text>
-            <TextInput
-              value={newText}
-              onChangeText={setNewText}
-              style={{ borderWidth: 1, borderColor: '#ccc', padding: 10, marginBottom: 20 }}
-            />
-            <TouchableOpacity onPress={saveText} style={{ backgroundColor: '#FDCB07', padding: 10, borderRadius: 5 }}>
-              <Text style={{ color: 'white', textAlign: 'center' }}>Save</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      <TextEditorModal
+        isVisible={isModalVisible}
+        onClose={() => {
+          setIsModalVisible(false);
+          setSelectedItem(null); // Reset selected item when closing
+        }}
+        initialText={selectedItem?.text || ''} // Use the selected item's text directly
+        initialStyles={selectedItem?.textStyle}
+        onSave={(text, styles) => {
+          if (selectedItem) {
+            const newItems = items.map(item =>
+              item.id === selectedItem.id
+                ? { ...item, text, textStyle: styles }
+                : item
+            );
+            setItems(newItems);
+            setIsModalVisible(false);
+            setSelectedItem(null); // Reset selected item after saving
+            saveItems();
+          }
+        }}
+      />
     </GestureHandlerRootView>
   );
 }
