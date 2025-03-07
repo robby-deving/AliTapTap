@@ -16,23 +16,25 @@ export default function Index() {
       </View>
 
       <View className="flex-1 justify-center items-center p-10">
-        <Text className="text-2xl font-semibold mb-10">Welcome to AliTapTap</Text>
-        <TouchableOpacity 
-          className="bg-[#FDCB07] w-full p-4 rounded"
-          onPress={() => router.push('/edit')}
+        <Text className="text-2xl font-semibold mb-10">
+          Welcome to AliTapTap
+        </Text>
+        <TouchableOpacity
+          className="bg-[#FDCB07] w-full p-4 rounded mb-3"
+          onPress={() => router.push("/shipping")} // Navigate to Shipping first
         >
           <Text className="text-white text-center text-xl font-semibold">
             Start Payment
           </Text>
         </TouchableOpacity>
 
-        {/* Go to Chat Button */}
+
         <TouchableOpacity
-          className="bg-[#007AFF] w-full p-4 rounded"
-          onPress={() => router.push("/chat")} // Navigate to Chat
+          className="bg-[#0759fd] w-full p-4 rounded"
+          onPress={() => router.push("/login")} // Navigate to login
         >
           <Text className="text-white text-center text-xl font-semibold">
-            Go to Chat
+            START Login & Signup
           </Text>
         </TouchableOpacity>
       </View>
