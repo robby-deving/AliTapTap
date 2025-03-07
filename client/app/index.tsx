@@ -39,7 +39,7 @@ export default function Index() {
   const handleLogin = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://192.168.1.19:4000/api/v1/auth/login", {
+      const response = await fetch("http://192.168.1.9:4000/api/v1/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -57,21 +57,20 @@ export default function Index() {
   
       if (!response.ok) throw new Error(data.message || "Login failed");
   
-      const { token, _id, isAdmin } = data.data || {}; // Use `_id` instead of `userId`
-      if (!token || !_id) throw new Error("Invalid response from server");
+      const { data: userData } = data; // Extract `data` object
+      if (!userData?.token || !userData?._id) throw new Error("Invalid response from server");
   
       // ✅ Prevent admin login
-      if (isAdmin) {
+      if (userData.isAdmin) {
         Alert.alert("Access Denied", "Admin accounts are not allowed to log in.");
         return;
       }
   
-      // ✅ Store both token and userId in AsyncStorage
-      await AsyncStorage.setItem("token", token);
-      await AsyncStorage.setItem("userId", _id); // Store `_id` as userId
+      // ✅ Store user data in AsyncStorage
+      await AsyncStorage.setItem("userData", JSON.stringify(userData));
   
       setIsAuthenticated(true);
-      Alert.alert("Login Successful", "You can now access the chat.");
+      Alert.alert("Login Successful", "You can now access the chat and shipping.");
     } catch (error) {
       console.error("❌ Login Error:", error);
   
@@ -118,6 +117,10 @@ export default function Index() {
 
       <TouchableOpacity className="bg-[#34C759] w-full p-4 rounded" onPress={() => router.push("/reviewDesign")}>
         <Text className="text-white text-center text-xl font-semibold">Review Design</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity className={`w-full p-4 rounded mt-4 ${isAuthenticated ? "bg-[#FF9500]" : "bg-gray-400"}`} onPress={() => isAuthenticated ? router.push("/shipping") : Alert.alert("Access Denied", "Please log in first.")}>
+        <Text className="text-white text-center text-xl font-semibold">Go to Shipping</Text>
       </TouchableOpacity>
 
       {/* Logout Button */}

@@ -130,12 +130,6 @@ npm install
 npm install socket.io-client
 ```
 
-Once you have your local IP address, update the `Chats.tsx` file from the `admin/src/pages` folder:
-
-```tsx
-const socket = io("http://localhost:4000");
-```
-
 ### **3️⃣ Start the Admin Panel**
 ```bash
 npm run dev

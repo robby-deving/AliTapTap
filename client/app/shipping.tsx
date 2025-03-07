@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Text,
   View,
@@ -10,6 +10,7 @@ import {
   Modal,
   TextInput,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import InputField from "../components/InputField";
 import StepperComponent from "../components/StepperComponent";
@@ -31,15 +32,56 @@ export default function Shipping() {
 
   const router = useRouter();
 
-  const handleAddAddress = () => {
+  type Address = {
+    street: string;
+    barangay: string;
+    city: string;
+    province: string;
+    zip: string;
+  };
+  
+  useEffect(() => {
+    const getUserData = async () => {
+      try {
+        const userDataString = await AsyncStorage.getItem("userData");
+        if (userDataString) {
+          const userData = JSON.parse(userDataString);
+          const fullName = `${userData.first_name} ${userData.last_name}`;
+          setFullName(fullName);
+          setPhoneNumber(userData.phone_number || "");
+  
+          // Ensure userData.address exists and is an array
+          if (Array.isArray(userData.address)) {
+            const formattedAddresses = userData.address.map((addr: Address) =>
+              `${addr.street}, ${addr.barangay}, ${addr.city}, ${addr.province}, ${addr.zip}`
+            );
+            setShippingAddresses(formattedAddresses);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+  
+    getUserData();
+  }, []);  
+
+  const handleAddAddress = async () => {
     if (!street || !barangay || !city || !province || !zipCode) {
       alert("Please complete all address fields");
       return;
     }
-
+  
     const newAddress = `${street}, ${barangay}, ${city}, ${province}, ${zipCode}`;
-    setShippingAddresses((prevAddresses) => [...prevAddresses, newAddress]); // Correctly update state
-
+    const updatedAddresses = [...shippingAddresses, newAddress];
+  
+    try {
+      await AsyncStorage.setItem("shippingAddresses", JSON.stringify(updatedAddresses));
+      setShippingAddresses(updatedAddresses);
+    } catch (error) {
+      console.error("Error saving address:", error);
+    }
+  
     // Reset fields
     setStreet("");
     setBarangay("");
@@ -47,7 +89,7 @@ export default function Shipping() {
     setProvince("");
     setZipCode("");
     setModalVisible(false);
-  };
+  };  
 
   const handleContinue = () => {
     if (!fullName || !phoneNumber || shippingAddresses.length === 0) {
@@ -169,13 +211,13 @@ export default function Shipping() {
       {/* Address Modal */}
       <Modal visible={modalVisible} transparent={true} animationType="slide">
       <View className="flex-1 justify-end bg-black/30">
-          <View className="bg-white w-full h-[600px] p-6 rounded-t-2xl">
-            <Text className="text-base font-semibold mb-9 text-center">
+          <View className="bg-white w-full h-3/4 p-6 rounded-t-2xl">
+            <Text className="text-lg font-semibold mb-9 text-center">
               Add Address
             </Text>
 
             {/* Street Input */}
-            <View className="w-full mb-2">
+            <View className="w-full mb-3">
               <InputField
                 label="St./Purok/Sitio/Subd."
                 placeholder="Enter your street"
@@ -185,7 +227,7 @@ export default function Shipping() {
             </View>
 
             {/* Barangay Input */}
-            <View className="w-full mb-2">
+            <View className="w-full mb-4">
               <InputField
                 label="Barangay"
                 placeholder="Enter your barangay"
@@ -195,7 +237,7 @@ export default function Shipping() {
             </View>
 
             {/* City Input */}
-            <View className="w-full mb-2">
+            <View className="w-full mb-4">
               <InputField
                 label="City/Municipality"
                 placeholder="Enter your city"
@@ -205,7 +247,7 @@ export default function Shipping() {
             </View>
 
             {/* Province Input */}
-            <View className="w-full mb-2">
+            <View className="w-full mb-4">
               <InputField
                 label="Province"
                 placeholder="Enter your province"
@@ -215,7 +257,7 @@ export default function Shipping() {
             </View>
 
             {/* ZIP Code Input */}
-            <View className="w-full mb-2">
+            <View className="w-full mb-4">
               <InputField
                 label="ZIP Code"
                 placeholder="Enter your ZIP code"
