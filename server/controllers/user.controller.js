@@ -116,7 +116,7 @@ const getUserStats = async (req, res) => {
 
 const addAddress = async (req, res) => {
     try {
-        const { street, barangay, city, province, zip, phone_number, first_name, last_name } = req.body;
+        const { _id, street, barangay, city, province, zip, phone_number, first_name, last_name } = req.body;
         const userId = req.params.id;
 
         if (!street || !barangay || !city || !province || !zip) {
@@ -128,21 +128,36 @@ const addAddress = async (req, res) => {
             return res.status(404).json({ message: "User not found." });
         }
 
-        // Check if the address already exists
-        const isDuplicate = user.address.some(addr => 
-            addr.street === street &&
-            addr.barangay === barangay &&
-            addr.city === city &&
-            addr.province === province &&
-            addr.zip === zip
-        );
-
         let addressMessage = "Address added successfully";
+        let addressUpdated = false;
 
-        if (isDuplicate) {
-            addressMessage = "Address already exists. Only personal details updated.";
-        } else {
-            user.address.push({ street, barangay, city, province, zip });
+        if (_id) {
+            // Check if the address with this ID exists in user's address array
+            const addressIndex = user.address.findIndex(addr => addr._id.toString() === _id);
+
+            if (addressIndex !== -1) {
+                // Update the existing address
+                user.address[addressIndex] = { _id, street, barangay, city, province, zip };
+                addressMessage = "Address updated successfully";
+                addressUpdated = true;
+            }
+        }
+
+        if (!addressUpdated) {
+            // Check if the exact address (excluding ID) already exists
+            const isDuplicate = user.address.some(addr =>
+                addr.street === street &&
+                addr.barangay === barangay &&
+                addr.city === city &&
+                addr.province === province &&
+                addr.zip === zip
+            );
+
+            if (isDuplicate) {
+                addressMessage = "Address already exists. Only personal details updated.";
+            } else {
+                user.address.push({ street, barangay, city, province, zip });
+            }
         }
 
         // Update personal details if provided
@@ -157,16 +172,16 @@ const addAddress = async (req, res) => {
             message: addressMessage,
             data: {
                 _id: user._id,
-                first_name: user.first_name, // Updated first name
-                last_name: user.last_name, // Updated last name
-                phone_number: user.phone_number, // Updated phone number
+                first_name: user.first_name,
+                last_name: user.last_name,
+                phone_number: user.phone_number,
                 email: user.email,
                 profile_picture: user.profile_picture,
-                address: user.address // Full address list
+                address: user.address
             }
         });
     } catch (error) {
-        console.error("Error adding address:", error);
+        console.error("Error adding/updating address:", error);
         res.status(500).json({ message: "Internal server error." });
     }
 };

@@ -33,6 +33,7 @@ export default function Shipping() {
   const router = useRouter();
 
   type Address = {
+    _id?: string;
     street: string;
     barangay: string;
     city: string;
@@ -63,42 +64,51 @@ export default function Shipping() {
     getUserData();
   }, []);
 
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+
   const handleAddAddress = async () => {
     if (!street || !barangay || !city || !province || !zipCode) {
       alert("Please complete all address fields");
       return;
     }
-
-    // Store as an object instead of a string
-    const newAddress = {
+  
+    let newAddress: Address = {
+      _id: editingIndex !== null ? shippingAddresses[editingIndex]._id : Date.now().toString(), // Preserve _id
       street,
       barangay,
       city,
       province,
       zip: zipCode,
     };
-
-    const updatedAddresses = [...shippingAddresses, newAddress];
-
+  
+    let updatedAddresses = [...shippingAddresses];
+  
+    if (editingIndex !== null) {
+      updatedAddresses[editingIndex] = newAddress; // Update existing address
+    } else {
+      updatedAddresses.push(newAddress); // Add new address
+    }
+  
     try {
       const userDataString = await AsyncStorage.getItem("userData");
       if (!userDataString) throw new Error("User data not found");
-
+  
       const userData = JSON.parse(userDataString);
       userData.address = updatedAddresses;
-
+  
       await AsyncStorage.setItem("userData", JSON.stringify(userData));
       setShippingAddresses(updatedAddresses);
     } catch (error) {
       console.error("Error saving address:", error);
     }
-
-    // Reset fields
+  
+    // Reset fields and close modal
     setStreet("");
     setBarangay("");
     setCity("");
     setProvince("");
     setZipCode("");
+    setEditingIndex(null);
     setModalVisible(false);
   };
 
@@ -109,22 +119,22 @@ export default function Shipping() {
       );
       return;
     }
-  
+
     try {
       const userDataString = await AsyncStorage.getItem("userData");
       if (!userDataString) throw new Error("User data not found");
-  
+
       const userData = JSON.parse(userDataString);
       const userId = userData._id;
-  
+
       // Extract first and last name
       const nameParts = fullName.split(" ");
       const firstName = nameParts[0] || "";
       const lastName = nameParts.slice(1).join(" ") || "";
-  
-      // Get the latest address (assuming the last added address is the newest)
+
+      // Get the latest address
       const latestAddress = shippingAddresses[shippingAddresses.length - 1];
-  
+
       const response = await fetch(
         `http://192.168.1.9:4000/api/v1/users/${userId}/add-address`,
         {
@@ -133,6 +143,7 @@ export default function Shipping() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
+            _id: latestAddress._id, // Send the address ID
             street: latestAddress.street,
             barangay: latestAddress.barangay,
             city: latestAddress.city,
@@ -144,14 +155,14 @@ export default function Shipping() {
           }),
         }
       );
-  
+
       if (!response.ok) {
         throw new Error("Failed to save shipping data.");
       }
-  
+
       const result = await response.json();
       console.log("Shipping data saved:", result);
-  
+
       router.push({
         pathname: "/payment",
         params: {
@@ -222,14 +233,23 @@ export default function Shipping() {
 
                 {shippingAddresses.length > 0 ? (
                   shippingAddresses.map((address, index) => (
-                    <View
+                    <TouchableOpacity
                       key={index}
                       className="border border-gray-200 p-4 rounded-lg bg-white mb-2"
+                      onPress={() => {
+                        setEditingIndex(index);
+                        setStreet(address.street);
+                        setBarangay(address.barangay);
+                        setCity(address.city);
+                        setProvince(address.province);
+                        setZipCode(address.zip);
+                        setModalVisible(true);
+                      }}
                     >
                       <Text className="text-black text-sm">
                         {`${address.street}, ${address.barangay}, ${address.city}, ${address.province}, ${address.zip}`}
                       </Text>
-                    </View>
+                    </TouchableOpacity>
                   ))
                 ) : (
                   <Text className="text-sm text-gray-400">
