@@ -11,7 +11,7 @@ export default function Index() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
 
-  // ✅ Load authentication token on app start
+  // ✅ Load authentication token on app starts
   useEffect(() => {
     const checkAuth = async () => {
       const token = await AsyncStorage.getItem("token");
