@@ -51,7 +51,7 @@ export default function Index() {
     const handleLogin = async () => {
       setLoading(true);
       try {
-        const response = await fetch("http://192.168.0.103:4000/api/v1/auth/login", {
+        const response = await fetch("http://192.168.1.9:4000/api/v1/auth/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),
@@ -82,7 +82,7 @@ export default function Index() {
         await AsyncStorage.setItem("userData", JSON.stringify(userData));
     
         setIsAuthenticated(true);
-        Alert.alert("Login Successful", "You can now access the chat and shipping.");
+        Alert.alert("Login Successful", "You can now access the app.");
       } catch (error) {
         console.error("❌ Login Error:", error);
     

@@ -33,6 +33,7 @@ Install the necessary dependencies:
 
 ```bash
  npm install
+ npx expo install expo-linear-gradient
 ```
 
 Start the development environment using Expo:
