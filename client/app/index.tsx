@@ -30,11 +30,20 @@ export default function Index() {
 
 
         <TouchableOpacity
-          className="bg-[#0759fd] w-full p-4 rounded"
+          className="bg-[#0759fd] w-full p-4 rounded mb-3"
           onPress={() => router.push("/login")} // Navigate to login
         >
           <Text className="text-white text-center text-xl font-semibold">
             START Login & Signup
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          className="bg-[#7607fd] w-full p-4 rounded"
+          onPress={() => router.push("/Logiin")} // Navigate to login
+        >
+          <Text className="text-white text-center text-xl font-semibold">
+            Login Debug
           </Text>
         </TouchableOpacity>
       </View>
