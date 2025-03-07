@@ -1,29 +1,71 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Header } from '../components/Header';
 
+interface TransactionData {
+  transaction: {
+    transaction_number: string;
+    created_at: string;
+    payment_method: string;
+    quantity: number;
+    shipping_subtotal: number;
+    total_amount: number;
+  };
+}
+
 const SuccessScreen: React.FC = () => {
     const router = useRouter();
     const navigation = useNavigation();
-    const { orderNumber, paymentTime, quantity, totalAmount } = useLocalSearchParams();
+    const [transactionData, setTransactionData] = useState<TransactionData | null>(null);
 
-    const handleGoBack = () => {
-        router.push('/');
+    useEffect(() => {
+        const fetchOrderSummary = async () => {
+            try {
+                const orderSummaryString = await AsyncStorage.getItem('orderSummary');
+                if (orderSummaryString) {
+                    const orderSummary = JSON.parse(orderSummaryString);
+                    console.log('Updated orderSummary:', orderSummary);
+                    setTransactionData({
+                        transaction: {
+                            transaction_number: orderSummary.transaction_number || 'N/A',
+                            created_at: orderSummary.created_at || new Date().toISOString(),
+                            payment_method: orderSummary.payment_method || 'N/A',
+                            quantity: orderSummary.quantity || 0,
+                            shipping_subtotal: orderSummary.shipping_subtotal || 0,
+                            total_amount: orderSummary.total_amount || 0
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching order summary:', error);
+            }
+        };
+
+        fetchOrderSummary();
+    }, []);
+
+    const handleGoBack = async () => {
+        try {
+            await AsyncStorage.removeItem('orderSummary');
+            router.push('/');
+        } catch (error) {
+            console.error('Error clearing order summary:', error);
+            router.push('/');
+        }
     };
 
     return (
         <View style={styles.container}>
-        <Header />
-
+            <Header />
 
             {/* Success Icon & Message */}
             <View className='p-10 flex justify-center items-center'>
                 <Image 
                     source={require('../assets/images/success.png')} 
-                   
                     resizeMode="contain"
                 />
                 <Text className='font-bold text-[#FEE308] text-2xl mt-5'>Order Success!</Text>
@@ -33,28 +75,30 @@ const SuccessScreen: React.FC = () => {
             <View style={styles.detailsContainer}>
                 <View style={styles.detailRow}>
                     <Text style={styles.label}>Order Number</Text>
-                    <Text style={styles.value}>{orderNumber}</Text>
+                    <Text style={styles.value}>{transactionData?.transaction?.transaction_number || 'N/A'}</Text>
                 </View>
                 <View style={styles.detailRow}>
                     <Text style={styles.label}>Payment Time</Text>
-                    <Text style={styles.value}>{paymentTime}</Text>
+                    <Text style={styles.value}>
+                        {transactionData?.transaction?.created_at ? new Date(transactionData.transaction.created_at).toLocaleString() : 'N/A'}
+                    </Text>
                 </View>
                 <View style={styles.detailRow}>
                     <Text style={styles.label}>Payment Method</Text>
-                    <Text style={styles.value}>Card</Text>
+                    <Text style={styles.value}>{transactionData?.transaction?.payment_method || 'N/A'}</Text>
                 </View>
                 <View style={styles.separator} />
                 <View style={styles.detailRow}>
                     <Text style={styles.label}>Quantity</Text>
-                    <Text style={styles.value}>{quantity}</Text>
+                    <Text style={styles.value}>{transactionData?.transaction?.quantity || 'N/A'}</Text>
                 </View>
                 <View style={styles.detailRow}>
                     <Text style={styles.label}>Shipping Cost</Text>
-                    <Text style={styles.value}>P60.00</Text>
+                    <Text style={styles.value}>₱{transactionData?.transaction?.shipping_subtotal?.toFixed(2) || 'N/A'}</Text>
                 </View>
                 <View style={styles.totalRow}>
                     <Text style={styles.totalLabel}>Total Amount</Text>
-                    <Text style={styles.totalValue}>P{totalAmount}</Text>
+                    <Text style={styles.totalValue}>₱{transactionData?.transaction?.total_amount?.toFixed(2) || 'N/A'}</Text>
                 </View>
             </View>
 

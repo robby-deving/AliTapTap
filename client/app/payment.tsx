@@ -13,6 +13,7 @@ import InputField from '../components/InputField';
 import StepperComponent from '../components/StepperComponent';
 import PaymentMethodSelect from '../components/PaymentMethodSelect';
 import { Header } from '../components/Header';
+import { updateOrderDetails } from '../services/helperFunctions';
 
 export default function Payment() {
   const [cardHolderName, setCardHolderName] = useState('');
@@ -24,6 +25,8 @@ export default function Payment() {
   const [paymentMethod, setPaymentMethod] = useState('');
 
   const handleContinue = () => {
+    updateOrderDetails('payment_method', paymentMethod);
+
     if (paymentMethod === 'card') {
       // Validate card inputs
       if (!cardHolderName || !cardNumber || !expiryDate || !cvv) {

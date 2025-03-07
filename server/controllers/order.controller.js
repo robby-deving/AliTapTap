@@ -5,27 +5,38 @@ const CardDesign = require("../Models/carddesign.model.js");
 // Create a new order
 const createOrder = async (req, res) => {
   try {
-    const { customer_id, design_id, front_image, back_image, details, quantity, total_price, order_status } = req.body;
+    const { customer_id, design_id, front_image, back_image, details, quantity, order_status, address_id } = req.body;
 
-    if (!customer_id || !design_id || !front_image || !back_image || !details || !quantity || !total_price) {
+    if (!customer_id || !design_id || !front_image || !back_image || !details || !quantity || address_id === undefined) {
       return res.status(400).json({ message: "All fields are required." });
     }
 
-    // Validate if front_info and back_info are arrays
-    if (!Array.isArray(details.front_info) || !Array.isArray(details.back_info)) {
-      return res.status(400).json({ message: "front_info and back_info must be arrays." });
-    }
-
-    // Check if customer and design exist
+    // Check if customer exists
     const customerExists = await User.findById(customer_id);
     if (!customerExists) {
       return res.status(400).json({ message: "Invalid customer ID, user not found." });
     }
 
+    // Check if design exists
     const designExists = await CardDesign.findById(design_id);
     if (!designExists) {
       return res.status(400).json({ message: "Invalid design ID, card design not found." });
     }
+
+    // Get the price per unit for the selected material
+    const price_per_unit = designExists.materials[details.material]?.price_per_unit;
+    if (!price_per_unit) {
+      return res.status(400).json({ message: "Invalid material selected." });
+    }
+
+    // Get the address from the user based on the address_id
+    const selectedAddress = customerExists.address[address_id];
+    if (!selectedAddress) {
+      return res.status(400).json({ message: "Invalid address ID." });
+    }
+
+    // Calculate total price
+    const total_price = price_per_unit * quantity;
 
     const newOrder = new Order({
       customer_id,
@@ -34,13 +45,13 @@ const createOrder = async (req, res) => {
       back_image,
       details: {
         material: details.material,
-        color: details.color,
-        front_info: details.front_info,
-        back_info: details.back_info,
+        price_per_unit: price_per_unit,
       },
       quantity,
       total_price,
       order_status: order_status || "Pending",
+      address_id,  
+      address_details: selectedAddress,  
     });
 
     const savedOrder = await newOrder.save();
@@ -110,8 +121,6 @@ const updateOrder = async (req, res) => {
     const updatedDetails = {
       ...existingOrder.details,
       ...details,
-      front_info: details.front_info ? details.front_info : existingOrder.details.front_info,
-      back_info: details.back_info ? details.back_info : existingOrder.details.back_info,
     };
 
     const updatedOrder = await Order.findByIdAndUpdate(

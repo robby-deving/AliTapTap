@@ -5,7 +5,7 @@ import StepperComponent from '../components/StepperComponent';
 import { Header } from '../components/Header';
 import { createPaymentIntent, createPaymentMethod, attachPaymentMethod } from '../services/paymentService';
 import { WebView } from 'react-native-webview';
-import { uploadImageToCloudinary, updateOrderDetails } from '@/services/helperFunctions';
+import { uploadImageToCloudinary, updateOrderDetails, saveOrderAndTransaction } from '@/services/helperFunctions';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface PaymentData {
@@ -141,6 +141,7 @@ export default function Review() {
     } else if (result.data?.attributes?.status === 'succeeded') {
 
       handleUpload();
+      saveOrderAndTransaction();
 
       router.push('/success');
     } else {
@@ -173,6 +174,8 @@ export default function Review() {
               if (navState.url.includes('success')) {
                 setRedirectUrl(null);
                 await handleUpload(); 
+                await saveOrderAndTransaction();
+
                 router.push('/success');
               } else if (navState.url.includes('cancel')) {
                 setRedirectUrl(null);

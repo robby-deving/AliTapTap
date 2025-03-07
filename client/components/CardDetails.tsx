@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { updateOrderDetails } from "@/services/helperFunctions";
+import { updateOrderDetails, saveOrderAndTransaction  } from "@/services/helperFunctions";
 
 type Product = {
   front_image?: string;
@@ -38,11 +38,19 @@ const CardDetails = ({ product }: CardDetailsProps) => {
     }
   };
 
-  const handleEditPress = () => {
-    updateOrderDetails('quantity', quantity);
-    updateOrderDetails('total_price', totalPrice);
-    updateOrderDetails('material', selectedMaterial);
-    router.push({ pathname: "/edit", params: { product: JSON.stringify(product) } });
+  const handleEditPress = async () => {
+    try {
+      await updateOrderDetails('quantity', quantity);    
+      await updateOrderDetails('material', selectedMaterial);
+      await updateOrderDetails('total_price', totalPrice);
+      router.push({ 
+        pathname: "/edit", 
+        params: { product: JSON.stringify(product) } 
+      });
+    } catch (error) {
+      console.error('Error updating order details:', error);
+      // You might want to show an error message to the user here
+    }
   };
 
   return (
