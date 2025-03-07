@@ -8,6 +8,7 @@ interface InputFieldProps {
   onChangeText: (text: string) => void;
   type?: 'text' | 'email' | 'number' | 'card' | 'date';
   maxLength?: number;
+  secureTextEntry?: boolean;
 }
 
 const InputField: React.FC<InputFieldProps> = ({
