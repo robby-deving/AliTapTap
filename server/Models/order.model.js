@@ -62,10 +62,10 @@ const orderModel = new Schema(
     },
     address_details: {
       street: { type: String },
+      barangay: { type: String },
       city: { type: String },
-      region: { type: String },
+      province: { type: String },
       zip: { type: String },
-      country: { type: String },
     },
   },
   {

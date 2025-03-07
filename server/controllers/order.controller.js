@@ -51,7 +51,7 @@ const createOrder = async (req, res) => {
       total_price,
       order_status: order_status || "Pending",
       address_id,  
-      address_details: selectedAddress, 
+      address_details: selectedAddress,  
     });
 
     const savedOrder = await newOrder.save();
