@@ -49,8 +49,8 @@ export const HomePageHeader = () => {
   };
 
   return (
-    <SafeAreaView style={{ backgroundColor: "#1C1C1C" }}>
-      <View style={{ width: "100%",  backgroundColor: "#1C1C1C", flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding:16 }}>
+    <SafeAreaView style={{ backgroundColor: "#231F20" }}>
+      <View style={{ width: "100%",  backgroundColor: "#231F20", flexDirection: "row", alignItems: "center", justifyContent: "space-between"}} className="p-5 ">
         {/* Profile Icon */}
         <TouchableOpacity onPress={handleProfilePress}>
           <ProfileIcon />

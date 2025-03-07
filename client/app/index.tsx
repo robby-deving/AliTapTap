@@ -13,7 +13,7 @@ export default function Index() {
       toValue: 0,
       useNativeDriver: true,
       tension: 10,
-      friction: 5,
+      friction: 8
     }).start();
 
     // Check internet connection and navigate after animation
@@ -23,8 +23,9 @@ export default function Index() {
         if (response.ok) {
           // Wait for 2 seconds to show splash screen
           setTimeout(() => {
+            // more security logic here check if user is logged in or not maybe check if token is still valid, if yes redirect to product if not to login
             router.replace('/productcatalogue');
-          }, 2000);
+          }, 1000);
         }
       } catch (error) {
         // Show error message if no internet

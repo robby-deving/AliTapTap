@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { Header } from '../components/Header';
 
 const SuccessScreen: React.FC = () => {
     const router = useRouter();
@@ -15,26 +16,17 @@ const SuccessScreen: React.FC = () => {
 
     return (
         <View style={styles.container}>
-            {/* Header Section */}
-            <View style={styles.header}>
-                <TouchableOpacity onPress={handleGoBack}>
-                    <Ionicons name="arrow-back" size={24} color="white" />
-                </TouchableOpacity>
-                <Image 
-                    source={require('../assets/images/logo.png')} 
-                    style={styles.logo}
-                    resizeMode="contain"
-                />
-            </View>
+        <Header />
+
 
             {/* Success Icon & Message */}
-            <View style={styles.successContainer}>
+            <View className='p-10 flex justify-center items-center'>
                 <Image 
                     source={require('../assets/images/success.png')} 
-                    style={styles.successImage}
+                   
                     resizeMode="contain"
                 />
-                <Text style={styles.successText}>Order Success!</Text>
+                <Text className='font-bold text-[#FEE308] text-2xl mt-5'>Order Success!</Text>
             </View>
 
             {/* Order Details */}
@@ -56,20 +48,29 @@ const SuccessScreen: React.FC = () => {
                     <Text style={styles.label}>Quantity</Text>
                     <Text style={styles.value}>{quantity}</Text>
                 </View>
+                <View style={styles.detailRow}>
+                    <Text style={styles.label}>Shipping Cost</Text>
+                    <Text style={styles.value}>P60.00</Text>
+                </View>
                 <View style={styles.totalRow}>
                     <Text style={styles.totalLabel}>Total Amount</Text>
                     <Text style={styles.totalValue}>P{totalAmount}</Text>
                 </View>
             </View>
 
+            <View className='flex-1'></View>
             {/* Buttons */}
-            <TouchableOpacity style={styles.homeButton} onPress={handleGoBack}>
-                <Text style={styles.homeButtonText}>Back to Home</Text>
-            </TouchableOpacity>
 
-            <TouchableOpacity style={styles.viewOrderButton}>
-                <Text style={styles.viewOrderText}>View Order</Text>
-            </TouchableOpacity>
+            <View className='w-full p-10'>
+                    <TouchableOpacity style={styles.homeButton} onPress={handleGoBack}>
+                        <Text className='text-white font-bold text-xl'>Back to Home</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={styles.viewOrderButton}>
+                        <Text style={styles.viewOrderText}>View Order</Text>
+                    </TouchableOpacity>
+            </View>
+
         </View>
     );
 };
@@ -148,7 +149,6 @@ const styles = StyleSheet.create({
         color: '#000',
     },
     homeButton: {
-        width: '90%',
         backgroundColor: '#FFC107',
         paddingVertical: 12,
         borderRadius: 5,
@@ -161,7 +161,6 @@ const styles = StyleSheet.create({
         color: '#000',
     },
     viewOrderButton: {
-        width: '90%',
         paddingVertical: 12,
         borderRadius: 5,
         alignItems: 'center',

@@ -7,7 +7,7 @@ export const Header = () => {
   const router = useRouter();
   
   return (
-    <SafeAreaView edges={['top']} className="bg-[#231F20]">
+    <SafeAreaView edges={['top']} style={{ backgroundColor: '#231F20' }}>
       <View className="w-full p-4 flex-row items-center justify-between">
         <TouchableOpacity onPress={() => router.back()} className="p-2">
           <Image

@@ -7,6 +7,7 @@ import { updateOrderDetails } from "@/services/helperFunctions";
 type Product = {
   front_image?: string;
   materials?: { [key: string]: { price_per_unit: number } };
+  name?: string;
 };
 
 type CardDetailsProps = {
@@ -40,6 +41,7 @@ const CardDetails = ({ product }: CardDetailsProps) => {
   const handleEditPress = () => {
     updateOrderDetails('quantity', quantity);
     updateOrderDetails('total_price', totalPrice);
+    updateOrderDetails('material', selectedMaterial);
     router.push({ pathname: "/edit", params: { product: JSON.stringify(product) } });
   };
 
@@ -57,8 +59,10 @@ const CardDetails = ({ product }: CardDetailsProps) => {
         </View>
 
         {/* Product Details */}
+        
         <View style={styles.detailsContainer}>
-          <Text style={styles.price}>₱ {totalPrice.toLocaleString()}</Text>
+        <Text className="text-2xl pb-2 font-bold">{ product.name}</Text>
+          <Text className="text-xl font-semibold">₱ {totalPrice.toLocaleString()}</Text>
           <View style={styles.separator} />
 
           {/* Material Selection */}
