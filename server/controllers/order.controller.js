@@ -1,6 +1,5 @@
 const Order = require("../Models/order.model.js");
 const User = require("../Models/user.model.js");
-const Product = require("../Models/product.model.js");
 const CardDesign = require("../Models/carddesign.model.js");
 
 // Create a new order
