@@ -55,6 +55,18 @@ const orderModel = new Schema(
       type: Date,
       default: null,
     },
+    
+    address_id: {
+      type: Number,  
+      required: true,
+    },
+    address_details: {
+      street: { type: String },
+      city: { type: String },
+      region: { type: String },
+      zip: { type: String },
+      country: { type: String },
+    },
   },
   {
     timestamps: {

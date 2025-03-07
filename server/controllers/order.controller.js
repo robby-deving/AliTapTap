@@ -5,18 +5,19 @@ const CardDesign = require("../Models/carddesign.model.js");
 // Create a new order
 const createOrder = async (req, res) => {
   try {
-    const { customer_id, design_id, front_image, back_image, details, quantity, order_status } = req.body;
+    const { customer_id, design_id, front_image, back_image, details, quantity, order_status, address_id } = req.body;
 
-    if (!customer_id || !design_id || !front_image || !back_image || !details || !quantity) {
+    if (!customer_id || !design_id || !front_image || !back_image || !details || !quantity || address_id === undefined) {
       return res.status(400).json({ message: "All fields are required." });
     }
 
-    // Check if customer and design exist
+    // Check if customer exists
     const customerExists = await User.findById(customer_id);
     if (!customerExists) {
       return res.status(400).json({ message: "Invalid customer ID, user not found." });
     }
 
+    // Check if design exists
     const designExists = await CardDesign.findById(design_id);
     if (!designExists) {
       return res.status(400).json({ message: "Invalid design ID, card design not found." });
@@ -26,6 +27,12 @@ const createOrder = async (req, res) => {
     const price_per_unit = designExists.materials[details.material]?.price_per_unit;
     if (!price_per_unit) {
       return res.status(400).json({ message: "Invalid material selected." });
+    }
+
+    // Get the address from the user based on the address_id
+    const selectedAddress = customerExists.address[address_id];
+    if (!selectedAddress) {
+      return res.status(400).json({ message: "Invalid address ID." });
     }
 
     // Calculate total price
@@ -43,6 +50,8 @@ const createOrder = async (req, res) => {
       quantity,
       total_price,
       order_status: order_status || "Pending",
+      address_id,  
+      address_details: selectedAddress, 
     });
 
     const savedOrder = await newOrder.save();
