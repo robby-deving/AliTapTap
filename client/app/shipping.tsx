@@ -119,50 +119,52 @@ export default function Shipping() {
       );
       return;
     }
-
+  
     try {
       const userDataString = await AsyncStorage.getItem("userData");
       if (!userDataString) throw new Error("User data not found");
-
+  
       const userData = JSON.parse(userDataString);
       const userId = userData._id;
-
+  
       // Extract first and last name
       const nameParts = fullName.split(" ");
       const firstName = nameParts[0] || "";
       const lastName = nameParts.slice(1).join(" ") || "";
-
-      // Get the latest address
-      const latestAddress = shippingAddresses[shippingAddresses.length - 1];
-
-      const response = await fetch(
-        `http://192.168.1.9:4000/api/v1/users/${userId}/add-address`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            _id: latestAddress._id, // Send the address ID
-            street: latestAddress.street,
-            barangay: latestAddress.barangay,
-            city: latestAddress.city,
-            province: latestAddress.province,
-            zip: latestAddress.zip,
-            phone_number: phoneNumber,
-            first_name: firstName,
-            last_name: lastName,
-          }),
+  
+      // Send each address separately
+      for (const address of shippingAddresses) {
+        const payload = {
+          ...address,
+          phone_number: phoneNumber,
+          first_name: firstName,
+          last_name: lastName,
+        };
+  
+        console.log("Sending address:", JSON.stringify(payload, null, 2));
+  
+        const response = await fetch(
+          `http://192.168.1.9:4000/api/v1/users/${userId}/add-address`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${userData.token}`,
+            },
+            body: JSON.stringify(payload),
+          }
+        );
+  
+        const result = await response.json();
+  
+        if (!response.ok) {
+          console.error("Server Error Response:", result);
+          throw new Error("Failed to save shipping data.");
         }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to save shipping data.");
+  
+        console.log("Shipping address saved:", result);
       }
-
-      const result = await response.json();
-      console.log("Shipping data saved:", result);
-
+  
       router.push({
         pathname: "/payment",
         params: {
