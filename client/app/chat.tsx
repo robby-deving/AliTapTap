@@ -17,7 +17,7 @@ export default function ChatScreen() {
   const [messages, setMessages] = useState<string[]>([]);
 
   useEffect(() => {
-    const newSocket = io("http://192.168.1.19:4000");
+    const newSocket = io("http://192.168.1.9:4000");
     setSocket(newSocket);
 
     newSocket.on("connect", () => {
@@ -46,7 +46,7 @@ export default function ChatScreen() {
         return;
       }
   
-      const response = await fetch("http://192.168.1.19:4000/api/v1/chat/send", {
+      const response = await fetch("http://192.168.1.9:4000/api/v1/chat/send", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
