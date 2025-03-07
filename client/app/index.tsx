@@ -1,35 +1,64 @@
-import React from "react";
-import { Text, View, Image, TouchableOpacity } from "react-native";
+import React, { useEffect, useRef } from "react";
+import { Text, View, TouchableOpacity, Image, Animated } from "react-native";
 import { useRouter } from "expo-router";
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function Index() {
   const router = useRouter();
+  const logoPosition = useRef(new Animated.Value(500)).current;
+
+  useEffect(() => {
+    // Animate logo
+    Animated.spring(logoPosition, {
+      toValue: 0,
+      useNativeDriver: true,
+      tension: 10,
+      friction: 5,
+    }).start();
+
+    // Check internet connection and navigate after animation
+    const checkConnectionAndNavigate = async () => {
+      try {
+        const response = await fetch('https://www.google.com');
+        if (response.ok) {
+          // Wait for 2 seconds to show splash screen
+          setTimeout(() => {
+            router.replace('/productcatalogue');
+          }, 2000);
+        }
+      } catch (error) {
+        // Show error message if no internet
+        alert('Please check your internet connection');
+      }
+    };
+
+    // Start checking after logo animation
+    setTimeout(checkConnectionAndNavigate, 1000);
+  }, []);
 
   return (
-    <View className="flex-1 relative bg-white">
-      {/* Header */}
-      <View className="bg-[#231F20] w-full p-4 flex flex-row items-center pt-20">
-        <Image
-          source={require("../assets/images/logo.png")}
-          style={{ width: 27.61, height: 38 }}
-          className="mx-auto"
-        />
-      </View>
-
-      {/* Main Content */}
-      <View className="flex-1 justify-center items-center p-10">
-        <Text className="text-2xl font-semibold mb-10">
-          Welcome to AliTapTap
-        </Text>
-        <TouchableOpacity
-          className="bg-[#FDCB07] w-full p-4 rounded"
-          onPress={() => router.push("/productcatalogue")} 
-        >
-          <Text className="text-white text-center text-xl font-semibold">
-            Browse Products
-          </Text>
-        </TouchableOpacity>
-      </View>
+    <View className="flex-1 relative">
+      <LinearGradient
+        colors={['#FFE300', '#FFFFFF','#FFFFFF']}
+        style={{ flex: 1 }}
+      >
+        {/* Main Content */}
+        <View className="flex-1 justify-center items-center p-10">
+          <Animated.Image
+            source={require('../assets/images/logoBlack.png')}
+            style={[
+              {
+                width: 200,
+                height: 200,
+                marginBottom: 20,
+                transform: [{ translateY: logoPosition }]
+              }
+            ]}
+            resizeMode="contain"
+          />
+          
+        </View>
+      </LinearGradient>
     </View>
   );
 }
