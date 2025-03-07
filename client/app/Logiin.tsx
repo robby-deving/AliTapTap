@@ -82,7 +82,7 @@ export default function Index() {
         await AsyncStorage.setItem("userData", JSON.stringify(userData));
     
         setIsAuthenticated(true);
-        Alert.alert("Login Successful", "You can now access the chat and shipping.");
+        Alert.alert("Login Successful", "You can now access the app.");
       } catch (error) {
         console.error("❌ Login Error:", error);
     
