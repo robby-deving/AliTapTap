@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 
+// Cloudinary Upload Function
 const uploadImageToCloudinary = async (file: File) => {
   const formData = new FormData();
   formData.append('file', file);
@@ -34,7 +35,7 @@ const uploadImageToCloudinary = async (file: File) => {
   }
 };
 
-
+// Modal Components
 const Dropzone = styled.div`
   border: 2px dashed #ddd;
   border-radius: 10px;
@@ -60,14 +61,14 @@ const UploadText = styled.p`
   margin-top: 5px;
 `;
 
-const ModalOverlay = styled.div`
+const ModalOverlay = styled.div<{ zIndex: number }>`
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.6);
-  z-index: 50;
+  z-index: ${(props) => props.zIndex};
   display: flex;
   justify-content: center;
   align-items: center;
@@ -159,6 +160,18 @@ const ModalTitle = styled.h2`
   margin-bottom: 20px;
 `;
 
+const SuccessModalContent = styled.div`
+  position: relative;
+  background-color: white;
+  padding: 30px;
+  width: 400px;
+  max-width: 100%;
+  border-radius: 15px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+  z-index: 60;
+  text-align: center;
+`;
+
 interface ModalProps {
   isOpen: boolean;
   closeModal: () => void;
@@ -176,6 +189,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, closeModal }) => {
   const [frontImageFile, setFrontImageFile] = useState<File | null>(null);
   const [backImageFile, setBackImageFile] = useState<File | null>(null);
   const [error, setError] = useState<string>('');
+  const [isSuccess, setIsSuccess] = useState<boolean>(false);  // New state for success modal
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -196,46 +210,45 @@ const Modal: React.FC<ModalProps> = ({ isOpen, closeModal }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(''); // Reset any previous error messages
-  
+    setIsSuccess(false);  // Reset success state
+
     let frontImageUrl = '';
     let backImageUrl = '';
-  
+
     try {
       // Upload front image if selected
       if (frontImageFile) {
         frontImageUrl = await uploadImageToCloudinary(frontImageFile);
         if (!frontImageUrl) throw new Error('Failed to upload front image');
       }
-  
+
       // Upload back image if selected
       if (backImageFile) {
         backImageUrl = await uploadImageToCloudinary(backImageFile);
         if (!backImageUrl) throw new Error('Failed to upload back image');
       }
-  
+
       const productData = {
         name: formData.productName,
-        front_image: frontImageUrl,  // Image URL returned from Cloudinary for front image
-        back_image: backImageUrl,    // Image URL returned from Cloudinary for back image
+        front_image: frontImageUrl,
+        back_image: backImageUrl,
         created_by: formData.createdBy,
         materials: {
           PVC: {
-            value: formData.pvcPrice,  // The price for PVC
-            price_per_unit: formData.pvcPrice,  // Assuming you also want to set price per unit
+            value: formData.pvcPrice,
+            price_per_unit: formData.pvcPrice,
           },
           Metal: {
-            value: formData.metalPrice,  // The price for Metal
-            price_per_unit: formData.metalPrice,  // Assuming you also want to set price per unit
+            value: formData.metalPrice,
+            price_per_unit: formData.metalPrice,
           },
           Wood: {
-            value: formData.woodPrice,  // The price for Wood
-            price_per_unit: formData.woodPrice,  // Assuming you also want to set price per unit
+            value: formData.woodPrice,
+            price_per_unit: formData.woodPrice,
           },
         },
       };
-  
-      console.log("Product Data to send to backend:", productData);  // Log the data being sent to backend for debugging
-  
+
       // Submit product data to API
       const response = await fetch('http://localhost:4000/api/v1/card-designs/admin/create', {
         method: 'POST',
@@ -244,13 +257,12 @@ const Modal: React.FC<ModalProps> = ({ isOpen, closeModal }) => {
         },
         body: JSON.stringify(productData),
       });
-  
+
       const data = await response.json();
-      console.log('Backend Response:', data);  // Log the backend response for debugging
-  
+
       if (response.ok) {
         console.log('Product created successfully:', data);
-        closeModal(); // Close the modal after successful submission
+        setIsSuccess(true); // Show success modal
       } else {
         throw new Error(`Error creating product: ${data.message || 'Unknown error'}`);
       }
@@ -259,129 +271,144 @@ const Modal: React.FC<ModalProps> = ({ isOpen, closeModal }) => {
       setError(error instanceof Error ? error.message : 'Something went wrong');
     }
   };
-  
-  
+
+  const handleCloseSuccessModal = () => {
+    setIsSuccess(false);  // Close success modal
+    closeModal();  // Close the main modal
+  };
 
   if (!isOpen) return null;
 
   return (
-    <ModalOverlay>
-      <ModalContent>
-        <CloseButton onClick={closeModal}>&times;</CloseButton>
-        <ModalTitle>Add New Product</ModalTitle>
+    <>
+      {isSuccess && (
+        <ModalOverlay zIndex={100}>
+          <SuccessModalContent>
+            <h2>Success!</h2>
+            <p>Your product has been successfully added.</p>
+            <Button onClick={handleCloseSuccessModal}>Close</Button>
+          </SuccessModalContent>
+        </ModalOverlay>
+      )}
 
-        {error && <div style={{ color: 'red', marginBottom: '10px' }}>{error}</div>} {/* Display error message */}
+      <ModalOverlay zIndex={50}>
+        <ModalContent>
+          <CloseButton onClick={closeModal}>&times;</CloseButton>
+          <ModalTitle>Add New Product</ModalTitle>
 
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block text-sm font-medium">Product Name</label>
-            <Input
-              type="text"
-              name="productName"
-              value={formData.productName}
-              onChange={handleChange}
-              required
-              placeholder="Enter product name"
-            />
-          </div>
+          {error && <div style={{ color: 'red', marginBottom: '10px' }}>{error}</div>}
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium">Front Image</label>
-            <Dropzone>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleFileChange(e, 'front')}
-                style={{ display: 'none' }}
-                id="front-upload"
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <label className="block text-sm font-medium">Product Name</label>
+              <Input
+                type="text"
+                name="productName"
+                value={formData.productName}
+                onChange={handleChange}
+                required
+                placeholder="Enter product name"
               />
-              <label htmlFor="front-upload">
-                {frontImageFile ? (
-                  <ImagePreview src={URL.createObjectURL(frontImageFile)} alt="Front Preview" />
-                ) : (
-                  <UploadText>Click to upload or drag an image</UploadText>
-                )}
-              </label>
-            </Dropzone>
-          </div>
+            </div>
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium">Back Image</label>
-            <Dropzone>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleFileChange(e, 'back')}
-                style={{ display: 'none' }}
-                id="back-upload"
+            <div className="mb-4">
+              <label className="block text-sm font-medium">Front Image</label>
+              <Dropzone>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleFileChange(e, 'front')}
+                  style={{ display: 'none' }}
+                  id="front-upload"
+                />
+                <label htmlFor="front-upload">
+                  {frontImageFile ? (
+                    <ImagePreview src={URL.createObjectURL(frontImageFile)} alt="Front Preview" />
+                  ) : (
+                    <UploadText>Click to upload or drag an image</UploadText>
+                  )}
+                </label>
+              </Dropzone>
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium">Back Image</label>
+              <Dropzone>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleFileChange(e, 'back')}
+                  style={{ display: 'none' }}
+                  id="back-upload"
+                />
+                <label htmlFor="back-upload">
+                  {backImageFile ? (
+                    <ImagePreview src={URL.createObjectURL(backImageFile)} alt="Back Preview" />
+                  ) : (
+                    <UploadText>Click to upload or drag an image</UploadText>
+                  )}
+                </label>
+              </Dropzone>
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium">Created By (Admin ID)</label>
+              <Input
+                type="text"
+                name="createdBy"
+                value={formData.createdBy}
+                onChange={handleChange}
+                required
+                placeholder="Enter Admin ID"
               />
-              <label htmlFor="back-upload">
-                {backImageFile ? (
-                  <ImagePreview src={URL.createObjectURL(backImageFile)} alt="Back Preview" />
-                ) : (
-                  <UploadText>Click to upload or drag an image</UploadText>
-                )}
-              </label>
-            </Dropzone>
-          </div>
+            </div>
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium">Created By (Admin ID)</label>
-            <Input
-              type="text"
-              name="createdBy"
-              value={formData.createdBy}
-              onChange={handleChange}
-              required
-              placeholder="Enter Admin ID"
-            />
-          </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium">Materials</label>
+              <div className="flex gap-4">
+                <div className="w-1/3">
+                  <label className="block text-sm">PVC Price</label>
+                  <Input
+                    type="number"
+                    name="pvcPrice"
+                    value={formData.pvcPrice}
+                    onChange={handleChange}
+                    required
+                    placeholder="₱0.00"
+                  />
+                </div>
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium">Materials</label>
-            <div className="flex gap-4">
-              <div className="w-1/3">
-                <label className="block text-sm">PVC Price</label>
-                <Input
-                  type="number"
-                  name="pvcPrice"
-                  value={formData.pvcPrice}
-                  onChange={handleChange}
-                  required
-                  placeholder="₱0.00"
-                />
-              </div>
+                <div className="w-1/3">
+                  <label className="block text-sm">Metal Price</label>
+                  <Input
+                    type="number"
+                    name="metalPrice"
+                    value={formData.metalPrice}
+                    onChange={handleChange}
+                    required
+                    placeholder="₱0.00"
+                  />
+                </div>
 
-              <div className="w-1/3">
-                <label className="block text-sm">Metal Price</label>
-                <Input
-                  type="number"
-                  name="metalPrice"
-                  value={formData.metalPrice}
-                  onChange={handleChange}
-                  required
-                  placeholder="₱0.00"
-                />
-              </div>
-
-              <div className="w-1/3">
-                <label className="block text-sm">Wood Price</label>
-                <Input
-                  type="number"
-                  name="woodPrice"
-                  value={formData.woodPrice}
-                  onChange={handleChange}
-                  required
-                  placeholder="₱0.00"
-                />
+                <div className="w-1/3">
+                  <label className="block text-sm">Wood Price</label>
+                  <Input
+                    type="number"
+                    name="woodPrice"
+                    value={formData.woodPrice}
+                    onChange={handleChange}
+                    required
+                    placeholder="₱0.00"
+                  />
+                </div>
               </div>
             </div>
-          </div>
 
-          <Button type="submit">Add Product</Button>
-        </form>
-      </ModalContent>
-    </ModalOverlay>
+            <Button type="submit">Add Product</Button>
+          </form>
+        </ModalContent>
+      </ModalOverlay>
+    </>
   );
 };
 
