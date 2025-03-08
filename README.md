@@ -30,10 +30,15 @@ cd client
 Install the necessary dependencies:
 
 ```bash
+<<<<<<< HEAD
 npm install
 npm install socket.io-client
 npm install axios
 npx expo install expo-router
+=======
+ npm install
+ npx expo install expo-linear-gradient
+>>>>>>> 0bf66862895e319db924070a99b2f9a7c9c27c04
 ```
 
 ### **3️⃣ Find Your Local IP Address (Required for Chat Development)**
