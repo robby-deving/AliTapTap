@@ -43,7 +43,7 @@ export default function Index() {
           onPress={() => router.push("/Logiin")} // Navigate to login
         >
           <Text className="text-white text-center text-xl font-semibold">
-            LATEST Login & Signup
+            LATEST Login & Signup with Terms and Conditions
           </Text>
         </TouchableOpacity>
       </View>
