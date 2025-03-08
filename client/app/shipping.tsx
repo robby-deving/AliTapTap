@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Text,
   View,
@@ -10,17 +10,20 @@ import {
   Modal,
   TextInput,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import InputField from "../components/InputField";
 import StepperComponent from "../components/StepperComponent";
 import { Header } from "../components/Header";
 import { Asset } from "expo-asset";
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function Shipping() {
   const [fullName, setFullName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [shippingAddresses, setShippingAddresses] = useState<string[]>([]);
+  const [shippingAddresses, setShippingAddresses] = useState<Address[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [selectedAddressIndex, setSelectedAddressIndex] = useState<number>(0);
 
   // Address fields
   const [street, setStreet] = useState("");
@@ -31,47 +34,66 @@ export default function Shipping() {
 
   const router = useRouter();
 
-  const handleAddAddress = () => {
-    if (!street || !barangay || !city || !province || !zipCode) {
-      alert("Please complete all address fields");
-      return;
-    }
-
-    const newAddress = `${street}, ${barangay}, ${city}, ${province}, ${zipCode}`;
-    setShippingAddresses((prevAddresses) => [...prevAddresses, newAddress]); // Correctly update state
-
-    // Reset fields
-    setStreet("");
-    setBarangay("");
-    setCity("");
-    setProvince("");
-    setZipCode("");
-    setModalVisible(false);
+  type Address = {
+    _id?: string;
+    street: string;
+    barangay: string;
+    city: string;
+    province: string;
+    zip: string;
   };
 
-  const handleContinue = () => {
-    if (!fullName || !phoneNumber || shippingAddresses.length === 0) {
-      alert(
-        "Please enter your full name, phone number, and at least one shipping address"
-      );
-      return;
-    }
+  useFocusEffect(
+    React.useCallback(() => {
+      const loadUserData = async () => {
+        try {
+          const userDataString = await AsyncStorage.getItem("userData");
+          if (userDataString) {
+            const userData = JSON.parse(userDataString);
+            
+            // Update addresses and selected index
+            if (Array.isArray(userData.address)) {
+              setShippingAddresses(userData.address);
+            }
+            setSelectedAddressIndex(userData.selectedAddressIndex || 0);
+            
+            // Combine first_name and last_name for fullName
+            if (userData.first_name || userData.last_name) {
+              setFullName(`${userData.first_name || ''} ${userData.last_name || ''}`.trim());
+            }
+            
+            // Set phone_number
+            if (userData.phone_number) {
+              setPhoneNumber(userData.phone_number);
+            }
+            
+            console.log('Focus effect - User data loaded:', {
+              fullName: `${userData.first_name || ''} ${userData.last_name || ''}`.trim(),
+              phone_number: userData.phone_number,
+              selectedIndex: userData.selectedAddressIndex
+            });
+          }
+        } catch (error) {
+          console.error("Error reloading user data:", error);
+        }
+      };
 
-    const shippingData = {
-      fullName,
-      phoneNumber,
-      shippingAddresses, // Pass the array instead of a single value
-    };
+      loadUserData();
+    }, [])
+  );
 
-    router.push({
-      pathname: "/payment",
-      params: {
-        shippingData: JSON.stringify(shippingData),
-      },
-    });
-  };
 
-  const groupIcon = Asset.fromModule(require("../assets/images/Group.png")).uri;
+
+  const handleContinue = async () => {
+    router.push("/payment");
+  }
+
+
+  useEffect(() => {
+    console.log('Current shipping addresses:', shippingAddresses);
+    console.log('Selected address index:', selectedAddressIndex);
+    console.log('Selected address:', shippingAddresses[selectedAddressIndex]);
+  }, [shippingAddresses, selectedAddressIndex]);
 
   return (
     <KeyboardAvoidingView
@@ -124,28 +146,49 @@ export default function Shipping() {
                 </Text>
 
                 {shippingAddresses.length > 0 ? (
-                  shippingAddresses.map((address, index) => (
-                    <View
-                      key={index}
-                      className="border border-gray-200 p-4 rounded-lg bg-white mb-2"
-                    >
-                      <Text className="text-black text-sm">{address}</Text>
-                    </View>
-                  ))
+                  <TouchableOpacity
+                    className="border border-gray-200 p-4 rounded-lg bg-white mb-2"
+                    onPress={() => {
+                      console.log('Navigating to addresses with index:', selectedAddressIndex);
+                      router.push("/addresses");
+                    }}
+                  >
+                    {shippingAddresses[selectedAddressIndex] ? (
+                      <View className="flex-row items-center justify-between">
+                        <Text className="text-black text-sm flex-1">
+                          {`${shippingAddresses[selectedAddressIndex]?.street || ''}, 
+                            ${shippingAddresses[selectedAddressIndex]?.barangay || ''}, 
+                            ${shippingAddresses[selectedAddressIndex]?.city || ''}, 
+                            ${shippingAddresses[selectedAddressIndex]?.province || ''}, 
+                            ${shippingAddresses[selectedAddressIndex]?.zip || ''}`
+                            .replace(/\s+/g, ' ')
+                            .trim()}
+                        </Text>
+                        <Image
+                            source={require('../assets/images/arrow_right.png')}
+                            style={{ width: 30, height: 30 }}
+                          />
+                        
+                      </View>
+                    ) : (
+                      <Text className="text-sm text-gray-500">
+                        Error loading address. Please select again.
+                      </Text>
+                    )}
+                  </TouchableOpacity>
                 ) : (
-                  <Text className="text-sm text-gray-400">
-                    No address added
-                  </Text>
+                  <TouchableOpacity
+                    className="border border-gray-200 p-4 rounded-lg w-full bg-white flex-row justify-center items-center"
+                    onPress={() => {
+                      console.log('No addresses, navigating to add address');
+                      router.push("/addresses");
+                    }}
+                  >
+                    <Text className="text-sm text-gray-500">
+                      + Add Shipping Address
+                    </Text>
+                  </TouchableOpacity>
                 )}
-
-                <TouchableOpacity
-                  className="border border-gray-200 p-4 rounded-lg w-full bg-white flex-row justify-center items-center"
-                  onPress={() => setModalVisible(true)}
-                >
-                  <Text className="text-sm text-gray-500">
-                    + Add Another Address
-                  </Text>
-                </TouchableOpacity>
               </View>
             </View>
           </View>
@@ -164,80 +207,7 @@ export default function Shipping() {
             </Text>
           </TouchableOpacity>
         </View>
-      </View>
-
-      {/* Address Modal */}
-      <Modal visible={modalVisible} transparent={true} animationType="slide">
-      <View className="flex-1 justify-end bg-black/30">
-          <View className="bg-white w-full h-[600px] p-6 rounded-t-2xl">
-            <Text className="text-base font-semibold mb-9 text-center">
-              Add Address
-            </Text>
-
-            {/* Street Input */}
-            <View className="w-full mb-2">
-              <InputField
-                label="St./Purok/Sitio/Subd."
-                placeholder="Enter your street"
-                value={street}
-                onChangeText={setStreet}
-              />
-            </View>
-
-            {/* Barangay Input */}
-            <View className="w-full mb-2">
-              <InputField
-                label="Barangay"
-                placeholder="Enter your barangay"
-                value={barangay}
-                onChangeText={setBarangay}
-              />
-            </View>
-
-            {/* City Input */}
-            <View className="w-full mb-2">
-              <InputField
-                label="City/Municipality"
-                placeholder="Enter your city"
-                value={city}
-                onChangeText={setCity}
-              />
-            </View>
-
-            {/* Province Input */}
-            <View className="w-full mb-2">
-              <InputField
-                label="Province"
-                placeholder="Enter your province"
-                value={province}
-                onChangeText={setProvince}
-              />
-            </View>
-
-            {/* ZIP Code Input */}
-            <View className="w-full mb-2">
-              <InputField
-                label="ZIP Code"
-                placeholder="Enter your ZIP code"
-                value={zipCode}
-                onChangeText={setZipCode}
-                type="number"
-              />
-            </View>
-
-            <View className="w-full">
-              <TouchableOpacity
-                className="bg-[#FDCB07] px-4 pt-4 rounded items-center w-full h-12"
-                onPress={handleAddAddress}
-              >
-                <Text className="text-white text-center font-semibold">
-                  Add Address
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      </View>      
     </KeyboardAvoidingView>
   );
 }

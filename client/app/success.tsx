@@ -51,7 +51,7 @@ const SuccessScreen: React.FC = () => {
     const handleGoBack = async () => {
         try {
             await AsyncStorage.removeItem('orderSummary');
-            router.push('/');
+            router.push('/productcatalogue');
         } catch (error) {
             console.error('Error clearing order summary:', error);
             router.push('/');

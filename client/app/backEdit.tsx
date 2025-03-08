@@ -427,7 +427,7 @@ export default function backEdit() {
               deselectAll();
               updateOrderDetails('design_id', parsedProduct._id);
 
-              router.push('/reviewDesign');
+              router.push('/shipping');
             }}
           >
             <Text className={`${isPressed ? 'text-[#FDCB07]' : 'text-white'} text-center text-xl font-semibold`}>Next</Text>

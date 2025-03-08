@@ -24,7 +24,7 @@ export default function Index() {
           // Wait for 2 seconds to show splash screen
           setTimeout(() => {
             // more security logic here check if user is logged in or not maybe check if token is still valid, if yes redirect to product if not to login
-            router.replace('/productcatalogue');
+            router.replace('/login');
           }, 1000);
         }
       } catch (error) {

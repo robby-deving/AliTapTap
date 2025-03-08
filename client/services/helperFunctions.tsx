@@ -38,6 +38,13 @@ interface TransactionData {
   status: string;
 }
 
+// Add this interface near the top with other interfaces
+interface UserDetails {
+  _id: string;
+  selectedAddressIndex?: number;
+  // Add other user properties as needed
+}
+
 const Base_Url = 'http://192.168.137.1:4000';
 
 const saveCardAsImage = async (cardRef: React.RefObject<ViewStyle>, side: 'front' | 'back'): Promise<void> => {
@@ -116,12 +123,16 @@ const orderSummary = async (attribute: string, value: any): Promise<void> => {
 const saveOrderAndTransaction = async () => {
   try {
     const orderDetailsString = await AsyncStorage.getItem('orderDetails');
+    const userData = await AsyncStorage.getItem('userData');
+
     const orderDetails: OrderDetails = orderDetailsString ? JSON.parse(orderDetailsString) : {};
+    const userDetails: UserDetails = userData ? JSON.parse(userData) : {};
+
 
     console.log('Order details:', orderDetails);
 
     const orderData: OrderData = {
-      customer_id: "67caa10d3e7138c6cf4d6101",
+      customer_id: userDetails._id,
       design_id: orderDetails.design_id ,
       front_image: orderDetails.front_image ,
       back_image: orderDetails.back_image ,
@@ -130,8 +141,11 @@ const saveOrderAndTransaction = async () => {
       },
       quantity: orderDetails.quantity,
       order_status: "Pending",
-      address_id: 1
+      address_id: userDetails.selectedAddressIndex || 0,
     };
+
+    console.log('Order data:', orderData);
+    
 
     // Create order with better error handling
     let orderResponse;
