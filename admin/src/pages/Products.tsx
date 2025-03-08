@@ -30,26 +30,28 @@ export default function CardDesigns() {
   const currentItems = cardDesignsData.data || []; // Data from the API hook
 
   return (
-    <div className="overflow-auto w-full flex p-10 gap-10">
-      <div className="flex-1">
-        <div className="flex justify-between items-center mb-5">
-          <h1 className="text-[2.25rem] font-bold">Products</h1>
-          <div className="flex gap-4">
-            <button
-              className="py-2 px-4 rounded-lg bg-white text-black border border-gray-300 font-semibold hover:bg-[#FDDF05] hover:text-white"
-              onClick={() => { /* Export logic */ }}
-            >
-              Export
-            </button>
+      <div className="overflow-auto w-full flex p-10 gap-10">
+        <div className="flex-1">
+          <div className="flex justify-between items-center mb-5">
+            <h1 className="text-[2.25rem] font-bold">Products</h1>
+            <div className="flex gap-4">
+              {/* Export Button */}
+              <button
+                className="py-2 px-4 rounded-lg bg-white text-black border border-gray-300 font-semibold"
+                onClick={() => { /* Export logic */ }}
+              >
+                Export
+              </button>
 
-            <button
-              className="py-2 px-4 rounded-lg bg-white text-black border border-gray-300 font-semibold hover:bg-[#FDDF05] hover:text-white"
-              onClick={openModal} // Open modal when clicked
-            >
-              Add Card
-            </button>
+              {/* Add Card Button */}
+              <button
+                className="py-2 px-4 rounded-lg bg-white text-black border border-gray-300 font-semibold"
+                onClick={openModal} // Open modal when clicked
+              >
+                Add Card
+              </button>
+            </div>
           </div>
-        </div>
 
         <DataTable
           columns={cardColumns} // Pass the columns for the DataTable

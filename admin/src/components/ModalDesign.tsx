@@ -1,56 +1,162 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 
+const uploadImageToCloudinary = async (file: File) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', 'robert');  // Add upload preset
+
+  try {
+    const response = await fetch('https://api.cloudinary.com/v1_1/ddye8veua/image/upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorMessage = `Failed to upload image. Status: ${response.status}`;
+      console.error(errorMessage);  // Log status code and details
+      throw new Error(errorMessage);
+    }
+
+    const data = await response.json();
+    console.log('Cloudinary Response:', data);  // Log full response for debugging
+
+    if (data.secure_url) {
+      return data.secure_url;  // Return the image URL
+    } else {
+      const errorMessage = 'Failed to upload image. Response did not include secure_url.';
+      console.error(errorMessage);
+      throw new Error(errorMessage);
+    }
+  } catch (error) {
+    console.error('Error uploading image to Cloudinary:', error);
+    return '';  // Return an empty string in case of error
+  }
+};
+
+
+const Dropzone = styled.div`
+  border: 2px dashed #ddd;
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  background-color: #f9f9f9;
+  transition: border-color 0.3s;
+  &:hover {
+    border-color: #007bff;
+  }
+`;
+
+const ImagePreview = styled.img`
+  max-width: 100px;
+  height: auto;
+  margin-top: 10px;
+`;
+
+const UploadText = styled.p`
+  color: #555;
+  font-size: 14px;
+  margin-top: 5px;
+`;
+
 const ModalOverlay = styled.div`
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.6);
   z-index: 50;
   display: flex;
   justify-content: center;
   align-items: center;
+  transition: all 0.3s ease-in-out;
 `;
 
 const ModalContent = styled.div`
   position: relative;
   background-color: white;
-  padding: 20px;
-  width: 400px;
+  padding: 30px;
+  width: 600px;
   max-width: 100%;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
   z-index: 60;
+  transform: scale(0.9);
+  opacity: 0;
+  animation: fadeIn 0.3s ease-in-out forwards;
+
+  @keyframes fadeIn {
+    0% {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
 `;
 
 const CloseButton = styled.button`
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 15px;
+  right: 15px;
   font-size: 24px;
   cursor: pointer;
-  color: #999;
+  color: #888;
+  background-color: transparent;
+  border: none;
   &:hover {
     color: #333;
   }
 `;
 
-// Placeholder styling for inputs
 const Input = styled.input`
   width: 100%;
-  padding: 10px;
-  margin-top: 5px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  padding: 12px;
+  margin-top: 8px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  font-size: 14px;
+  color: #333;
 
-  /* Placeholder styles */
   &::placeholder {
-    font-size: 14px; /* Set font size to 10px */
-    font-style: italic; /* Set placeholder text to italics */
-    color: #888; /* Light grey color for placeholder */
+    color: #aaa;
   }
+
+  &:focus {
+    outline: none;
+    border-color: #007bff;
+    background-color: #fff;
+  }
+`;
+
+const Button = styled.button`
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  color: white;
+  background-color: #007bff;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 20px;
+
+  &:hover {
+    background-color: #0056b3;
+  }
+`;
+
+const ModalTitle = styled.h2`
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  text-align: center;
+  margin-bottom: 20px;
 `;
 
 interface ModalProps {
@@ -61,24 +167,100 @@ interface ModalProps {
 const Modal: React.FC<ModalProps> = ({ isOpen, closeModal }) => {
   const [formData, setFormData] = useState({
     productName: '',
-    frontImage: '',
-    backImage: '',
     createdBy: '',
     pvcPrice: '',
     metalPrice: '',
     woodPrice: '',
   });
 
+  const [frontImageFile, setFrontImageFile] = useState<File | null>(null);
+  const [backImageFile, setBackImageFile] = useState<File | null>(null);
+  const [error, setError] = useState<string>('');
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Form data submitted:', formData);
-    closeModal(); // Close the modal after form submission
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, type: 'front' | 'back') => {
+    const file = e.target.files ? e.target.files[0] : null;
+    if (file) {
+      if (type === 'front') {
+        setFrontImageFile(file);
+      } else {
+        setBackImageFile(file);
+      }
+    }
   };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(''); // Reset any previous error messages
+  
+    let frontImageUrl = '';
+    let backImageUrl = '';
+  
+    try {
+      // Upload front image if selected
+      if (frontImageFile) {
+        frontImageUrl = await uploadImageToCloudinary(frontImageFile);
+        if (!frontImageUrl) throw new Error('Failed to upload front image');
+      }
+  
+      // Upload back image if selected
+      if (backImageFile) {
+        backImageUrl = await uploadImageToCloudinary(backImageFile);
+        if (!backImageUrl) throw new Error('Failed to upload back image');
+      }
+  
+      const productData = {
+        name: formData.productName,
+        front_image: frontImageUrl,  // Image URL returned from Cloudinary for front image
+        back_image: backImageUrl,    // Image URL returned from Cloudinary for back image
+        created_by: formData.createdBy,
+        materials: {
+          PVC: {
+            value: formData.pvcPrice,  // The price for PVC
+            price_per_unit: formData.pvcPrice,  // Assuming you also want to set price per unit
+          },
+          Metal: {
+            value: formData.metalPrice,  // The price for Metal
+            price_per_unit: formData.metalPrice,  // Assuming you also want to set price per unit
+          },
+          Wood: {
+            value: formData.woodPrice,  // The price for Wood
+            price_per_unit: formData.woodPrice,  // Assuming you also want to set price per unit
+          },
+        },
+      };
+  
+      console.log("Product Data to send to backend:", productData);  // Log the data being sent to backend for debugging
+  
+      // Submit product data to API
+      const response = await fetch('http://localhost:4000/api/v1/card-designs/admin/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(productData),
+      });
+  
+      const data = await response.json();
+      console.log('Backend Response:', data);  // Log the backend response for debugging
+  
+      if (response.ok) {
+        console.log('Product created successfully:', data);
+        closeModal(); // Close the modal after successful submission
+      } else {
+        throw new Error(`Error creating product: ${data.message || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setError(error instanceof Error ? error.message : 'Something went wrong');
+    }
+  };
+  
+  
 
   if (!isOpen) return null;
 
@@ -86,7 +268,9 @@ const Modal: React.FC<ModalProps> = ({ isOpen, closeModal }) => {
     <ModalOverlay>
       <ModalContent>
         <CloseButton onClick={closeModal}>&times;</CloseButton>
-        <h2 className="text-2xl font-bold mb-5 text-center">Add New Product</h2>
+        <ModalTitle>Add New Product</ModalTitle>
+
+        {error && <div style={{ color: 'red', marginBottom: '10px' }}>{error}</div>} {/* Display error message */}
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
@@ -102,27 +286,43 @@ const Modal: React.FC<ModalProps> = ({ isOpen, closeModal }) => {
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium">Front Image URL</label>
-            <Input
-              type="url"
-              name="frontImage"
-              value={formData.frontImage}
-              onChange={handleChange}
-              required
-              placeholder="Enter front image URL"
-            />
+            <label className="block text-sm font-medium">Front Image</label>
+            <Dropzone>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleFileChange(e, 'front')}
+                style={{ display: 'none' }}
+                id="front-upload"
+              />
+              <label htmlFor="front-upload">
+                {frontImageFile ? (
+                  <ImagePreview src={URL.createObjectURL(frontImageFile)} alt="Front Preview" />
+                ) : (
+                  <UploadText>Click to upload or drag an image</UploadText>
+                )}
+              </label>
+            </Dropzone>
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium">Back Image URL</label>
-            <Input
-              type="url"
-              name="backImage"
-              value={formData.backImage}
-              onChange={handleChange}
-              required
-              placeholder="Enter back image URL"
-            />
+            <label className="block text-sm font-medium">Back Image</label>
+            <Dropzone>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleFileChange(e, 'back')}
+                style={{ display: 'none' }}
+                id="back-upload"
+              />
+              <label htmlFor="back-upload">
+                {backImageFile ? (
+                  <ImagePreview src={URL.createObjectURL(backImageFile)} alt="Back Preview" />
+                ) : (
+                  <UploadText>Click to upload or drag an image</UploadText>
+                )}
+              </label>
+            </Dropzone>
           </div>
 
           <div className="mb-4">
@@ -178,15 +378,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, closeModal }) => {
             </div>
           </div>
 
-          {/* Submit Button */}
-          <div className="mb-4">
-            <button
-              type="submit"
-              className="w-full flex items-center justify-center gap-2 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600"
-            >
-              <span className="text-lg font-bold">+</span> Add Product
-            </button>
-          </div>
+          <Button type="submit">Add Product</Button>
         </form>
       </ModalContent>
     </ModalOverlay>

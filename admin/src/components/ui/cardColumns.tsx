@@ -97,12 +97,11 @@ export const cardColumns: ColumnDef<CardDesign>[] = [
         className="text-sm px-2"
       >
         Price per Unit
-        <ArrowUpDown className="ml-0 h-4 w-4" />
       </Button>
     ),
     cell: ({ row }) => {
       const materials = row.getValue("materials");
-
+  
       if (materials && typeof materials === "object") {
         return (
           <div className="text-sm px-2">
@@ -114,10 +113,10 @@ export const cardColumns: ColumnDef<CardDesign>[] = [
           </div>
         );
       }
-
+  
       return <div className="text-sm px-2">No price available</div>;
     },
-  },
+},
   {
     accessorKey: "created_at",
     header: ({ column }) => (
