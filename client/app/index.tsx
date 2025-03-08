@@ -34,7 +34,7 @@ export default function Index() {
           onPress={() => router.push("/login")} // Navigate to login
         >
           <Text className="text-white text-center text-xl font-semibold">
-            START Login & Signup
+            OLD Login & Signup
           </Text>
         </TouchableOpacity>
 
@@ -43,7 +43,7 @@ export default function Index() {
           onPress={() => router.push("/Logiin")} // Navigate to login
         >
           <Text className="text-white text-center text-xl font-semibold">
-            Login Debug
+            LATEST Login & Signup
           </Text>
         </TouchableOpacity>
       </View>
