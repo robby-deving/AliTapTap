@@ -14,7 +14,7 @@ export function ButtonOutline({ text, onClick, disabled, className }: ButtonOutl
       variant="outline" 
       onClick={onClick} 
       disabled={disabled}
-      className={`hover:bg-gray-200 text-[#232323] border !border-[#E4E4E7] ${className}`}
+      className={`cursor-pointer hover:bg-gray-200 text-[#232323] border !border-[#E4E4E7] ${className}`}
     >
       {text}
     </Button>

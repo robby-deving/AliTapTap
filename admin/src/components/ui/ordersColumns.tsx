@@ -61,17 +61,17 @@ export const columns: ColumnDef<Order>[] = [
   {
     accessorKey: "amount",
     header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Amount
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        )
-      },
-    cell: ({ row }) => `₱${row.getValue("amount")}`,
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Amount
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => `₱${parseFloat(row.getValue("amount")).toFixed(2)}`,
   },
   {
     accessorKey: "material",
@@ -123,7 +123,7 @@ export const columns: ColumnDef<Order>[] = [
     id: "actions",
     header: "More Details",
     cell: ({ row }) => (
-        <button className="p-1 bg-transparent hover:bg-gray-200 rounded-md">
+        <button className="p-1 bg-transparent hover:bg-gray-200 cursor-pointer rounded-md">
             <MoreHorizontal className="w-5 h-5 text-gray-500" />
         </button>
     ),

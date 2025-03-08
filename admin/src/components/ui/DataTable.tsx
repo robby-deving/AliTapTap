@@ -1,8 +1,8 @@
 "use client"
 
-import { ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { ButtonIcon } from "@/components/ui/buttonIcon"
+// import { ButtonIcon } from "@/components/ui/buttonIcon"
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import * as React from "react"
 // import { ArrowUp, ArrowDown } from "lucide-react";
 // import { useState } from "react";
@@ -139,28 +139,51 @@ export function DataTable<TData, TValue>({
             Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
         </span>
         <div className="flex justify-between space-x-2">
-          <ButtonIcon 
-            direction="double-left" 
-            onClick={() => table.firstPage()} 
-            disabled={!table.getCanPreviousPage()} 
-          />
-          <ButtonIcon 
-            direction="left" 
-            onClick={() => table.previousPage()} 
-            disabled={!table.getCanPreviousPage()} 
-          />
-          <ButtonIcon 
-            direction="right" 
-            onClick={() => table.nextPage()} 
-            disabled={!table.getCanNextPage()} 
-          />
-          <ButtonIcon 
-            direction="double-right" 
-            onClick={() => table.lastPage()} 
-            disabled={!table.getCanNextPage()} 
-          />
+        <Button variant="outline" size="icon"
+          className="border-[#E4E4E7] hover:bg-gray-200 cursor-pointer" 
+          onClick={() => table.setPageIndex(0)}
+          disabled={!table.getCanPreviousPage()}>
+          <ChevronsLeft />
+        </Button>
+        <Button variant="outline" size="icon" 
+          className="border-[#E4E4E7] hover:bg-gray-200 cursor-pointer"
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}>
+          <ChevronLeft />
+        </Button>
+        <Button variant="outline" size="icon" 
+          className="border-[#E4E4E7] hover:bg-gray-200 cursor-pointer"
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}>
+          <ChevronRight />
+        </Button>
+        <Button variant="outline" size="icon" 
+          className="border-[#E4E4E7] hover:bg-gray-200 cursor-pointer"
+          onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+          disabled={!table.getCanNextPage()}>
+          <ChevronsRight />
+        </Button>
+        {/* <ButtonIcon
+          direction="double-left" 
+          onClick={() => table.setPageIndex(0)} 
+          disabled={!table.getCanPreviousPage()} 
+        />
+        <ButtonIcon 
+          direction="left" 
+          onClick={() => table.previousPage()} 
+          disabled={!table.getCanPreviousPage()} 
+        />
+        <ButtonIcon 
+          direction="right" 
+          onClick={() => table.nextPage()} 
+          disabled={!table.getCanNextPage()} 
+        />
+        <ButtonIcon 
+          direction="double-right" 
+          onClick={() => table.setPageIndex(table.getPageCount() - 1)} 
+          disabled={!table.getCanNextPage()} 
+        /> */}
         </div>
-        
       </div>
 
     </div>
