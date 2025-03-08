@@ -20,30 +20,11 @@ export default function Index() {
           Welcome to AliTapTap
         </Text>
         <TouchableOpacity
-          className="bg-[#FDCB07] w-full p-4 rounded mb-3"
-          onPress={() => router.push("/shipping")} // Navigate to Shipping first
+          className="bg-[#98fbcb] w-full p-4 rounded"
+          onPress={() => router.push("/profile")} // Navigate to login
         >
-          <Text className="text-white text-center text-xl font-semibold">
-            Start Payment
-          </Text>
-        </TouchableOpacity>
-
-
-        <TouchableOpacity
-          className="bg-[#0759fd] w-full p-4 rounded mb-3"
-          onPress={() => router.push("/login")} // Navigate to login
-        >
-          <Text className="text-white text-center text-xl font-semibold">
-            OLD Login & Signup
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          className="bg-[#7607fd] w-full p-4 rounded"
-          onPress={() => router.push("/Logiin")} // Navigate to login
-        >
-          <Text className="text-white text-center text-xl font-semibold">
-            LATEST Login & Signup with Terms and Conditions
+          <Text className="text-[#47b580] text-center text-xl font-semibold">
+            Go to Profile
           </Text>
         </TouchableOpacity>
       </View>
