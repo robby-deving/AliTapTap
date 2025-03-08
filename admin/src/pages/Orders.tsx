@@ -5,29 +5,6 @@ import { DataTable } from "../components/ui/DataTable";
 import { ButtonOutline } from "@/components/ui/buttonOutline";
 import axios from "axios"; // Import axios for API requests
 
-// async function getData(): Promise<Order[]> {
-//     return [
-//         {
-//           orderId: "ORD12345",
-//           userId: "USR001",
-//           designName: "Minimalist Black Card",
-//           amount: 250,
-//           material: "Plastic",
-//           status: "Pending",
-//           date: "2025-03-07",
-//         },
-//         {
-//           orderId: "ORD12346",
-//           userId: "USR002",
-//           designName: "Modern NFC Business Card",
-//           amount: 300,
-//           material: "Metal",
-//           status: "Shipped",
-//           date: "2025-03-06",
-//         },
-//       ];
-// }
-
 
 export default function Orders() {
     const [data, setData] = useState<Order[]>([]);
