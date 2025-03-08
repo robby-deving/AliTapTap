@@ -1,6 +1,6 @@
 import { useState } from "react";
 import useFetchCardProducts from "../hooks/useFetchCardProducts"; // Import the new hook
-import Modal from "../components/ModalDesign";
+import Modal from "../components/Modal";
 import { DataTable } from "../components/ui/ProductDataTable"; // Import DataTable
 import { cardColumns } from "../components/ui/cardColumns"; // Import the default export
 
