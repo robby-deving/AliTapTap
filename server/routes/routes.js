@@ -6,7 +6,6 @@ const cardDesignRoutes = require('./carddesign.route');
 const dashboardRoutes = require("./dashboard.route");
 const transactionRoutes = require('./transaction.route');  
 const orderRoutes = require('./order.route');
-
 const paymentRoutes = require('./payment.route');
 
 const base = "/api/v1";

@@ -36,7 +36,7 @@ export default function Dashboard() {
                                 </svg>
                             </div>
                                 
-                            <div className='flex gap-10 mt-5 justify-evenly items-center'>
+                            <div className='flex gap-8 mt-5 justify-evenly items-center'>
                                 <div>
                                     <h3 className='text-sm text-gray-400'>Daily</h3>
                                     <p className='font-bold text-2xl'>{revenueData.loading ? "Loading..." : `₱ ${revenueData.data?.dailyRevenue.toLocaleString()}.00`}</p>

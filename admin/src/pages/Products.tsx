@@ -1,20 +1,10 @@
-import React, { useState } from 'react';
-import useFetchData from "../hooks/useFetchData";
+import React, { useState } from "react";
+import useFetchCardProducts from "../hooks/useFetchCardProducts"; // Import the new hook
 
 export default function CardDesigns() {
   const [selectedButton, setSelectedButton] = useState<string | null>(null);
 
-  // Define the type for card designs
-  interface CardDesign {
-    _id: string;
-    name: string;
-    front_image: string;
-    back_image: string;
-    materials: { [key: string]: { price_per_unit: number } };
-  }
-
-  // Fetch data using the correct endpoint
-  const cardDesignsData = useFetchData<CardDesign[]>("card-designs");
+  const cardDesignsData = useFetchCardProducts(); // Using the new hook
 
   const handleButtonClick = (button: string) => {
     setSelectedButton(button);
@@ -26,7 +16,6 @@ export default function CardDesigns() {
         <div className="flex justify-between items-center mb-5">
           <h1 className="text-[2.25rem] font-bold">Card Designs</h1>
           <div className="flex gap-4">
-            {/* Export Button */}
             <button
               className={`py-2 px-4 rounded-lg
                 ${selectedButton === 'Export'
@@ -37,7 +26,6 @@ export default function CardDesigns() {
               Export
             </button>
 
-            {/* Add Card Design Button */}
             <button
               className={`py-2 px-4 rounded-lg
                 ${selectedButton === 'Add Card Design'
@@ -52,7 +40,6 @@ export default function CardDesigns() {
 
         <div className="border border-gray-300 rounded-md p-7 bg-white">
           <table className="w-full border-collapse">
-            {/* Table Header */}
             <thead>
               <tr className="text-gray-400 text-center">
                 <th className="p-3 text-sm">Card Design ID</th>
@@ -65,7 +52,6 @@ export default function CardDesigns() {
               </tr>
             </thead>
 
-            {/* Table Body */}
             <tbody>
               {cardDesignsData.loading ? (
                 <tr>
