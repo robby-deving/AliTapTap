@@ -29,25 +29,26 @@ const createCardAdmin = async (req, res) => {
 
     if (front_image) {
       const frontImageUpload = await cloudinary.uploader.upload(front_image, {
-        folder: "card_designs",  // Specify a folder in Cloudinary
+        folder: "card_designs",
       });
-      frontImageUrl = frontImageUpload.secure_url;  // Cloudinary URL for the front image
+      frontImageUrl = frontImageUpload.secure_url;
     }
 
     if (back_image) {
       const backImageUpload = await cloudinary.uploader.upload(back_image, {
-        folder: "card_designs",  // Specify a folder in Cloudinary
+        folder: "card_designs",
       });
-      backImageUrl = backImageUpload.secure_url;  // Cloudinary URL for the back image
+      backImageUrl = backImageUpload.secure_url;
     }
 
     // Create the card design (product)
     const newCardDesign = new CardDesign({
-      name,  // Include name now
-      front_image: frontImageUrl,  // Cloudinary URL
-      back_image: backImageUrl,    // Cloudinary URL
+      name,
+      front_image: frontImageUrl,
+      back_image: backImageUrl,
       created_by,
-      materials: materials,  // Materials with prices (PVC, Metal, Wood)
+      materials: materials,
+      created_at: new Date(), // ✅ Save the timestamp
     });
 
     await newCardDesign.save();
@@ -65,10 +66,14 @@ const createCardAdmin = async (req, res) => {
   }
 };
 
+
 // Get all card products (admin products)
 const getCardProducts = async (req, res) => {
   try {
-    const cardProducts = await CardDesign.find({ deleted_at: null });  // Fetch all card products
+    const cardProducts = await CardDesign.find({ deleted_at: null }) // Only fetch non-deleted products
+      .select("_id name front_image back_image materials created_at") // ✅ Include created_at
+      .populate("created_by", "name email"); // Optional: Include creator details
+
     res.status(200).json({
       message: "Card products retrieved successfully",
       data: cardProducts,
@@ -81,6 +86,7 @@ const getCardProducts = async (req, res) => {
     });
   }
 };
+
 
 // Get a specific card product (product) by ID (admin view)
 const getCardProductById = async (req, res) => {
