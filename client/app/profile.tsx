@@ -63,7 +63,7 @@ export default function Profile() {
               {/* My Orders Section */}
                 <View className="w-full mb-4">
                     <TouchableOpacity
-                        className="border border-gray-200 p-5 rounded-lg bg-white flex-row items-center justify-between" // Changed to justify-between for proper spacing
+                        className="border border-gray-200 p-5 rounded-lg bg-white flex-row items-center justify-between"
                         onPress={handleOrders}
                     >
                         <View className="flex-row items-center">
@@ -76,9 +76,9 @@ export default function Profile() {
                         </View>
                         <Image
                             source={require('../assets/images/arrow-right-icon.png')}
-                            resizeMode="contain" // Ensures the image maintains its aspect ratio
+                            resizeMode="contain"
                             style={{ width: 20, height: 20 }}
-                            className="self-center ml-2" // Adjusted for spacing
+                            className="self-center ml-2" 
                         />
                     </TouchableOpacity>
                 </View>
