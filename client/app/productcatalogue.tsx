@@ -1,23 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, FlatList, ScrollView, ActivityIndicator, Modal } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router"; 
-import { HomePageHeader } from "../components/HomePageHeader"; 
-import { fetchProducts } from "../services/productService"; 
+import { useRouter } from "expo-router";
+import { HomePageHeader } from "../components/HomePageHeader";
+import { fetchProducts } from "../services/productService";
 
 const ProductCatalogue: React.FC = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [filterVisible, setFilterVisible] = useState<boolean>(false); 
-  const [sortOrder, setSortOrder] = useState<string>("lowest-highest"); 
-  const [searchQuery, setSearchQuery] = useState<string>(""); 
-  const router = useRouter(); 
+  const [filterVisible, setFilterVisible] = useState<boolean>(false);
+  const [sortOrder, setSortOrder] = useState<string>("lowest-highest");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const router = useRouter();
 
   // Use the service to fetch products
   const fetchData = async () => {
     try {
-      const fetchedProducts = await fetchProducts(); 
+      const fetchedProducts = await fetchProducts();
       setProducts(fetchedProducts);
       setLoading(false);
     } catch (err) {
@@ -39,7 +39,7 @@ const ProductCatalogue: React.FC = () => {
   };
 
   const handleCloseFilter = () => {
-    setFilterVisible(false); 
+    setFilterVisible(false);
   };
 
   const handleSort = (order: string) => {
@@ -62,6 +62,8 @@ const ProductCatalogue: React.FC = () => {
       return priceA - priceB;
     } else if (sortOrder === "highest-lowest") {
       return priceB - priceA;
+    } else if (sortOrder === "alphabetical") {
+      return a.name.localeCompare(b.name);
     }
     return 0;
   });
@@ -116,7 +118,7 @@ const ProductCatalogue: React.FC = () => {
 
         {/* Product Grid */}
         <FlatList
-          data={filteredProducts} 
+          data={filteredProducts}
           keyExtractor={(item, index) => `${item.id}-${index}`}
           numColumns={2}
           contentContainerStyle={styles.productList}
@@ -164,12 +166,15 @@ const ProductCatalogue: React.FC = () => {
       <Modal visible={filterVisible} animationType="slide" transparent={true} onRequestClose={handleCloseFilter}>
         <View style={styles.modalBackground}>
           <View style={styles.filterModal}>
-            <Text style={styles.filterTitle}>Sort by Price</Text>
+            <Text style={styles.filterTitle}>Sort by</Text>
             <TouchableOpacity style={styles.filterOption} onPress={() => handleSort("lowest-highest")}>
               <Text style={styles.filterOptionText}>Lowest to Highest</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.filterOption} onPress={() => handleSort("highest-lowest")}>
               <Text style={styles.filterOptionText}>Highest to Lowest</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.filterOption} onPress={() => handleSort("alphabetical")}>
+              <Text style={styles.filterOptionText}>Alphabetical (A-Z)</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.closeButton} onPress={handleCloseFilter}>
               <Text style={styles.closeButtonText}>Close</Text>
@@ -206,7 +211,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 14,
-    color: "#333", 
+    color: "#333",
     fontStyle: "italic", // Apply italic to the input text
   },
   filterButton: {
