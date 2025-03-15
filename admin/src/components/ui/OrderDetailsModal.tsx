@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Order } from "./ordersColumns";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
+import axios from "axios"; // Import axios for API requests
 
 interface OrderDetailsModalProps {
   order: Order;
@@ -13,6 +14,7 @@ interface OrderDetailsModalProps {
 
 export default function OrderDetailsModal({ order, children }: OrderDetailsModalProps) {
   const [orderStatus, setOrderStatus] = useState<string>(order.status ?? "Pending"); // Initialize with order status
+  const [loading, setLoading] = useState<boolean>(false); // Loading state for button disable
 
   // Function to determine the button styles based on status
   const getStatusStyles = () => {
@@ -25,6 +27,25 @@ export default function OrderDetailsModal({ order, children }: OrderDetailsModal
         return "bg-[#E5FEE9] text-[#319F43] border-[#319F43]";
       default:
         return "bg-gray-100 text-gray-700 border-gray-500";
+    }
+  };
+
+  // Function to update order status in the backend
+  const handleStatusChange = async (newStatus: string) => {
+    setOrderStatus(newStatus); // Optimistically update UI
+    setLoading(true); // Show loading state
+
+    try {
+      await axios.put(
+        `http://localhost:4000/api/v1/orders/update-order-status/${order.orderId}/status`,
+        { order_status: newStatus },
+        { headers: { "Content-Type": "application/json" } }
+      );
+    } catch (error) {
+      console.error("Error updating order status:", error);
+      setOrderStatus(order.status); // Revert UI on failure
+    } finally {
+      setLoading(false); // Remove loading state
     }
   };
 
@@ -82,7 +103,10 @@ export default function OrderDetailsModal({ order, children }: OrderDetailsModal
             {/* Order Status with Dropdown */}
             <div className="flex justify-between items-center">
               <span className="font-medium text-sm">Order Status</span>
-              <Select onValueChange={(value: string) => setOrderStatus(value)} defaultValue={orderStatus}>
+              <Select onValueChange={handleStatusChange}
+                defaultValue={orderStatus}
+                disabled={loading} // Disable dropdown while updating
+              >
                 <SelectTrigger className={`w-28 px-4 py-1 text-xs rounded-md border text-center cursor-pointer ${getStatusStyles()}`}>
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>

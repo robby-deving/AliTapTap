@@ -23,4 +23,8 @@ router.delete("/delete-order/:id", orderController.deleteOrder);
 // Get orders for admin orders page
 router.get("/get-user-orders", orderController.getUserOrders);
 
+// Update order status
+// router.put("/orders/:id/status", orderController.updateOrderStatus);
+router.put("/update-order-status/:orderId/status", orderController.updateOrderStatus);
+
 module.exports = router;

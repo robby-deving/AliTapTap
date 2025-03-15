@@ -233,6 +233,75 @@ const getOrdersByCustomer = async (req, res) => {
     }
 };
 
+const updateOrderStatus = async (req, res) => {
+    try {
+      console.log("Request body:", req.body); // Debugging line
+  
+      const { orderId } = req.params;
+      const { order_status } = req.body;
+  
+      if (!order_status) {
+        return res.status(400).json({ message: "Order status is required" });
+      }
+  
+      const validStatuses = ["Pending", "Shipped", "Delivered"];
+      if (!validStatuses.includes(order_status)) {
+        return res.status(400).json({ message: "Invalid order status" });
+      }
+  
+      const updatedOrder = await Order.findByIdAndUpdate(
+        orderId,
+        { order_status },
+        { new: true }
+      );
+  
+      if (!updatedOrder) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+  
+      res.status(200).json({
+        message: "Order status updated successfully",
+        updatedOrder,
+      });
+    } catch (error) {
+      console.error("Error updating order status:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  };
+
+// const updateOrderStatus = async (req, res) => {
+//     try {
+//       const { orderId } = req.params; // Extract order ID from URL
+//       const { order_status } = req.body; // Get new status from request body
+  
+//       // Validate order_status
+//       const validStatuses = ["Pending", "Shipped", "Delivered"];
+//       if (!validStatuses.includes(order_status)) {
+//         return res.status(400).json({ message: "Invalid order status" });
+//       }
+  
+//       // Find and update the order
+//       const updatedOrder = await Order.findByIdAndUpdate(
+//         orderId,
+//         { order_status },
+//         { new: true } // Return the updated document
+//       );
+  
+//       if (!updatedOrder) {
+//         return res.status(404).json({ message: "Order not found" });
+//       }
+  
+//       res.status(200).json({
+//         message: "Order status updated successfully",
+//         updatedOrder,
+//       });
+//     } catch (error) {
+//       console.error("Error updating order status:", error);
+//       res.status(500).json({ message: "Internal server error" });
+//     }
+//   };
+  
+
 module.exports = {
     createOrder,
     getOrder,
@@ -241,4 +310,5 @@ module.exports = {
     deleteOrder,
     getOrdersByCustomer,
     getUserOrders,
+    updateOrderStatus,
 };
