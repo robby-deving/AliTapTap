@@ -62,7 +62,7 @@ export default function login() {
         });
     
         const text = await response.text();
-        console.log("🔍 Raw Server Response:", text);
+        // console.log("🔍 Raw Server Response:", text);
     
         let data;
         try {

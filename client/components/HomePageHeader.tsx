@@ -40,12 +40,12 @@ export const HomePageHeader = () => {
 
   const handleProfilePress = () => {
     // Placeholder function for now
-    console.log("Profile icon pressed");
+    router.push("/profile");
   };
 
   const handleChatPress = () => {
     // Placeholder function for now
-    console.log("Chat icon pressed");
+    router.push("/chat");
   };
 
   return (

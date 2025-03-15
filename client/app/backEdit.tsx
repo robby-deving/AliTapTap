@@ -425,9 +425,10 @@ export default function backEdit() {
               await saveBackCardAsImage();
               saveText();
               deselectAll();
-              updateOrderDetails('design_id', parsedProduct._id);
+              await updateOrderDetails('design_id', parsedProduct._id);
 
-              router.push('/shipping');
+              router.push("/shipping");
+
             }}
           >
             <Text className={`${isPressed ? 'text-[#FDCB07]' : 'text-white'} text-center text-xl font-semibold`}>Next</Text>
