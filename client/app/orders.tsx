@@ -87,8 +87,20 @@ export default function Orders() {
     }
   }, [user]);
 
-  const handleOrderPreview = (orderId: string) => {
-    // router.push(`/order-preview/${orderId}`);
+  const handleOrderPreview = (order: FormattedOrder) => {
+    router.push({
+      pathname: '/order-preview',
+      params: {
+        title: order.title,
+        material: order.material,
+        quantity: order.quantity.toString(),
+        price: order.price.toString(),
+        orderNumber: order.orderNumber,
+        status: order.status,
+        front_image: order.front_image,
+        back_image: order.back_image
+      }
+    });
   };
 
   if (loading) {
@@ -142,7 +154,7 @@ export default function Orders() {
             .map((order) => (
             <TouchableOpacity
               key={order.id}
-              onPress={() => handleOrderPreview(order.id)}
+              onPress={() => handleOrderPreview(order)}
               className="border border-gray-200 p-5 rounded-lg bg-white mb-4"
             >
               <View>
