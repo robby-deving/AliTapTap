@@ -4,6 +4,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react"; // Import icon
 import { ArrowUpDown } from "lucide-react"
+import OrderDetailsModal from "./OrderDetailsModal"; // Import modal component
 
 export type Order = {
   orderId: string;
@@ -13,6 +14,10 @@ export type Order = {
   material: string;
   status: "Pending" | "Shipped" | "Delivered";
   date: string;
+  quantity: number;
+  fullName: string;
+  phone: string;
+  // paymentMethod: string;
 };
 
 export const columns: ColumnDef<Order>[] = [
@@ -123,9 +128,11 @@ export const columns: ColumnDef<Order>[] = [
     id: "actions",
     header: "More Details",
     cell: ({ row }) => (
+      <OrderDetailsModal order={row.original}>
         <button className="p-1 bg-transparent hover:bg-gray-200 cursor-pointer rounded-md">
-            <MoreHorizontal className="w-5 h-5 text-gray-500" />
+          <MoreHorizontal className="w-5 h-5 text-gray-500" />
         </button>
+      </OrderDetailsModal>
     ),
   },
 ];

@@ -113,13 +113,17 @@ const getUserOrders = async (req, res) => {
         const orders = await Order.find()
           .populate({
             path: "customer_id",
-            select: "username email first_name last_name",
+            select: "username email first_name last_name phone_number",
           })
           .populate({
             path: "design_id",
             select: "name",
           })
-          .select("customer_id design_id total_price details.material order_status created_at");
+        //   .populate({
+        //     path: "transaction",  // ✅ Fetch transaction for payment method
+        //     select: "payment_method",
+        //   })
+          .select("customer_id design_id quantity total_price details.material order_status created_at");
     
         console.log("Fetched Orders:", JSON.stringify(orders, null, 2)); // Debugging
     
@@ -137,9 +141,12 @@ const getUserOrders = async (req, res) => {
             username: order.customer_id?.username || "Unknown User",
             fullName: `${order.customer_id?.first_name || ""} ${order.customer_id?.last_name || ""}`.trim(),
             email: order.customer_id?.email || "No Email",
+            phone: order.customer_id?.phone_number || "No Phone Number",
+            // paymentMethod: order.transaction?.payment_method || "No Payment Method",
             designName: order.design_id?.name || "No Design",
             amount: order.total_price,
             material: order.details?.material || "No Material Info",
+            quantity: order.quantity || 0,
             status: order.order_status,
             date: order.created_at,
           };
