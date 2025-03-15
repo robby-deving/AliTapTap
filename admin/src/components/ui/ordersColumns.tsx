@@ -17,7 +17,7 @@ export type Order = {
   quantity: number;
   fullName: string;
   phone: string;
-  // paymentMethod: string;
+  paymentMethod: string;
 };
 
 export const columns: ColumnDef<Order>[] = [

@@ -1,6 +1,7 @@
 const Order = require("../Models/order.model.js");
 const User = require("../Models/user.model.js");
 const Product = require("../Models/product.model.js");
+const Transaction = require("../Models/transaction.model.js");
 const CardDesign = require("../Models/carddesign.model.js");
 
 // Create a new order
@@ -110,54 +111,56 @@ const getAllOrders = async (req, res) => {
 
 const getUserOrders = async (req, res) => {
     try {
+        // Fetch orders with populated customer and design details
         const orders = await Order.find()
-          .populate({
-            path: "customer_id",
-            select: "username email first_name last_name phone_number",
-          })
-          .populate({
-            path: "design_id",
-            select: "name",
-          })
-        //   .populate({
-        //     path: "transaction",  // ✅ Fetch transaction for payment method
-        //     select: "payment_method",
-        //   })
-          .select("customer_id design_id quantity total_price details.material order_status created_at");
-    
-        console.log("Fetched Orders:", JSON.stringify(orders, null, 2)); // Debugging
-    
-        const formattedOrders = orders.map((order) => {
-          if (!order.customer_id) {
-            console.warn(`Order ${order._id} has no customer_id!`);
-          }
-          if (!order.design_id) {
-            console.warn(`Order ${order._id} has no design_id!`);
-          }
-    
-          return {
-            orderId: order._id,
-            userId: order.customer_id?._id || null,
-            username: order.customer_id?.username || "Unknown User",
-            fullName: `${order.customer_id?.first_name || ""} ${order.customer_id?.last_name || ""}`.trim(),
-            email: order.customer_id?.email || "No Email",
-            phone: order.customer_id?.phone_number || "No Phone Number",
-            // paymentMethod: order.transaction?.payment_method || "No Payment Method",
-            designName: order.design_id?.name || "No Design",
-            amount: order.total_price,
-            material: order.details?.material || "No Material Info",
-            quantity: order.quantity || 0,
-            status: order.order_status,
-            date: order.created_at,
-          };
+            .populate({
+                path: "customer_id",
+                select: "username email first_name last_name phone_number",
+            })
+            .populate({
+                path: "design_id",
+                select: "name",
+            })
+            .select("customer_id design_id quantity total_price details.material order_status created_at");
+
+        // Extract order IDs to fetch related transactions
+        const orderIds = orders.map(order => order._id);
+
+        // Fetch transactions where order_id matches any of the fetched orders
+        const transactions = await Transaction.find({ order_id: { $in: orderIds } })
+            .select("order_id payment_method");
+
+        // Convert transactions array into a map for efficient lookup
+        const transactionMap = new Map();
+        transactions.forEach(transaction => {
+            transactionMap.set(transaction.order_id.toString(), transaction.payment_method);
         });
-    
+
+        // Format orders and include payment method from the transactionMap
+        const formattedOrders = orders.map((order) => {
+            return {
+                orderId: order._id,
+                userId: order.customer_id?._id || null,
+                username: order.customer_id?.username || "Unknown User",
+                fullName: `${order.customer_id?.first_name || ""} ${order.customer_id?.last_name || ""}`.trim(),
+                email: order.customer_id?.email || "No Email",
+                phone: order.customer_id?.phone_number || "No Phone Number",
+                paymentMethod: transactionMap.get(order._id.toString()) || "No Payment Method",
+                designName: order.design_id?.name || "No Design",
+                amount: order.total_price,
+                material: order.details?.material || "No Material Info",
+                quantity: order.quantity || 0,
+                status: order.order_status,
+                date: order.created_at,
+            };
+        });
+
         res.status(200).json(formattedOrders);
-      } catch (error) {
-        console.error("Error fetching orders:", error); // Debugging
+    } catch (error) {
+        console.error("Error fetching orders:", error);
         res.status(500).json({ error: "Failed to fetch orders", details: error.message });
-      }
-  };
+    }
+};
 
 // Update an order by ID
 const updateOrder = async (req, res) => {
