@@ -18,6 +18,8 @@ export type Order = {
   fullName: string;
   phone: string;
   paymentMethod: string;
+  front_image: string;
+  back_image: string;
 };
 
 export const columns: ColumnDef<Order>[] = [

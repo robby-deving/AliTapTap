@@ -121,7 +121,7 @@ const getUserOrders = async (req, res) => {
                 path: "design_id",
                 select: "name",
             })
-            .select("customer_id design_id quantity total_price details.material order_status created_at");
+            .select("customer_id design_id front_image back_image quantity total_price details.material order_status created_at");
 
         // Extract order IDs to fetch related transactions
         const orderIds = orders.map(order => order._id);
@@ -147,6 +147,8 @@ const getUserOrders = async (req, res) => {
                 phone: order.customer_id?.phone_number || "No Phone Number",
                 paymentMethod: transactionMap.get(order._id.toString()) || "No Payment Method",
                 designName: order.design_id?.name || "No Design",
+                front_image: order.front_image || "",
+                back_image: order.back_image || "",
                 amount: order.total_price,
                 material: order.details?.material || "No Material Info",
                 quantity: order.quantity || 0,

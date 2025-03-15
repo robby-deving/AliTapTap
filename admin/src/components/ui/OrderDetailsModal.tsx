@@ -54,19 +54,35 @@ export default function OrderDetailsModal({ order, children }: OrderDetailsModal
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="max-w-3xl min-w-3xl p-12">
+      <DialogContent className="min-w-[51rem] max-w-5xl p-12 flex flex-col">
         <DialogHeader>
-          <DialogTitle className="font-bold">Order Details</DialogTitle>
+          <DialogTitle className="font-bold text-left">Order Details</DialogTitle>
         </DialogHeader>
         {/* Container for Two Side-by-Side Divs */}
         <div className="flex gap-x-10">
           {/* Left Blank Div (You can add content later) */}
-          <div className="w-1/2 p-5 rounded-lg border-2 border-[#FFEE70]">
+          <div className="w-[300px] p-5 rounded-lg border-2 border-[#FFEE70] flex flex-col gap-5">
             <p className="text-[#949494] uppercase text-xs font-semibold">Card Preview</p>
+
+            <div className="w-full flex flex-col items-center gap-2">
+              <img
+                src={order.front_image}
+                alt="Front Design"
+                className="w-full h-40 object-cover rounded-md border border-[#949494] text-[#949494]"
+              />
+            </div>
+
+            <div className="w-full flex flex-col items-center gap-2">
+              <img
+                src={order.back_image}
+                alt="Back Design"
+                className="w-full h-40 object-cover rounded-md border border-[#949494] text-[#949494]"
+              />
+            </div>
           </div>
 
           {/* Right Div: Order Details */}
-          <div className="space-y-5 text-sm py-5">
+          <div className="space-y-7 text-sm py-5">
             <p className="text-[#949494] uppercase text-xs font-semibold">Order Information</p>
             {/* Card Info */}
             <div className="space-y-1">
@@ -112,7 +128,7 @@ export default function OrderDetailsModal({ order, children }: OrderDetailsModal
                 <SelectTrigger className={`w-28 px-4 py-1 text-xs rounded-md border text-center cursor-pointer ${getStatusStyles()}`}>
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
-                <SelectContent className="bg-white">
+                <SelectContent className="bg-white border-[#E4E4E7]">
                   <SelectItem value="Pending" className="cursor-pointer">Pending</SelectItem>
                   <SelectItem value="Shipped" className="cursor-pointer">Shipped</SelectItem>
                   <SelectItem value="Delivered" className="cursor-pointer">Delivered</SelectItem>
