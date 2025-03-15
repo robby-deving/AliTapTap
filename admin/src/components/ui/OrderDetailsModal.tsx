@@ -54,21 +54,23 @@ export default function OrderDetailsModal({ order, children }: OrderDetailsModal
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="max-w-3xl min-w-3xl">
+      <DialogContent className="max-w-3xl min-w-3xl p-12">
         <DialogHeader>
-          <DialogTitle>Order Details</DialogTitle>
+          <DialogTitle className="font-bold">Order Details</DialogTitle>
         </DialogHeader>
         {/* Container for Two Side-by-Side Divs */}
-        <div className="flex gap-x-4">
+        <div className="flex gap-x-10">
           {/* Left Blank Div (You can add content later) */}
-          <div className="w-1/2 bg-gray-100 p-5 rounded-lg"></div>
+          <div className="w-1/2 p-5 rounded-lg border-2 border-[#FFEE70]">
+            <p className="text-[#949494] uppercase text-xs font-semibold">Card Preview</p>
+          </div>
 
           {/* Right Div: Order Details */}
-          <div className="space-y-5 text-sm p-5">
-            <p className="text-gray-500 uppercase text-xs font-semibold">Order Information</p>
+          <div className="space-y-5 text-sm py-5">
+            <p className="text-[#949494] uppercase text-xs font-semibold">Order Information</p>
             {/* Card Info */}
             <div className="space-y-1">
-              <p className="text-gray-500 text-xs font-semibold">Card Info</p>
+              <p className="text-[#949494] text-xs font-semibold">Card Info</p>
               <div className="flex justify-between gap-75">
                 <span className="font-medium text-sm">Material</span>
                 <span className="text-sm">{order.material}</span>
@@ -81,7 +83,7 @@ export default function OrderDetailsModal({ order, children }: OrderDetailsModal
 
             {/* Transaction Details */}
             <div className="space-y-1">
-              <p className="text-gray-500 text-xs font-semibold">Transaction Details</p>
+              <p className="text-[#949494] text-xs font-semibold">Transaction Details</p>
               <div className="flex justify-between">
                 <span className="font-medium text-sm">Order ID</span>
                 <span className="text-sm">{order.orderId}</span>
