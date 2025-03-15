@@ -8,17 +8,15 @@ import {
   Platform,
   ScrollView,
   Dimensions,
-  Modal,
   LogBox,
   TextInput,
   Pressable,
 } from 'react-native';
 import { useRouter } from "expo-router";
-import { Picker } from '@react-native-picker/picker';
 import TermsContent from "../components/TermsContent";
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons'; // For the eye icon
-
+import Modal from 'react-native-modal';
 
 LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
 
@@ -57,11 +55,13 @@ export default function SignupScreen() {
   const [isTermsModalVisible, setIsTermsModalVisible] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isGenderModalVisible, setIsGenderModalVisible] = useState(false);
 
   const router = useRouter();
   const windowHeight = Dimensions.get('window').height;
+  const Base_Url = 'http://192.168.137.1:4000';
 
-  const handleSignup = () => {
+  const handleSignup = async () => {
     if (!isTermsAccepted) {
       setIsTermsModalVisible(true);
       return;
@@ -74,7 +74,41 @@ export default function SignupScreen() {
       alert('Passwords do not match');
       return;
     }
-    console.log('Signing up with:', { firstName, lastName, username, gender, phone, email, password });
+
+
+    
+    try {
+      const response = await fetch(`${Base_Url}/api/v1/auth/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          first_name: firstName,    // Changed to match server model
+          last_name: lastName,      // Changed to match server model
+          username,
+          email,
+          password,
+          phone_number: phone,      // Changed to match server model
+          gender,
+          profile_picture: null,    // Added missing field
+          isAdmin: false,           // Added missing field
+          address: [],             // Added missing field
+          payment_method: []        // Added missing field
+        }),
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert(errorData.message || 'Registration failed');
+        return;
+      }
+  
+      const data = await response.json();
+      alert('Registration successful!');
+      router.push('/login');
+    } catch (error) {
+      console.error('Registration error:', error);
+      alert('An error occurred during registration');
+    }
   };
 
   const handleTermsAccept = () => {
@@ -141,18 +175,55 @@ export default function SignupScreen() {
               />
               <View className="mb-4">
                 <Text className="text-sm font-medium mb-1">Gender</Text>
-                <View className="border text-base border-gray-300 rounded-lg bg-white">
-                  <Picker
-                    selectedValue={gender}
-                    onValueChange={(itemValue) => setGender(itemValue)}
-                    style={{ height: 45 }}
-                  >
-                    <Picker.Item label="Choose Gender" value="" />
-                    <Picker.Item label="Male" value="Male" />
-                    <Picker.Item label="Female" value="Female" />
-                    <Picker.Item label="Other" value="Other" />
-                  </Picker>
-                </View>
+                <TouchableOpacity 
+                  onPress={() => setIsGenderModalVisible(true)}
+                  className="border border-gray-300 rounded-lg bg-white p-4 flex-row justify-between items-center"
+                >
+                  <Text className={gender ? "text-black" : "text-gray-400"}>
+                    {gender || "Choose Gender"}
+                  </Text>
+                  <Ionicons name="chevron-down" size={20} color="gray" />
+                </TouchableOpacity>
+
+                <Modal
+                  isVisible={isGenderModalVisible}
+                  onBackdropPress={() => setIsGenderModalVisible(false)}
+                  backdropOpacity={0.5}
+                  style={{ margin: 0, justifyContent: 'flex-end' }}
+                >
+                  <View className="bg-white rounded-t-3xl">
+                    <View className="p-4 border-b border-gray-200">
+                      <Text className="text-xl font-semibold text-center">Select Gender</Text>
+                    </View>
+                    
+                    {["Male", "Female", "Other"].map((item) => (
+                      <TouchableOpacity
+                        key={item}
+                        className={`p-4 border-b border-gray-100 ${gender === item ? 'bg-yellow-50' : ''}`}
+                        onPress={() => {
+                          setGender(item);
+                          setIsGenderModalVisible(false);
+                        }}
+                      >
+                        <View className="flex-row justify-between items-center">
+                          <Text className={`text-lg ${gender === item ? 'text-yellow-500 font-semibold' : 'text-gray-700'}`}>
+                            {item}
+                          </Text>
+                          {gender === item && (
+                            <Ionicons name="checkmark" size={24} color="#EAB308" />
+                          )}
+                        </View>
+                      </TouchableOpacity>
+                    ))}
+                    
+                    <TouchableOpacity
+                      className="p-4 bg-gray-50"
+                      onPress={() => setIsGenderModalVisible(false)}
+                    >
+                      <Text className="text-center text-gray-500 font-semibold">Cancel</Text>
+                    </TouchableOpacity>
+                  </View>
+                </Modal>
               </View>
               <InputField 
                 label='Phone Number' 
@@ -163,7 +234,7 @@ export default function SignupScreen() {
               <InputField 
                 label='Email' 
                 placeholder="Enter Email" 
-                value={email} 
+                value={email}
                 onChangeText={setEmail}
               />
               <InputField 
