@@ -14,6 +14,8 @@ import { Header } from "../components/Header";
 import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import Modal from "react-native-modal";
+import { Ionicons } from "@expo/vector-icons";
 
 // Add this interface at the top of the file, after the imports
 interface User {
@@ -53,6 +55,7 @@ export default function EditProfile() {
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
+  const [isGenderModalVisible, setIsGenderModalVisible] = useState(false);
   const Base_Url = 'http://192.168.137.1:4000';
 
   useEffect(() => {
@@ -203,19 +206,55 @@ export default function EditProfile() {
                 />
                 <View className="mb-4">
                   <Text className="text-sm font-medium mb-1">Gender</Text>
-                  <View className="border text-base border-gray-300 rounded-lg bg-white">
-                    <Picker
-                      selectedValue={gender}
-                      onValueChange={(itemValue) => setGender(itemValue)}
-                      style={{ height: 45 }}
-                    >
-                      <Picker.Item label="Choose Gender" value="" />
-                      <Picker.Item label="Male" value="Male" />
-                      <Picker.Item label="Female" value="Female" />
-                      <Picker.Item label="Other" value="Other" />
-                    </Picker>
-                  </View>
+                  <TouchableOpacity
+                    className="w-full p-4 border border-gray-300 rounded-lg bg-white flex-row justify-between items-center"
+                    onPress={() => setIsGenderModalVisible(true)}
+                  >
+                    <Text className={gender ? "text-black" : "text-gray-400"}>
+                      {gender || "Select Gender"}
+                    </Text>
+                    <Ionicons name="chevron-down" size={20} color="#A0A0A0" />
+                  </TouchableOpacity>
                 </View>
+                <Modal
+                  isVisible={isGenderModalVisible}
+                  onBackdropPress={() => setIsGenderModalVisible(false)}
+                  backdropOpacity={0.5}
+                  style={{ margin: 0, justifyContent: 'flex-end' }}
+                >
+                  <View className="bg-white rounded-t-3xl">
+                    <View className="p-4 border-b border-gray-200">
+                      <Text className="text-xl font-semibold text-center">Select Gender</Text>
+                    </View>
+                    
+                    {["Male", "Female", "Other"].map((item) => (
+                      <TouchableOpacity
+                        key={item}
+                        className={`p-4 border-b border-gray-100 ${gender === item ? 'bg-yellow-50' : ''}`}
+                        onPress={() => {
+                          setGender(item);
+                          setIsGenderModalVisible(false);
+                        }}
+                      >
+                        <View className="flex-row justify-between items-center">
+                          <Text className={`text-lg ${gender === item ? 'text-yellow-500 font-semibold' : 'text-gray-700'}`}>
+                            {item}
+                          </Text>
+                          {gender === item && (
+                            <Ionicons name="checkmark" size={24} color="#EAB308" />
+                          )}
+                        </View>
+                      </TouchableOpacity>
+                    ))}
+                    
+                    <TouchableOpacity
+                      className="p-4 bg-gray-50"
+                      onPress={() => setIsGenderModalVisible(false)}
+                    >
+                      <Text className="text-center text-gray-500 font-semibold">Cancel</Text>
+                    </TouchableOpacity>
+                  </View>
+                </Modal>
                 <InputField 
                   label='Phone Number (optional)' 
                   placeholder="Enter Phone Number" 
