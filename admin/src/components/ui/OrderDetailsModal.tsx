@@ -45,7 +45,7 @@ export default function OrderDetailsModal({ order, children, updateOrderInTable 
 
       // Update the row in the parent table
       if (updateOrderInTable) {
-        updateOrderInTable(order.orderId, { status: newStatus });
+        updateOrderInTable(order.orderId, { status: newStatus as "Pending" | "Shipped" | "Delivered" }); // Change to updateOrderInTable(order.orderId, { status: newStatus }); if needed
       }
     } catch (error) {
       console.error("Error updating order status:", error);

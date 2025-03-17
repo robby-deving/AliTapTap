@@ -51,7 +51,7 @@ export function DataTable<TData, TValue>({
               return column.cell({
                 ...context,
                 updateOrderInTable,
-              });
+              } as CellContext<TData, TValue> & { updateOrderInTable: typeof updateOrderInTable }); //Remove if needed
             }
             return column.cell;
           }
