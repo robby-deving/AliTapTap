@@ -1,3 +1,4 @@
+import React from "react";
 import { Button } from "@/components/ui/button";
 
 type ButtonOutlineProps = {
@@ -8,15 +9,21 @@ type ButtonOutlineProps = {
   
 };
 
-export function ButtonOutline({ text, onClick, disabled, className }: ButtonOutlineProps) {
+export const ButtonOutline = React.forwardRef<HTMLButtonElement, ButtonOutlineProps>(
+  ({ text, onClick, disabled, className, ...props }, ref) => {
   return (
-    <Button 
+    <Button
+      ref={ref} 
       variant="outline" 
       onClick={onClick} 
       disabled={disabled}
       className={`cursor-pointer hover:bg-gray-200 text-[#232323] border !border-[#E4E4E7] ${className}`}
+      {...props}
     >
       {text}
     </Button>
   );
 }
+);
+
+ButtonOutline.displayName = "ButtonOutline";

@@ -134,9 +134,9 @@ export default function OrderDetailsModal({ order, children, updateOrderInTable 
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-[#E4E4E7]">
-                  <SelectItem value="Pending" className="cursor-pointer">Pending</SelectItem>
-                  <SelectItem value="Shipped" className="cursor-pointer">Shipped</SelectItem>
-                  <SelectItem value="Delivered" className="cursor-pointer">Delivered</SelectItem>
+                  <SelectItem value="Pending" className="cursor-pointer hover:bg-gray-100">Pending</SelectItem>
+                  <SelectItem value="Shipped" className="cursor-pointer hover:bg-gray-100">Shipped</SelectItem>
+                  <SelectItem value="Delivered" className="cursor-pointer hover:bg-gray-100">Delivered</SelectItem>
                 </SelectContent>
               </Select>
             </div>
