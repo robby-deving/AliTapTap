@@ -149,7 +149,6 @@ const updateCardProduct = async (req, res) => {
   }
 };
 
-// Delete Card Design and Emit Event
 const deleteCardProduct = async (req, res) => {
   try {
     const deletedCardProduct = await CardDesign.findByIdAndUpdate(
@@ -162,7 +161,8 @@ const deleteCardProduct = async (req, res) => {
       return res.status(404).json({ message: "Card product not found" });
     }
 
-    // Emit real-time update to the frontend
+    // Emit real-time update to the frontend using io from the app
+    const io = req.app.get('io');
     io.emit('product_deleted', deletedCardProduct);  // Emit the event
 
     res.status(200).json({
@@ -176,6 +176,7 @@ const deleteCardProduct = async (req, res) => {
     });
   }
 };
+
 
 
 // Customer: Create or Update the card design with front_info and back_info (customizations)
