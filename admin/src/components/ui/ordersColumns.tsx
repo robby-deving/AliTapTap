@@ -2,9 +2,9 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal } from "lucide-react"; // Import icon
+import { MoreHorizontal } from "lucide-react";
 import { ArrowUpDown } from "lucide-react"
-import OrderDetailsModal from "./OrderDetailsModal"; // Import modal component
+import OrderDetailsModal from "./OrderDetailsModal";
 
 export type Order = {
   orderId: string;
@@ -40,30 +40,30 @@ export const columns: ColumnDef<Order>[] = [
   {
     accessorKey: "fullName",
     header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Customer Name
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        )
-      },
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Customer Name
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
   },
   {
     accessorKey: "designName",
     header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Design Name
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        )
-      },
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Design Name
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
   },
   {
     accessorKey: "amount",
@@ -83,30 +83,30 @@ export const columns: ColumnDef<Order>[] = [
   {
     accessorKey: "material",
     header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Material
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        )
-      },
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Material
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
   },
   {
     accessorKey: "status",
     header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Status
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        )
-      },
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Status
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
     cell: ({ row }) => {
       const status = row.getValue("status") as string;
       return <div className={`px-2 py-1 rounded ${statusColor(status)}`}>{status}</div>;
@@ -115,22 +115,25 @@ export const columns: ColumnDef<Order>[] = [
   {
     accessorKey: "date",
     header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Date
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        )
-      },
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Date
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
   },
   {
     id: "actions",
     header: "More Details",
-    cell: ({ row }) => (
-      <OrderDetailsModal order={row.original}>
+    cell: ({ row, updateOrderInTable }) => (
+      <OrderDetailsModal 
+        order={row.original} 
+        updateOrderInTable={updateOrderInTable}
+      >
         <button className="p-1 bg-transparent hover:bg-gray-200 cursor-pointer rounded-md">
           <MoreHorizontal className="w-5 h-5 text-gray-500" />
         </button>
@@ -148,5 +151,7 @@ const statusColor = (status: string) => {
       return "bg-[#FFFDEB] border-1 border-[#FDDF05] text-[#FDDF05]";
     case "Delivered":
       return "bg-[#E5FEE9] border-1 border-[#319F43] text-[#319F43]";
+    default:
+      return "bg-gray-100 text-gray-500 border-gray-500";
   }
 };

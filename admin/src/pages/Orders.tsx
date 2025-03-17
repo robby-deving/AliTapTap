@@ -1,10 +1,10 @@
+// In Orders.js
 import React from 'react';
 import { useEffect, useState } from "react";
 import { Order, columns } from "../components/ui/ordersColumns";
 import { DataTable } from "../components/ui/DataTable";
 import { ButtonOutline } from "@/components/ui/buttonOutline";
-import axios from "axios"; // Import axios for API requests
-
+import axios from "axios";
 
 export default function Orders() {
     const [data, setData] = useState<Order[]>([]);
@@ -14,7 +14,7 @@ export default function Orders() {
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const response = await axios.get("http://localhost:4000/api/v1/orders/get-user-orders"); // Adjust API route as needed
+                const response = await axios.get("http://localhost:4000/api/v1/orders/get-user-orders");
                 setData(response.data);
             } catch (err) {
                 setError("Failed to load orders.");
@@ -26,24 +26,14 @@ export default function Orders() {
         fetchOrders();
     }, []);
 
-    // const [data, setData] = useState<Order[]>([]);
-
-    // useEffect(() => {
-    //     async function fetchData() {
-    //         try {
-    //             const response = await fetch("http://localhost:4000/api/v1/orders/get-user-orders");
-    //             if (!response.ok) {
-    //                 throw new Error("Failed to fetch orders");
-    //             }
-    //             const result = await response.json();
-    //             setData(result.data); // Extract the array from the response
-    //         } catch (error) {
-    //             console.error("Error fetching data:", error);
-    //         }
-    //     }
-
-    //     fetchData();
-    // }, []);
+    // Function to update a specific order in the data array
+    const updateOrderInTable = (orderId: string, updatedData: Partial<Order>) => {
+        setData(prevData => 
+            prevData.map(order => 
+                order.orderId === orderId ? { ...order, ...updatedData } : order
+            )
+        );
+    };
 
     return (
         <div className='overflow-auto w-full flex p-10 gap-10'>
@@ -52,8 +42,6 @@ export default function Orders() {
                 <div className="flex justify-between items-center">
                     <h1 className='text-[2.25rem] font-bold pb-5'>Orders</h1>
                     <div>
-                    {/* <label className="mr-2 text-sm font-medium">Filter by Date:</label>
-                    <input type="date" className="border p-2 rounded-lg" /> */}
                     <ButtonOutline text="Export" onClick={() => alert("Going to Dashboard!")} />
                     </div>
                 </div>
@@ -65,13 +53,15 @@ export default function Orders() {
                 ) : error ? (
                     <p className="text-center text-red-500">{error}</p>
                 ) : (
-                    /* Data Table */
-                    <DataTable columns={columns} data={data} />
+                    /* Pass the updateOrderInTable function to the DataTable */
+                    <DataTable 
+                        columns={columns} 
+                        data={data} 
+                        updateOrderInTable={updateOrderInTable} 
+                    />
                 )}
                 </div>
             </div>
         </div>
-        
-        
     );
 }
