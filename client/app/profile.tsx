@@ -58,19 +58,36 @@ export default function Profile() {
                   {userName}
                 </Text>
                 <Text className="text-gray-500 text-l">{userEmail}</Text>
+                <TouchableOpacity
+                  onPress={() => router.push("/edit-profile")}
+                  className="mt-6">
+                  <View className="flex-row items-center">
+                    <Image 
+                    source={require('../assets/images/edit-icon.png')}
+                    style={{ width: 17, height: 17 }}
+                    className="self-center mx-2">
+                  </Image>
+                    <Text className=" text-l font-semibold">
+                      Edit Profile
+                    </Text>
+                  </View>
+                  
+                  
+                </TouchableOpacity>
+
               </View>
 
               {/* My Orders Section */}
                 <View className="w-full mb-4">
                     <TouchableOpacity
-                        className="border border-gray-200 p-5 rounded-lg bg-white flex-row items-center justify-between"
-                        onPress={handleOrders}
+                      className="border border-gray-200 p-5 rounded-lg bg-white flex-row items-center justify-between"
+                      onPress={handleOrders}
                     >
                         <View className="flex-row items-center">
                         <Image
-                            source={require('../assets/images/orders-icon.png')}
-                            style={{ width: 25, height: 25 }}
-                            className="self-center mx-2"
+                          source={require('../assets/images/orders-icon.png')}
+                          style={{ width: 25, height: 25 }}
+                          className="self-center mx-2"
                         />
                         <Text className="text-black text-xl font-semibold">My Orders</Text>
                         </View>
