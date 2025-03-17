@@ -1,8 +1,6 @@
-// Modal.tsx
-
 import React, { useState } from 'react';
 import { ModalOverlay, ModalContent, CloseButton, ModalTitle, Input, Button, Dropzone, ImagePreview, UploadText, SuccessModalContent } from './ModalDesign';
-import { uploadImageToCloudinary } from '../hooks/cloudinary';  // Assuming you have the uploadImageToCloudinary function in a separate file
+import { uploadImageToCloudinary } from '../hooks/cloudinary'; // Assuming you have the uploadImageToCloudinary function in a separate file
 
 interface ModalProps {
   isOpen: boolean;
@@ -115,21 +113,30 @@ const Modal: React.FC<ModalProps> = ({ isOpen, closeModal }) => {
           <SuccessModalContent>
             <h2>Success!</h2>
             <p>Your product has been successfully added.</p>
-            <Button onClick={handleCloseSuccessModal}>Close</Button>
+            <Button
+              onClick={handleCloseSuccessModal}
+              className="custom-close-btn"
+            >
+              Close
+            </Button>
           </SuccessModalContent>
         </ModalOverlay>
       )}
 
+
       <ModalOverlay zIndex={50}>
         <ModalContent>
           <CloseButton onClick={closeModal}>&times;</CloseButton>
-          <ModalTitle>Add New Product</ModalTitle>
+          <ModalTitle>Add New Card</ModalTitle>
 
-          {error && <div style={{ color: 'red', marginBottom: '10px' }}>{error}</div>}
+          {/* PRODUCT INFORMATION */}
+          <div className="mb-4">
+            <h3 className="text-[13px] text-[#949494] font-medium">PRODUCT INFORMATION</h3>
+          </div>
 
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
-              <label className="block text-sm font-medium">Product Name</label>
+              <label className="block text-sm font-medium mb-1">Product Name</label>
               <Input
                 type="text"
                 name="productName"
@@ -137,51 +144,55 @@ const Modal: React.FC<ModalProps> = ({ isOpen, closeModal }) => {
                 onChange={handleChange}
                 required
                 placeholder="Enter product name"
+                className="focus:border-yellow-500 focus:ring-yellow-500"
               />
             </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium">Front Image</label>
-              <Dropzone>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => handleFileChange(e, 'front')}
-                  style={{ display: 'none' }}
-                  id="front-upload"
-                />
-                <label htmlFor="front-upload">
-                  {frontImageFile ? (
-                    <ImagePreview src={URL.createObjectURL(frontImageFile)} alt="Front Preview" />
-                  ) : (
-                    <UploadText>Click to upload or drag an image</UploadText>
-                  )}
-                </label>
-              </Dropzone>
+            {/* Front and Back Image Fields in Two Columns */}
+            <div className="mb-4 flex gap-4">
+              <div className="w-1/2">
+                <label className="block text-sm font-medium mb-2">Front Image</label>
+                <Dropzone>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleFileChange(e, 'front')}
+                    style={{ display: 'none' }}
+                    id="front-upload"
+                  />
+                  <label htmlFor="front-upload">
+                    {frontImageFile ? (
+                      <ImagePreview src={URL.createObjectURL(frontImageFile)} alt="Front Preview" />
+                    ) : (
+                      <UploadText>Click to upload or drag an image</UploadText>
+                    )}
+                  </label>
+                </Dropzone>
+              </div>
+
+              <div className="w-1/2">
+                <label className="block text-sm font-medium mb-2">Back Image</label>
+                <Dropzone>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleFileChange(e, 'back')}
+                    style={{ display: 'none' }}
+                    id="back-upload"
+                  />
+                  <label htmlFor="back-upload">
+                    {backImageFile ? (
+                      <ImagePreview src={URL.createObjectURL(backImageFile)} alt="Back Preview" />
+                    ) : (
+                      <UploadText>Click to upload or drag an image</UploadText>
+                    )}
+                  </label>
+                </Dropzone>
+              </div>
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium">Back Image</label>
-              <Dropzone>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => handleFileChange(e, 'back')}
-                  style={{ display: 'none' }}
-                  id="back-upload"
-                />
-                <label htmlFor="back-upload">
-                  {backImageFile ? (
-                    <ImagePreview src={URL.createObjectURL(backImageFile)} alt="Back Preview" />
-                  ) : (
-                    <UploadText>Click to upload or drag an image</UploadText>
-                  )}
-                </label>
-              </Dropzone>
-            </div>
-
-            <div className="mb-4">
-              <label className="block text-sm font-medium">Created By (Admin ID)</label>
+              <label className="block text-sm font-medium mb-1">Created By (Admin ID)</label>
               <Input
                 type="text"
                 name="createdBy"
@@ -189,14 +200,21 @@ const Modal: React.FC<ModalProps> = ({ isOpen, closeModal }) => {
                 onChange={handleChange}
                 required
                 placeholder="Enter Admin ID"
+                className="focus:border-yellow-500 focus:ring-yellow-500"
               />
             </div>
 
+            {/* PRODUCT PRICING */}
             <div className="mb-4">
-              <label className="block text-sm font-medium">Materials</label>
+              <h3 className="text-[13px] text-[#949494] font-medium">PRODUCT PRICING</h3>
+            </div>
+
+            {/* Materials Pricing Section */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2">Materials</label>
               <div className="flex gap-4">
                 <div className="w-1/3">
-                  <label className="block text-sm">PVC Price</label>
+                  <label className="block text-sm text-[#949494]">PVC Price</label>
                   <Input
                     type="number"
                     name="pvcPrice"
@@ -204,11 +222,12 @@ const Modal: React.FC<ModalProps> = ({ isOpen, closeModal }) => {
                     onChange={handleChange}
                     required
                     placeholder="₱0.00"
+                    className="focus:border-yellow-500 focus:ring-yellow-500"
                   />
                 </div>
 
                 <div className="w-1/3">
-                  <label className="block text-sm">Metal Price</label>
+                  <label className="block text-sm text-[#949494]">Metal Price</label>
                   <Input
                     type="number"
                     name="metalPrice"
@@ -216,11 +235,12 @@ const Modal: React.FC<ModalProps> = ({ isOpen, closeModal }) => {
                     onChange={handleChange}
                     required
                     placeholder="₱0.00"
+                    className="focus:border-yellow-500 focus:ring-yellow-500"
                   />
                 </div>
 
                 <div className="w-1/3">
-                  <label className="block text-sm">Wood Price</label>
+                  <label className="block text-sm text-[#949494]">Wood Price</label>
                   <Input
                     type="number"
                     name="woodPrice"
@@ -228,6 +248,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, closeModal }) => {
                     onChange={handleChange}
                     required
                     placeholder="₱0.00"
+                    className="focus:border-yellow-500 focus:ring-yellow-500"
                   />
                 </div>
               </div>

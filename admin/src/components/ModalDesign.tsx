@@ -22,9 +22,11 @@ export const ImagePreview = styled.img`
 `;
 
 export const UploadText = styled.p`
-  color: #555;
-  font-size: 14px;
-  margin-top: 5px;
+  color: #949494;
+  font-size: 12px;
+  margin-top: 20px;
+  height: 40px; /* Set a larger height if needed */
+  
 `;
 
 export const ModalOverlay = styled.div<{ zIndex: number }>`
@@ -106,7 +108,7 @@ export const Button = styled.button`
   padding: 12px;
   font-size: 16px;
   color: white;
-  background-color: #007bff;
+  background-color: #FDDF05;
   border-radius: 8px;
   border: none;
   cursor: pointer;
@@ -114,16 +116,27 @@ export const Button = styled.button`
   margin-top: 20px;
 
   &:hover {
-    background-color: #0056b3;
+    background-color: #f7c500;
+  }
+`;
+
+export const CloseButtonStyled = styled(Button)`
+  background-color: #C0C0C0; /* gray background */
+  color: #FFFFFF; /* white text */
+  margin-top: 10px; /* Adjust margin if needed */
+
+  &:hover {
+    background-color: #A0A0A0; /* darker gray on hover */
   }
 `;
 
 export const ModalTitle = styled.h2`
-  font-size: 24px;
-  font-weight: 600;
-  color: #333;
-  text-align: center;
-  margin-bottom: 20px;
+  font-size: 22px;
+  font-weight: bold; 
+  color: #000000; /* Black color */
+  text-align: left; /* Aligns text to the left */
+  margin-bottom: 12px;
+  font-family: 'Helvetica', 'Arial', sans-serif; /* Default general sans-serif font */
 `;
 
 export const SuccessModalContent = styled.div`

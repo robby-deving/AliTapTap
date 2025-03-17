@@ -71,7 +71,7 @@ const createCardAdmin = async (req, res) => {
 const getCardProducts = async (req, res) => {
   try {
     const cardProducts = await CardDesign.find({ deleted_at: null }) // Only fetch non-deleted products
-      .select("_id name front_image back_image materials created_at") // ✅ Include created_at
+      .select("_id name front_image back_image materials created_at modified_at") // Removed deleted_at
       .populate("created_by", "name email"); // Optional: Include creator details
 
     res.status(200).json({
@@ -86,6 +86,7 @@ const getCardProducts = async (req, res) => {
     });
   }
 };
+
 
 
 // Get a specific card product (product) by ID (admin view)
@@ -148,7 +149,7 @@ const updateCardProduct = async (req, res) => {
   }
 };
 
-// Delete a card product (admin side)
+// Delete Card Design and Emit Event
 const deleteCardProduct = async (req, res) => {
   try {
     const deletedCardProduct = await CardDesign.findByIdAndUpdate(
@@ -161,6 +162,9 @@ const deleteCardProduct = async (req, res) => {
       return res.status(404).json({ message: "Card product not found" });
     }
 
+    // Emit real-time update to the frontend
+    io.emit('product_deleted', deletedCardProduct);  // Emit the event
+
     res.status(200).json({
       message: "Card product marked as deleted",
     });
@@ -172,6 +176,7 @@ const deleteCardProduct = async (req, res) => {
     });
   }
 };
+
 
 // Customer: Create or Update the card design with front_info and back_info (customizations)
 const createCardDesign = async (req, res) => {

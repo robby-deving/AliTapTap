@@ -98,42 +98,6 @@ export function DataTable<TData, TValue>({
         </TableBody>
       </Table>
     </div>
-    {/* Pagination Controls */}
-    {/* <div className="flex items-center justify-end space-x-2 py-4">
-        <Button
-          variant="outline"
-          onClick={() => table.firstPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          {"<<"}
-        </Button>
-        <Button
-          variant="outline"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          {"<"}
-        </Button>
-        <span className="text-sm text-gray-600">
-          Page {table.getState().pagination.pageIndex + 1} of{" "}
-          {table.getPageCount()}
-        </span>
-        <Button
-          variant="outline"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          {">"}
-        </Button>
-        <Button
-          variant="outline"
-          onClick={() => table.lastPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          {">>"}
-        </Button>
-      </div> */}
-      
       <div className="flex items-center justify-between space-x-4 py-4">
         <span className="text-sm text-gray-600">
             Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
@@ -163,26 +127,6 @@ export function DataTable<TData, TValue>({
           disabled={!table.getCanNextPage()}>
           <ChevronsRight />
         </Button>
-        {/* <ButtonIcon
-          direction="double-left" 
-          onClick={() => table.setPageIndex(0)} 
-          disabled={!table.getCanPreviousPage()} 
-        />
-        <ButtonIcon 
-          direction="left" 
-          onClick={() => table.previousPage()} 
-          disabled={!table.getCanPreviousPage()} 
-        />
-        <ButtonIcon 
-          direction="right" 
-          onClick={() => table.nextPage()} 
-          disabled={!table.getCanNextPage()} 
-        />
-        <ButtonIcon 
-          direction="double-right" 
-          onClick={() => table.setPageIndex(table.getPageCount() - 1)} 
-          disabled={!table.getCanNextPage()} 
-        /> */}
         </div>
       </div>
 
