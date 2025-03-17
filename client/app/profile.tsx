@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Text,
   View,
@@ -10,13 +10,34 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Header } from "../components/Header";
-import { Asset } from "expo-asset";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Profile() {
-  const [userEmail] = useState("archie@gmail.com"); // Simulated user email
-  const [userName] = useState("Archie Onoya"); // Simulated user name
+  const [userName, setUserName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
 
   const router = useRouter();
+
+  useEffect(() => {
+    const initializeUser = async () => {
+      try {
+        const userData = await AsyncStorage.getItem('userData');
+        if (userData) {
+          const parsedUserData = JSON.parse(userData);
+          console.log('Parsed user data:', parsedUserData);
+
+          setUserEmail(parsedUserData.email);
+          setUserName(parsedUserData.username);
+          
+    
+        }
+      } catch (err) {
+        console.error('Error loading user data:', err);
+      }
+    };
+
+    initializeUser();
+  }, []);
 
   const handleLogout = () => {
     // Add logout logic here (e.g., clear user session)

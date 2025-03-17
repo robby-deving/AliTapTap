@@ -56,9 +56,13 @@ export default function Orders() {
       if (!user?._id) return;
 
       try {
-        
         const response = await axios.get(`${Base_Url}/api/v1/orders/get-orders/customer/${user._id}`);
 
+        if (!response.data || !response.data.data || response.data.data.length === 0) {
+          setOrders([]);
+          setError('No orders found');
+          return;
+        }
 
         const formattedOrders = response.data.data.map(order => ({
           id: order._id,
@@ -73,9 +77,14 @@ export default function Orders() {
         }));
 
         setOrders(formattedOrders);
+        setError(null);
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-        setError(errorMessage);
+        if (axios.isAxiosError(err) && err.response?.status === 404) {
+          setError('No orders found yet');
+        } else {
+          const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+          setError(errorMessage);
+        }
         console.error("Failed to fetch orders:", err);
       } finally {
         setLoading(false);
@@ -113,8 +122,22 @@ export default function Orders() {
 
   if (error) {
     return (
-      <View className="flex-1 bg-white justify-center items-center">
-        <Text>Error loading orders: {error}</Text>
+      <View className="flex-1 bg-white">
+        <Header />
+        <View className="flex-1 justify-center items-center px-4">
+          <Text className="text-xl text-center mb-4">
+            {error === 'No orders found' || error === 'No orders found yet' 
+              ? "You haven't placed any orders yet"
+              : `Error: ${error}`
+            }
+          </Text>
+          <TouchableOpacity 
+            onPress={() => router.push('/productcatalogue')}
+            className="bg-[#FFE300] px-6 py-3 rounded-full"
+          >
+            <Text className="font-semibold">Start Shopping</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState , useEffect } from "react";
 import {
   Text,
   View,
@@ -12,6 +12,20 @@ import {
 import { useRouter } from "expo-router";
 import { Header } from "../components/Header";
 import { Picker } from '@react-native-picker/picker';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+
+// Add this interface at the top of the file, after the imports
+interface User {
+  _id: string;
+  token: string;
+  first_name: string;
+  last_name: string;
+  username: string;
+  gender: string;
+  phone: string;
+  email: string;
+}
 
 // Reusing the same InputField component from SignupScreen
 const InputField = ({ label, placeholder, value, onChangeText }) => (
@@ -31,23 +45,108 @@ const InputField = ({ label, placeholder, value, onChangeText }) => (
 
 export default function EditProfile() {
   const router = useRouter();
-  
-  const [firstName, setFirstName] = useState("Archie");
-  const [lastName, setLastName] = useState("Onoya");
-  const [username, setUsername] = useState("archie123");
-  const [gender, setGender] = useState("Male");
-  const [phone, setPhone] = useState("09123456789");
-  const [email, setEmail] = useState("archie@gmail.com");
+  const [user, setUser] = useState<User | null>(null);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [username, setUsername] = useState('');
+  const [gender, setGender] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [error, setError] = useState('');
+  const Base_Url = 'http://192.168.137.1:4000';
 
-  const handleSave = () => {
-    // Basic validation
-    if (!firstName || !lastName || !username || !gender || !email) {
-      alert("Please fill in all required fields");
+  useEffect(() => {
+    const initializeUser = async () => {
+      try {
+        const userData = await AsyncStorage.getItem('userData');
+        if (userData) {
+          const parsedUserData = JSON.parse(userData);
+          console.log('Parsed user data:', parsedUserData);
+          
+          setUser(parsedUserData);
+          setFirstName(parsedUserData.first_name || '');
+          setLastName(parsedUserData.last_name || '');
+          setUsername(parsedUserData.username || '');
+          setGender(parsedUserData.gender || '');
+          setPhone(parsedUserData.phone_number || '');
+          setEmail(parsedUserData.email || '');
+        }
+      } catch (err) {
+        console.error('Error loading user data:', err);
+        setError('Failed to load user data');
+      }
+    };
+
+    initializeUser();
+  }, []);
+
+  const handleSave = async () => {
+    if (!firstName || !lastName || !username || !gender || !phone || !email) {
+      alert('Please fill in all fields');
       return;
     }
-    // Here you would typically save the changes to your backend
-    console.log("Saving profile:", { firstName, lastName, username, gender, phone, email });
-    router.push("/profile");
+
+    if (!user || !user.token) {
+      alert('User not authenticated');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${Base_Url}/api/v1/users/update/${user._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${user.token}`,
+        },
+        body: JSON.stringify({
+          first_name: firstName,
+          last_name: lastName,
+          username,
+          email,
+          phone_number: phone,
+          gender,
+        }),
+      });
+
+      // Log the raw response for debugging
+      const responseText = await response.text();
+      console.log('Raw response:', responseText);
+  
+      if (!response.ok) {
+        try {
+          const errorData = JSON.parse(responseText);
+          alert(errorData.message || 'Updating profile failed');
+        } catch (parseError) {
+          console.error('Error parsing error response:', parseError);
+          alert(`Server error: ${responseText.substring(0, 100)}`);
+        }
+        return;
+      }
+  
+      try {
+        const data = JSON.parse(responseText);
+        
+        // Update the stored user data
+        await AsyncStorage.setItem('userData', JSON.stringify({
+          ...user,
+          first_name: firstName,
+          last_name: lastName,
+          username,
+          email,
+          phone,
+          gender,
+        }));
+        
+        alert('Profile updated successfully!');
+        router.push('/profile');
+      } catch (parseError) {
+        console.error('Error parsing success response:', parseError);
+        alert('Server returned invalid data');
+      }
+    } catch (error) {
+      console.error('Update error:', error);
+      alert(`Network error: ${error.message}`);
+    }
   };
 
   const handleCancel = () => {
