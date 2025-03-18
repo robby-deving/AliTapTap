@@ -6,7 +6,6 @@ import Dashboard from './pages/Dashboard';
 import Orders from './pages/Orders';
 import Products from './pages/Products';
 import Topbar from './components/Topbar';
-import DemoPage from './pages/payments/page';
 
 function App() {
     return (
@@ -21,8 +20,6 @@ function App() {
                           <Route path="/orders" element={<Orders />} />
                           <Route path="/products" element={<Products />} />
                           <Route path="/chats" element={<Chats />} />
-                          <Route path="/payments" element={<DemoPage />} />
-
                       </Routes>
                   </div>
                 </div>

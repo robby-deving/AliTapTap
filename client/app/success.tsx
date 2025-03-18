@@ -50,7 +50,7 @@ export default function SuccessScreen() {
             router.replace('/productcatalogue');
         } catch (error) {
             console.error('Error clearing order summary:', error);
-            router.replace('/');
+            router.replace('/orders');
         }
     };
 

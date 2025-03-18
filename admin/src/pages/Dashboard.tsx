@@ -28,7 +28,7 @@ export default function Dashboard() {
                     {/* Left Section */}
                     <div>
                         {/* // Revenue */}
-                        <div className='border border-gray-300 rounded-md p-7 bg-white '>
+                        <div className='border border-[#E4E4E7] rounded-md p-7 bg-white '>
                             <div className='flex justify-between items-center'>
                                 <h2 className='text-xl font-semibold text-[#FDDF05]'>Revenue</h2>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="13" height="15" viewBox="0 0 13 15" fill="none">
@@ -36,7 +36,7 @@ export default function Dashboard() {
                                 </svg>
                             </div>
                                 
-                            <div className='flex gap-10 mt-5 justify-evenly items-center'>
+                            <div className='flex gap-8 mt-5 justify-evenly items-center'>
                                 <div>
                                     <h3 className='text-sm text-gray-400'>Daily</h3>
                                     <p className='font-bold text-2xl'>{revenueData.loading ? "Loading..." : `₱ ${revenueData.data?.dailyRevenue.toLocaleString()}.00`}</p>
@@ -61,7 +61,7 @@ export default function Dashboard() {
 
                         <div className='flex gap-5'>  {/*  this div contains the total user total orders and best selling */}
                             <div className='flex-1'>
-                                <div className='bg-white border border-gray-300 rounded-md p-7 mt-5'>
+                                <div className='bg-white border border-[#E4E4E7] rounded-md p-7 mt-5'>
                                     <div className='flex justify-between items-center'>
                                         <h2 className='text-xl font-semibold text-[#FDDF05]'>Total Orders</h2>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="15" height="16" viewBox="0 0 15 16" fill="none">
@@ -75,7 +75,7 @@ export default function Dashboard() {
                                     </p>
                                 </div>
 
-                                <div className='bg-white border border-gray-300 rounded-md p-7 mt-5'>
+                                <div className='bg-white border border-[#E4E4E7] rounded-md p-7 mt-5'>
                                     <div className='flex justify-between items-center'>
                                         <h2 className='text-xl font-semibold text-[#FDDF05]'>Total Users</h2>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="17" height="16" viewBox="0 0 17 16" fill="none">
@@ -91,7 +91,7 @@ export default function Dashboard() {
                                 </div>
 
                             </div>
-                            <div className='flex-1 bg-white border border-gray-300 rounded-md p-7 mt-5'>
+                            <div className='flex-1 bg-white border border-[#E4E4E7] rounded-md p-7 mt-5'>
                                 <div className='flex justify-between items-center'>
                                     <h2 className='text-xl font-semibold text-[#FDDF05]'>Best Selling</h2>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -137,7 +137,7 @@ export default function Dashboard() {
 
                         <div className='bg-white mt-5'>
                             <h1 className='text-xl font-semibold text-[#FDDF05]'>Unverified Orders</h1>
-                            <div className="border border-gray-300 rounded-md mt-3">
+                            <div className="border border-[#E4E4E7] rounded-md mt-3">
                                 <table className="w-full border-collapse">
                                     {/* Table Header */}
                                     <thead>
@@ -156,7 +156,7 @@ export default function Dashboard() {
                                         </tr>
                                     ) : unverifiedOrdersData.data?.formattedOrders.length ? (
                                         unverifiedOrdersData.data.formattedOrders.map((order) => (
-                                            <tr key={order.order_id} className="border-t border-gray-300 text-center">
+                                            <tr key={order.order_id} className="border-t border-[#E4E4E7] text-center">
                                                 <td className="p-3 text-[13px]">{order.order_id}</td>
                                                 <td className="p-3 text-[13px]">{order.name}</td>
                                                 <td className="p-3 text-[13px]">{order.transaction_number}</td>
@@ -184,14 +184,14 @@ export default function Dashboard() {
                     <div>
                         <div>
                             <h1 className='text-xl font-semibold text-[#FDDF05]'>Sales</h1>
-                            <div className='border border-gray-300 rounded-md p-7 my-5'>
+                            <div className='border border-[#E4E4E7] rounded-md p-7 my-5'>
                                 <SalesChart />
                             </div>
                         </div>
 
                         <div className='bg-white mt-5'>
                             <h1 className='text-xl font-semibold text-[#FDDF05]'>Recent Transactions</h1>
-                            <div className="border border-gray-300 rounded-md mt-3">
+                            <div className="border border-[#E4E4E7] rounded-md mt-3">
                                 <table className="w-full border-collapse">
                                     {/* Table Header */}
                                     <thead>
@@ -211,7 +211,7 @@ export default function Dashboard() {
                                         </tr>
                                     ) : recentTransactionsData.data?.recentTransactions.length ? (
                                         recentTransactionsData.data.recentTransactions.map((transaction) => (
-                                            <tr key={transaction.transaction_number} className="border-t border-gray-300 text-center">
+                                            <tr key={transaction.transaction_number} className="border-t border-[#E4E4E7] text-center">
                                                 <td className="p-3 text-[13px]">{transaction.transaction_number}</td>
                                                 <td className="p-3 text-[13px]">{transaction.customer_id.first_name} {transaction.customer_id.last_name}</td>
                                                 <td className="p-3 text-[13px]">₱{transaction.total_amount.toLocaleString()}.00</td>
