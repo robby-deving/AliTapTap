@@ -44,13 +44,13 @@ export default function Profile() {
               Profile
             </Text>
 
-            <View className="w-full flex flex-col items-center mt-5">
+            <View className="w-full flex flex-col items-center">
               <View className="w-full my-12 items-center">
                 {/* Profile Icon and Details */}
                 <View className="justify-center px-8 pb-6 flex-1">
                     <Image 
                     source={require('../assets/images/profile-icon.png')} 
-                    style={{ width:110, height: 110 }} 
+                    style={{ width:90, height: 90 }} 
                     className="self-center" 
                     />
                 </View>
@@ -86,15 +86,15 @@ export default function Profile() {
                         <View className="flex-row items-center">
                         <Image
                           source={require('../assets/images/orders-icon.png')}
-                          style={{ width: 25, height: 25 }}
-                          className="self-center mx-2"
+                          style={{ width: 22, height: 22 }}
+                          className="self-center ml-2 mr-3"
                         />
                         <Text className="text-black text-xl font-semibold">My Orders</Text>
                         </View>
                         <Image
                             source={require('../assets/images/arrow-right-icon.png')}
                             resizeMode="contain"
-                            style={{ width: 20, height: 20 }}
+                            style={{ width: 18, height: 18 }}
                             className="self-center ml-2" 
                         />
                     </TouchableOpacity>

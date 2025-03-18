@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Header } from "../components/Header";
-import { Picker } from '@react-native-picker/picker';
+
 
 // Reusing the same InputField component from SignupScreen
 const InputField = ({ label, placeholder, value, onChangeText }) => (
