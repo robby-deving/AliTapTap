@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation } from '@react-navigation/native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { Header } from '../components/Header';
 
 interface TransactionData {
@@ -17,9 +15,8 @@ interface TransactionData {
   };
 }
 
-const SuccessScreen: React.FC = () => {
+export default function SuccessScreen() {
     const router = useRouter();
-    const navigation = useNavigation();
     const [transactionData, setTransactionData] = useState<TransactionData | null>(null);
 
     useEffect(() => {
@@ -28,7 +25,6 @@ const SuccessScreen: React.FC = () => {
                 const orderSummaryString = await AsyncStorage.getItem('orderSummary');
                 if (orderSummaryString) {
                     const orderSummary = JSON.parse(orderSummaryString);
-                    console.log('Updated orderSummary:', orderSummary);
                     setTransactionData({
                         transaction: {
                             transaction_number: orderSummary.transaction_number || 'N/A',
@@ -51,10 +47,10 @@ const SuccessScreen: React.FC = () => {
     const handleGoBack = async () => {
         try {
             await AsyncStorage.removeItem('orderSummary');
-            router.push('/productcatalogue');
+            router.replace('/productcatalogue');
         } catch (error) {
             console.error('Error clearing order summary:', error);
-            router.push('/');
+            router.replace('/');
         }
     };
 
@@ -62,155 +58,161 @@ const SuccessScreen: React.FC = () => {
         <View style={styles.container}>
             <Header />
 
-            {/* Success Icon & Message */}
-            <View className='p-10 flex justify-center items-center'>
-                <Image 
-                    source={require('../assets/images/success.png')} 
-                    resizeMode="contain"
-                />
-                <Text className='font-bold text-[#FEE308] text-2xl mt-5'>Order Success!</Text>
+            <View style={styles.content}>
+                {/* Success Icon & Message */}
+                <View style={styles.successContainer}>
+                    <Image 
+                        source={require('../assets/images/success.png')} 
+                        style={styles.successImage}
+                        resizeMode="contain"
+                    />
+                    <Text style={styles.successText}>Order Success!</Text>
+                </View>
+
+                {/* Order Details */}
+                <View style={styles.detailsContainer}>
+                    <View style={styles.detailRow}>
+                        <Text style={styles.label}>Order Number</Text>
+                        <Text style={styles.value}>{transactionData?.transaction?.transaction_number || 'N/A'}</Text>
+                    </View>
+                    <View style={styles.detailRow}>
+                        <Text style={styles.label}>Payment Time</Text>
+                        <Text style={styles.value}>
+                            {transactionData?.transaction?.created_at ? 
+                                new Date(transactionData.transaction.created_at).toLocaleString() : 'N/A'}
+                        </Text>
+                    </View>
+                    <View style={styles.detailRow}>
+                        <Text style={styles.label}>Payment Method</Text>
+                        <Text style={styles.value}>{transactionData?.transaction?.payment_method || 'N/A'}</Text>
+                    </View>
+                    <View style={styles.separator} />
+                    <View style={styles.detailRow}>
+                        <Text style={styles.label}>Quantity</Text>
+                        <Text style={styles.value}>{transactionData?.transaction?.quantity || 'N/A'}</Text>
+                    </View>
+                    <View style={styles.detailRow}>
+                        <Text style={styles.label}>Shipping Cost</Text>
+                        <Text style={styles.value}>₱{transactionData?.transaction?.shipping_subtotal?.toFixed(2) || 'N/A'}</Text>
+                    </View>
+                    <View style={styles.totalRow}>
+                        <Text style={styles.totalLabel}>Total Amount</Text>
+                        <Text style={styles.totalValue}>₱{transactionData?.transaction?.total_amount?.toFixed(2) || 'N/A'}</Text>
+                    </View>
+                </View>
             </View>
 
-            {/* Order Details */}
-            <View style={styles.detailsContainer}>
-                <View style={styles.detailRow}>
-                    <Text style={styles.label}>Order Number</Text>
-                    <Text style={styles.value}>{transactionData?.transaction?.transaction_number || 'N/A'}</Text>
-                </View>
-                <View style={styles.detailRow}>
-                    <Text style={styles.label}>Payment Time</Text>
-                    <Text style={styles.value}>
-                        {transactionData?.transaction?.created_at ? new Date(transactionData.transaction.created_at).toLocaleString() : 'N/A'}
-                    </Text>
-                </View>
-                <View style={styles.detailRow}>
-                    <Text style={styles.label}>Payment Method</Text>
-                    <Text style={styles.value}>{transactionData?.transaction?.payment_method || 'N/A'}</Text>
-                </View>
-                <View style={styles.separator} />
-                <View style={styles.detailRow}>
-                    <Text style={styles.label}>Quantity</Text>
-                    <Text style={styles.value}>{transactionData?.transaction?.quantity || 'N/A'}</Text>
-                </View>
-                <View style={styles.detailRow}>
-                    <Text style={styles.label}>Shipping Cost</Text>
-                    <Text style={styles.value}>₱{transactionData?.transaction?.shipping_subtotal?.toFixed(2) || 'N/A'}</Text>
-                </View>
-                <View style={styles.totalRow}>
-                    <Text style={styles.totalLabel}>Total Amount</Text>
-                    <Text style={styles.totalValue}>₱{transactionData?.transaction?.total_amount?.toFixed(2) || 'N/A'}</Text>
-                </View>
-            </View>
-
-            <View className='flex-1'></View>
             {/* Buttons */}
+            <View style={styles.buttonContainer}>
+                <TouchableOpacity style={styles.homeButton} onPress={handleGoBack}>
+                    <Text style={styles.homeButtonText}>Back to Home</Text>
+                </TouchableOpacity>
 
-            <View className='w-full p-10'>
-                    <TouchableOpacity style={styles.homeButton} onPress={handleGoBack}>
-                        <Text className='text-white font-bold text-xl'>Back to Home</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={styles.viewOrderButton}>
-                        <Text style={styles.viewOrderText}>View Order</Text>
-                    </TouchableOpacity>
+                <TouchableOpacity style={styles.viewOrderButton}>
+                    <Text style={styles.viewOrderText}>View Order</Text>
+                </TouchableOpacity>
             </View>
-
         </View>
     );
-};
+}
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
-        alignItems: 'center',
     },
-    header: {
-        width: '100%',
-        height: 80,
-        backgroundColor: '#1C1C1C',
-        flexDirection: 'row',
+    content: {
+        flex: 1,
         alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingTop: 40,
-    },
-    logo: {
-        height: 30,
-        width: 30,
-        marginLeft: 'auto',
-        marginRight: 'auto',
     },
     successContainer: {
         alignItems: 'center',
-        marginTop: 40,
+        padding: 40,
     },
     successImage: {
-        width: 100,  // Increased image size
-        height: 100, // Increased image size
-        marginBottom: 15,
+        width: 120,
+        height: 120,
+        marginBottom: 20,
     },
     successText: {
-        fontSize: 20,
+        fontSize: 24,
         fontWeight: 'bold',
-        color: '#FEE308', // Updated to requested color
+        color: '#FEE308',
     },
     detailsContainer: {
         width: '90%',
         backgroundColor: '#fff',
-        paddingVertical: 20,
-        paddingHorizontal: 15,
+        padding: 20,
+        borderRadius: 10,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
     },
     detailRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: 8,
+        marginBottom: 12,
     },
     label: {
         fontSize: 14,
-        color: '#333',
+        color: '#666',
     },
     value: {
         fontSize: 14,
-        fontWeight: 'bold',
+        fontWeight: '600',
+        color: '#333',
     },
     separator: {
         height: 1,
-        backgroundColor: '#ccc',
-        marginVertical: 10,
+        backgroundColor: '#E5E5E5',
+        marginVertical: 15,
     },
     totalRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginTop: 10,
+        marginTop: 15,
+        paddingTop: 15,
+        borderTopWidth: 1,
+        borderTopColor: '#E5E5E5',
     },
     totalLabel: {
         fontSize: 16,
         fontWeight: 'bold',
+        color: '#333',
     },
     totalValue: {
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: 'bold',
-        color: '#000',
+        color: '#FFC107',
+    },
+    buttonContainer: {
+        width: '100%',
+        padding: 20,
+        backgroundColor: '#fff',
     },
     homeButton: {
         backgroundColor: '#FFC107',
-        paddingVertical: 12,
-        borderRadius: 5,
+        paddingVertical: 15,
+        borderRadius: 8,
         alignItems: 'center',
-        marginTop: 20,
+        marginBottom: 12,
     },
     homeButtonText: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: '#000',
+        color: '#fff',
     },
     viewOrderButton: {
-        paddingVertical: 12,
-        borderRadius: 5,
+        paddingVertical: 15,
+        borderRadius: 8,
         alignItems: 'center',
         borderWidth: 1,
         borderColor: '#FFC107',
-        marginTop: 10,
     },
     viewOrderText: {
         fontSize: 16,
@@ -218,5 +220,3 @@ const styles = StyleSheet.create({
         color: '#FFC107',
     },
 });
-
-export default SuccessScreen;

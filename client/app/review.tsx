@@ -140,8 +140,8 @@ export default function Review() {
       setRedirectUrl(result.data.attributes.next_action.redirect.url);
     } else if (result.data?.attributes?.status === 'succeeded') {
 
-      handleUpload();
-      saveOrderAndTransaction();
+      await handleUpload();
+      await saveOrderAndTransaction();
 
       router.push('/success');
     } else {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect , useCallback} from "react";
 import {
   Text,
   View,
@@ -15,8 +15,8 @@ import { useRouter } from "expo-router";
 import InputField from "../components/InputField";
 import StepperComponent from "../components/StepperComponent";
 import { Header } from "../components/Header";
-import { Asset } from "expo-asset";
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect } from 'expo-router';
+
 
 export default function Shipping() {
   const [fullName, setFullName] = useState("");
@@ -44,34 +44,25 @@ export default function Shipping() {
   };
 
   useFocusEffect(
-    React.useCallback(() => {
+    useCallback(() => {
       const loadUserData = async () => {
         try {
           const userDataString = await AsyncStorage.getItem("userData");
           if (userDataString) {
             const userData = JSON.parse(userDataString);
             
-            // Update addresses and selected index
             if (Array.isArray(userData.address)) {
               setShippingAddresses(userData.address);
             }
             setSelectedAddressIndex(userData.selectedAddressIndex || 0);
             
-            // Combine first_name and last_name for fullName
             if (userData.first_name || userData.last_name) {
               setFullName(`${userData.first_name || ''} ${userData.last_name || ''}`.trim());
             }
             
-            // Set phone_number
             if (userData.phone_number) {
               setPhoneNumber(userData.phone_number);
             }
-            
-            console.log('Focus effect - User data loaded:', {
-              fullName: `${userData.first_name || ''} ${userData.last_name || ''}`.trim(),
-              phone_number: userData.phone_number,
-              selectedIndex: userData.selectedAddressIndex
-            });
           }
         } catch (error) {
           console.error("Error reloading user data:", error);
@@ -82,12 +73,9 @@ export default function Shipping() {
     }, [])
   );
 
-
-
   const handleContinue = async () => {
     router.push("/payment");
   }
-
 
   useEffect(() => {
     console.log('Current shipping addresses:', shippingAddresses);
