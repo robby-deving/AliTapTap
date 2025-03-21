@@ -122,10 +122,52 @@ const getAllReviews = async (req, res) => {
     }
 };
 
+const getReviewsByDesignId = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { latest } = req.query;
+
+        // Base query with design_id filter
+        let query = Review.find({ design_id: id });
+
+        // Add population and sorting
+        query = query
+            .populate('customer_id', 'first_name last_name')
+            .sort({ created_at: -1 });
+
+        // Apply limit if latest is true
+        if (latest === 'true') {
+            query = query.limit(3);
+        }
+
+        const reviews = await query;
+
+        // Transform the data
+        const formattedReviews = reviews.map(review => ({
+            _id: review._id,
+            customer_name: `${review.customer_id.first_name} ${review.customer_id.last_name}`,
+            ratings: review.ratings,
+            review_text: review.review_text,
+            created_at: review.created_at,
+            design_id: review.design_id,
+            order_id: review.order_id
+        }));
+
+        res.status(200).json({
+            message: "Reviews retrieved successfully",
+            data: formattedReviews
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Reviews query failed", error: error.message });
+    }
+};
+
 module.exports = {
     createReview,
     updateReview,
     deleteReview,
     getReview,
     getAllReviews,
+    getReviewsByDesignId
 };

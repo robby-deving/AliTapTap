@@ -1,13 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { updateOrderDetails, saveOrderAndTransaction  } from "@/services/helperFunctions";
+import { Svg, Path } from 'react-native-svg';  // Add this import at the top
 
 type Product = {
   front_image?: string;
   materials?: { [key: string]: { price_per_unit: number } };
   name?: string;
+  _id?: string;
+};
+
+type Review = {
+  _id: string;
+  customer_name: string;
+  ratings: number;
+  review_text: string;
+  created_at: string;
 };
 
 type CardDetailsProps = {
@@ -19,7 +29,10 @@ const CardDetails = ({ product }: CardDetailsProps) => {
   const [selectedMaterial, setSelectedMaterial] = useState(materialOptions[0]);
   const [quantity, setQuantity] = useState(1);
   const [totalPrice, setTotalPrice] = useState(0);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const router = useRouter();
+  const Base_Url = 'http://192.168.137.1:4000';
+
 
   // Calculate total price when quantity or material changes
   React.useEffect(() => {
@@ -52,6 +65,42 @@ const CardDetails = ({ product }: CardDetailsProps) => {
       // You might want to show an error message to the user here
     }
   };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      month: '2-digit',
+      day: '2-digit',
+      year: '2-digit'
+    });
+  };
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+        if (!product?._id) return;
+
+        try {
+            const response = await fetch(`${Base_Url}/api/v1/review/get-product-reviews/${product._id}`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            if (data?.data) {
+                setReviews(data.data);
+            } else {
+                console.warn("No reviews data in response");
+                setReviews([]);
+            }
+        } catch (error) {
+            console.error('Error fetching reviews:', error.message);
+            setReviews([]);
+        }
+    };
+
+    fetchReviews();
+}, [product?._id]);
 
   return (
     <View style={styles.container}>
@@ -99,6 +148,44 @@ const CardDetails = ({ product }: CardDetailsProps) => {
             <TouchableOpacity onPress={handleIncrease} style={styles.quantityButton}>
               <Ionicons name="add" size={20} color="black" />
             </TouchableOpacity>
+          </View>
+
+          <View style={styles.reviewsContainer}>
+            <View style={[styles.separator, { marginTop: 40 }]} />
+            <View style={styles.reviewsWrapper}>
+              <Text style={styles.reviewsTitle}>Reviews</Text>
+              {reviews.map((review) => (
+                <View key={review._id} style={styles.reviewItem}>
+                  <Image 
+                    source={require('../assets/images/profile-icon.png')} 
+                    style={{ width: 25, height: 25, marginRight: 20, }} />
+                  <View style={styles.reviewContent}>
+                    <View style={styles.reviewHeader}>
+                      <Text style={styles.reviewerName}>{review.customer_name}</Text>
+                      <Text style={styles.reviewDate}>{formatDate(review.created_at)}</Text>
+                    </View>
+                    <View className="flex-row mb-2" >
+                    {[...Array(5)].map((_, index) => (
+                        <Svg 
+                          key={index} 
+                          width={12} 
+                          height={12} 
+                          viewBox="0 0 22 21"
+                        >
+                          <Path
+                            d="M4.2075 20.9L5.995 13.1725L0 7.975L7.92 7.2875L11 0L14.08 7.2875L22 7.975L16.005 13.1725L17.7925 20.9L11 16.8025L4.2075 20.9Z"
+                            fill={index < review.ratings ? "#FFE300" : "#D3D3D3"}
+                          />
+                        </Svg>
+                      ))}
+                    </View>
+                    <View>
+                      <Text style={styles.reviewText}>{review.review_text}</Text>
+                    </View>
+                  </View>
+                </View>
+              ))}
+            </View>
           </View>
 
           {/* Edit Design Button */}
@@ -156,7 +243,8 @@ const styles = StyleSheet.create({
   /* Yellow Separator */
   separator: {
     height: 2,
-    backgroundColor: "#FFD700",
+    backgroundColor: "#FFE300",
+    opacity: 0.5,
     width: "100%",
     marginVertical: 5,
   },
@@ -253,6 +341,45 @@ editButtonContainer: {
     fontSize: 16,
     fontWeight: "bold",
     color: "white",
+  },
+
+  reviewsContainer: {
+    width: '100%',
+  },
+  reviewsWrapper: {
+    width: '100%',
+  },
+  reviewsTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 10,
+    marginTop: 10,
+
+  },
+  reviewItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    marginTop: 10,
+  },
+
+  reviewContent: {
+    flex: 1,
+  },
+  reviewHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  reviewerName: {
+    fontWeight: '500',
+  },
+  reviewDate: {
+    color: '#666',
+  },
+
+  reviewText: {
+    color: '#333',
   },
 });
 
