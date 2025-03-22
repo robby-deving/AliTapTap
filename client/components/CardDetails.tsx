@@ -104,7 +104,6 @@ const CardDetails = ({ product }: CardDetailsProps) => {
 
   return (
     <View style={styles.container}>
-      {/* Scrollable Content */}
       <ScrollView contentContainerStyle={styles.content}>
         {/* Product Image */}
         <View style={styles.imageContainer}>
@@ -187,15 +186,15 @@ const CardDetails = ({ product }: CardDetailsProps) => {
               ))}
             </View>
           </View>
-
-          {/* Edit Design Button */}
-          <View style={styles.editButtonContainer}>
-            <TouchableOpacity onPress={handleEditPress} style={styles.editButton}>
-              <Text style={styles.editButtonText}>Edit Design</Text>
-            </TouchableOpacity>
-          </View>
         </View>
       </ScrollView>
+      
+      {/* Move the edit button outside ScrollView */}
+      <View style={styles.editButtonContainer}>
+        <TouchableOpacity onPress={handleEditPress} style={styles.editButton}>
+          <Text style={styles.editButtonText}>Edit Design</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -203,12 +202,13 @@ const CardDetails = ({ product }: CardDetailsProps) => {
 const styles = StyleSheet.create({
   container: { 
     flex: 1, 
-    backgroundColor: "#F5F5F5" 
+    backgroundColor: "#F5F5F5",
+    position: 'relative' // Add this
   },
   content: {
     flexGrow: 1, 
     justifyContent: "space-between", 
-    paddingBottom: 1, 
+    paddingBottom: 80, // Add padding to account for fixed button
   },
 
   /* Product Image */
@@ -323,8 +323,14 @@ quantityText: {
 
 /* Edit Button Container */
 editButtonContainer: {
-  alignItems: "center", // Center the button horizontally
-  marginTop: 45,  // Space from previous elements
+  position: 'absolute',
+  bottom: 0,
+  left: 0,
+  right: 0,
+  backgroundColor: 'white',
+  paddingVertical: 15,
+  paddingHorizontal: 30,
+
 },
 
   /* Edit Design Button */
@@ -333,7 +339,7 @@ editButtonContainer: {
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: "center",
-    width: 325,
+    width: '100%',
     height: 50,
   },
 
@@ -358,7 +364,7 @@ editButtonContainer: {
   },
   reviewItem: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     width: '100%',
     marginTop: 10,
   },

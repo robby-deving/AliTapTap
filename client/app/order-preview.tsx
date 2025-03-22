@@ -164,7 +164,7 @@ export default function OrderPreview() {
         <View className="h-32" />
       </ScrollView>
       <View className="absolute bottom-0 w-full px-8 pb-8 pt-4 bg-white border-t border-gray-200">
-      {order.status !== 'Delivered' && (
+      {order.status == 'Delivered' && (
         <View className="flex-row justify-between mb-4">
           
           <TouchableOpacity
