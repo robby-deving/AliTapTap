@@ -19,6 +19,7 @@ interface FormattedOrder {
   quantity: number;
   price: number;
   orderNumber: string;
+  design_id: string;
   status: string;
   front_image: string;
   back_image: string;
@@ -69,6 +70,7 @@ export default function Orders() {
           title: order.design_id.name,
           material: order.details.material,
           quantity: order.quantity,
+          design_id: order.design_id._id,
           price: order.total_price,
           orderNumber: order._id.substring(0, 8),
           status: order.order_status,
@@ -100,11 +102,13 @@ export default function Orders() {
     router.push({
       pathname: '/order-preview',
       params: {
+        id: order.id, // Add this to pass the order ID
         title: order.title,
         material: order.material,
         quantity: order.quantity.toString(),
         price: order.price.toString(),
         orderNumber: order.orderNumber,
+        design_id: order.design_id, // Now this is already the ID string
         status: order.status,
         front_image: order.front_image,
         back_image: order.back_image

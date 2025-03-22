@@ -16,6 +16,7 @@ const CardDetailsScreen = () => {
       <Header />
       {/* Pass the product as a prop to CardDetails */}
       <CardDetails product={parsedProduct} />
+
     </View>
   );
 };
