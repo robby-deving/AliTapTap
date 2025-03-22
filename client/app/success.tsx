@@ -50,9 +50,10 @@ export default function SuccessScreen() {
             router.replace('/productcatalogue');
         } catch (error) {
             console.error('Error clearing order summary:', error);
-            router.replace('/orders');
+            router.replace('/');
         }
     };
+    
 
     return (
         <View style={styles.container}>
@@ -108,7 +109,7 @@ export default function SuccessScreen() {
                     <Text style={styles.homeButtonText}>Back to Home</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.viewOrderButton}>
+                <TouchableOpacity style={styles.viewOrderButton} onPress={() => router.push('/orders')}>
                     <Text style={styles.viewOrderText}>View Order</Text>
                 </TouchableOpacity>
             </View>

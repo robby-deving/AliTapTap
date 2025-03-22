@@ -5,7 +5,17 @@ const CardDesign = require("../Models/carddesign.model.js");
 // Create a new order
 const createOrder = async (req, res) => {
   try {
-    const { customer_id, design_id, front_image, back_image, details, quantity, order_status, address_id } = req.body;
+    const { 
+      customer_id, 
+      design_id, 
+      front_image, 
+      back_image, 
+      details, 
+      quantity, 
+      order_status, 
+      address_id,
+      shipping_cost // Add this parameter
+    } = req.body;
 
     if (!customer_id || !design_id || !front_image || !back_image || !details || !quantity || address_id === undefined) {
       return res.status(400).json({ message: "All fields are required." });
@@ -35,8 +45,9 @@ const createOrder = async (req, res) => {
       return res.status(400).json({ message: "Invalid address ID." });
     }
 
-    // Calculate total price
-    const total_price = price_per_unit * quantity;
+    // Calculate total price including shipping
+    const base_price = price_per_unit * quantity;
+    const total_price = base_price + (shipping_cost || 0); // Add shipping cost to total
 
     const newOrder = new Order({
       customer_id,
@@ -46,9 +57,10 @@ const createOrder = async (req, res) => {
       details: {
         material: details.material,
         price_per_unit: price_per_unit,
+        shipping_cost: shipping_cost // Store shipping cost in details
       },
       quantity,
-      total_price,
+      total_price, // This will now include shipping
       order_status: order_status || "Pending",
       address_id,  
       address_details: selectedAddress,  

@@ -16,6 +16,7 @@ import InputField from "../components/InputField";
 import StepperComponent from "../components/StepperComponent";
 import { Header } from "../components/Header";
 import { useFocusEffect } from 'expo-router';
+import { updateOrderDetails } from "../services/helperFunctions";
 
 
 export default function Shipping() {
@@ -24,6 +25,8 @@ export default function Shipping() {
   const [shippingAddresses, setShippingAddresses] = useState<Address[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedAddressIndex, setSelectedAddressIndex] = useState<number>(0);
+  const [selectedShipping, setSelectedShipping] = useState("standard");
+  const [shippingModalVisible, setShippingModalVisible] = useState(false);
 
   // Address fields
   const [street, setStreet] = useState("");
@@ -34,6 +37,12 @@ export default function Shipping() {
 
   const router = useRouter();
 
+  const shippingCost =[
+    {name: "standard", price: 58 , duration: "10 to 15 days"},
+    {name: "express", price: 150 , duration: "5 to 7 days"},
+    {name: "priority", price: 220 , duration: "3 to 4 day"}
+  ]
+
   type Address = {
     _id?: string;
     street: string;
@@ -42,6 +51,20 @@ export default function Shipping() {
     province: string;
     zip: string;
   };
+
+  const getSelectedShippingDetails = () => {
+    const selectedOption = shippingCost.find(option => option.name === selectedShipping);
+    if (!selectedOption) {
+      return shippingCost[0];
+    }
+  
+    updateOrderDetails('shipping_method', {
+        name: selectedOption?.name,
+        price: selectedOption?.price,
+        duration: selectedOption?.duration
+    });    
+    return selectedOption;
+};
 
   useFocusEffect(
     useCallback(() => {
@@ -178,6 +201,82 @@ export default function Shipping() {
                   </TouchableOpacity>
                 )}
               </View>
+
+              <View className="w-full ">
+                <Text className="text-black font-semibold mb-2 text-base">
+                  Shipping Method
+                </Text>
+                <TouchableOpacity
+                  className="border border-gray-200 p-4 rounded-lg bg-white"
+                  onPress={() => setShippingModalVisible(true)}
+                >
+                  <View className="flex-row items-center justify-between">
+                    <View>
+                      <Text className="text-black font-semibold">
+                        {getSelectedShippingDetails()?.name.charAt(0).toUpperCase() + 
+                        getSelectedShippingDetails()?.name.slice(1)}
+                      </Text>
+                      <Text className="text-gray-500 text-sm">
+                        Expected delivery is within {getSelectedShippingDetails()?.duration}
+                      </Text>
+                    </View>
+                    <View className="flex-row items-center">
+                      <Text className="text-black font-semibold mr-2">
+                        ₱{getSelectedShippingDetails()?.price}
+                      </Text>
+                      <Image
+                        source={require('../assets/images/arrow_right.png')}
+                        style={{ width: 20, height: 20 }}
+                      />
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              </View>
+
+              <Modal
+                animationType="slide"
+                transparent={true}
+                visible={shippingModalVisible}
+                onRequestClose={() => setShippingModalVisible(false)}
+              >
+                <View className="flex-1 justify-end bg-black/50">
+                  <View className="bg-white rounded-t-3xl p-6">
+                    <View className="flex-row justify-between items-center mb-4">
+                      <Text className="text-xl font-bold">Select Shipping Method</Text>
+                      <TouchableOpacity onPress={() => setShippingModalVisible(false)}>
+                        <Text className="text-xl">✕</Text>
+                      </TouchableOpacity>
+                    </View>
+                    
+                    {shippingCost.map((option) => (
+                      <TouchableOpacity
+                        key={option.name}
+                        className={`border rounded-lg p-4 mb-2 ${
+                          selectedShipping === option.name
+                            ? "border-[#FDCB07] bg-[#FDCB07]/10"
+                            : "border-gray-200"
+                        }`}
+                        onPress={() => {
+                          setSelectedShipping(option.name);
+                          setShippingModalVisible(false);
+                        }}
+                      >
+                        <View className="flex-row justify-between items-center">
+                          <View>
+                            <Text className="font-semibold capitalize">
+                              {option.name}
+                            </Text>
+                            <Text className="text-gray-500 text-sm">
+                            Expected delivery is within {option.duration}
+                            </Text>
+                          </View>
+                          <Text className="font-semibold">₱{option.price}</Text>
+                        </View>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+              </Modal>
             </View>
           </View>
 

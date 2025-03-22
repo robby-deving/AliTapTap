@@ -49,8 +49,9 @@ export default function Review() {
         if (orderDetails) {
           const parsedDetails = JSON.parse(orderDetails);
           const total = parsedDetails.total_price || 0;
-          setTotalAmount(total);
-          console.log('Total Amount:', total);
+          const toPay = total + parsedDetails.shipping_method.price;
+          setTotalAmount(toPay);
+          console.log('Total Amount:', toPay);
         }
       } catch (error) {
         console.error('Failed to fetch total amount:', error);

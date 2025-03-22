@@ -4,6 +4,11 @@ import axios from 'axios';
 import { ViewStyle } from 'react-native';
 
 // Define interface for order details
+export type ShippingMethod = {
+  name: string;
+  price: number;
+  duration: string;
+}
 interface OrderDetails {
   design_id: string;
   front_image: string;
@@ -11,6 +16,8 @@ interface OrderDetails {
   material: string;
   quantity: number;
   payment_method: string;
+  shipping_method: ShippingMethod;
+
 }
 
 // Define interface for order data
@@ -21,10 +28,13 @@ interface OrderData {
   back_image: string;
   details: {
     material: string;
+    price_per_unit: number; // Add this field
   };
   quantity: number;
   order_status: string;
   address_id: number;
+  total_price: number;
+  shipping_cost?: number; // Add shipping cost field
 }
 
 // Define interface for transaction data
@@ -128,20 +138,23 @@ const saveOrderAndTransaction = async () => {
     const orderDetails: OrderDetails = orderDetailsString ? JSON.parse(orderDetailsString) : {};
     const userDetails: UserDetails = userData ? JSON.parse(userData) : {};
 
-
-    console.log('Order details:', orderDetails);
-
+    // Calculate total price including shipping
+    const totalPriceWithShipping = orderDetails.total_price + orderDetails.shipping_method.price;
+    
     const orderData: OrderData = {
       customer_id: userDetails._id,
-      design_id: orderDetails.design_id ,
-      front_image: orderDetails.front_image ,
-      back_image: orderDetails.back_image ,
+      design_id: orderDetails.design_id,
+      front_image: orderDetails.front_image,
+      back_image: orderDetails.back_image,
       details: {
         material: orderDetails.material,
+        price_per_unit: orderDetails.total_price, // Add base price per unit
       },
       quantity: orderDetails.quantity,
       order_status: "Pending",
       address_id: userDetails.selectedAddressIndex || 0,
+      total_price: totalPriceWithShipping,
+      shipping_cost: orderDetails.shipping_method.price // Add shipping cost separately
     };
 
     console.log('Order data:', orderData);
@@ -173,9 +186,9 @@ const saveOrderAndTransaction = async () => {
     const transactionData: TransactionData = {
       order_id: savedOrder._id,
       customer_id: orderData.customer_id,
-      merchandise_subtotal: savedOrder.total_price,
-      shipping_subtotal: 150, // change later-on when shipping is implemented
-      total_amount: savedOrder.total_price + 150,
+      merchandise_subtotal: orderDetails.total_price, // Original price without shipping
+      shipping_subtotal: orderDetails.shipping_method.price,
+      total_amount: totalPriceWithShipping, // Use the same total price
       payment_method: orderDetails.payment_method || 'cash',
       status: "Completed"
     };
