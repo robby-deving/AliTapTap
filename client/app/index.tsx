@@ -68,6 +68,7 @@ export default function Index() {
   
       // ✅ Store user data in AsyncStorage
       await AsyncStorage.setItem("userData", JSON.stringify(userData));
+      await AsyncStorage.setItem("userId", userData._id); // Store userId separately
   
       setIsAuthenticated(true);
       Alert.alert("Login Successful", "You can now access the chat and shipping.");

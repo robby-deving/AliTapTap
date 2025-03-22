@@ -11,13 +11,19 @@ import io, { Socket } from "socket.io-client";
 import { Header } from "../components/Header";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+// Define constants for IP address and host
+const SERVER_IP = "192.168.1.9"; // Change this when needed
+const SERVER_PORT = "4000";
+const API_BASE_URL = `http://${SERVER_IP}:${SERVER_PORT}`;
+const SOCKET_URL = `http://${SERVER_IP}:${SERVER_PORT}`;
+
 export default function ChatScreen() {
   const [chatMessage, setChatMessage] = useState("");
   const [socket, setSocket] = useState<Socket | null>(null);
   const [messages, setMessages] = useState<string[]>([]);
 
   useEffect(() => {
-    const newSocket = io("http://192.168.1.9:4000");
+    const newSocket = io(SOCKET_URL);
     setSocket(newSocket);
 
     newSocket.on("connect", () => {
@@ -35,18 +41,19 @@ export default function ChatScreen() {
 
   const submitChatMessage = async () => {
     if (!socket || chatMessage.trim() === "") return;
-  
+
     try {
       // Retrieve the senderId from AsyncStorage (or wherever you store auth data)
-      const senderId = await AsyncStorage.getItem("userId"); // Ensure this is set when user logs in
-      const receiverId = "67b14d4255dbde56064ce4a5"; // Fixed receiverId
-  
+      const senderId = await AsyncStorage.getItem("userId");
+      console.log("Retrieved senderId:", senderId);
+      const receiverId = "67c00e4097fb8a5aeb426db5"; // Fixed receiverId
+
       if (!senderId) {
         console.error("User ID not found. Make sure the user is logged in.");
         return;
       }
-  
-      const response = await fetch("http://192.168.1.9:4000/api/v1/chat/send", {
+
+      const response = await fetch(`${API_BASE_URL}/api/v1/chat/send`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -57,15 +64,15 @@ export default function ChatScreen() {
           message: chatMessage,
         }),
       });
-  
+
       const data = await response.json();
       console.log("Response from backend:", data);
-  
+
       if (!response.ok) {
         console.error("Failed to send message to backend:", data);
         return;
       }
-  
+
       socket.emit("message", data.message);
       setChatMessage("");
     } catch (error) {
