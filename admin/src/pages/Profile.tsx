@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export default function AdminProfile() {
 //   const adminData = {
@@ -11,6 +12,7 @@ export default function AdminProfile() {
 //     phoneNumber: "09123456789",
 //   };
     const { user } = useAuth();
+    const navigate = useNavigate();
 
   return (
     <div className="overflow-auto w-full flex p-10 gap-10">
@@ -65,7 +67,11 @@ export default function AdminProfile() {
                 <p className="w-full border border-[#BDBDBD] px-4 py-4 rounded text-[#4F4F4F]">{user?.phone_number || "N/A"}</p>
               </div>
 
-              <button type="button" className="w-full cursor-pointer bg-[#FDCB07] hover:bg-[#E5B606] text-white py-4 rounded text-lg font-semibold mt-4">
+              <button 
+                type="button" 
+                className="w-full cursor-pointer bg-[#FDCB07] hover:bg-[#E5B606] text-white py-4 rounded text-lg font-semibold mt-4"
+                onClick={() => navigate("/edit-profile")}  
+              >
                 Edit Profile
               </button>
             </div>
