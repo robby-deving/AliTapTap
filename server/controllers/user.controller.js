@@ -186,11 +186,45 @@ const addAddress = async (req, res) => {
     }
 };
 
+const updateUserProfile = async (req, res) => {
+    try {
+        const userId = req.params.id; // Get user ID from URL params
+        const { first_name, last_name, username, email, phone_number, gender } = req.body;
+
+        // Find the user by ID
+        let user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Update user details
+        user.first_name = first_name || user.first_name;
+        user.last_name = last_name || user.last_name;
+        user.username = username || user.username;
+        user.email = email || user.email;
+        user.phone_number = phone_number || user.phone_number;
+        user.gender = gender || user.gender;
+
+        // Save the updated user data
+        const updatedUser = await user.save();
+
+        res.status(200).json({
+            message: "Profile updated successfully",
+            user: updatedUser
+        });
+    } catch (error) {
+        console.error("Error updating profile:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
 module.exports = {
     updateUser,
     deleteUser,
     getAdmin,
     getAllUsers,
     getUserStats,
-    addAddress
+    addAddress,
+    updateUserProfile
 };

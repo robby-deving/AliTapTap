@@ -4,16 +4,9 @@ import { useNavigate } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function AdminProfile() {
-//   const adminData = {
-//     firstName: "Ian Gabriel",
-//     lastName: "Villame",
-//     username: "@ianVillame123",
-//     gender: "Male",
-//     email: "ian@gmail.com",
-//     phoneNumber: "09123456789",
-//   };
-    const { user } = useAuth();
+    const { user, login } = useAuth();
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
 
     const [formData, setFormData] = useState({
         first_name: user?.first_name || "",
@@ -24,13 +17,58 @@ export default function AdminProfile() {
         gender: user?.gender || "Male",
     });
     
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
     };
     
-    const handleSave = () => {
-        console.log("Updated Profile:", formData);
-        navigate("/profile");
+    const handleGenderChange = (value: string) => {
+        setFormData({ ...formData, gender: value });
+    };
+    
+    const handleSave = async () => {
+        setLoading(true);
+        try {
+            const token = localStorage.getItem("authToken") || "";
+            const response = await fetch(`http://localhost:4000/api/v1/users/update-admin/${user?._id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify(formData),
+            });
+    
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || "Failed to update profile");
+            }
+    
+            // Update the auth context
+            login({ 
+                ...(user ?? {}), // Ensure user is an object
+                ...formData, 
+                _id: user?._id || "", 
+                isAdmin: user?.isAdmin ?? false, 
+                profile_picture: user?.profile_picture ?? null,  
+                address: user?.address ?? [],  
+                payment_method: user?.payment_method ?? [],  
+                token 
+            });
+    
+            console.log("Profile updated successfully");
+            setTimeout(() => {
+                navigate("/profile");
+            }, 900);
+        } catch (error) {
+            console.error("Error updating profile:", error);
+            if (error instanceof Error) {
+                alert(error.message);
+            } else {
+                alert("An unknown error occurred.");
+            }
+        } finally {
+            setLoading(false); // ✅ Stop loading
+        }
     };
 
   return (
@@ -60,8 +98,11 @@ export default function AdminProfile() {
                     <label className="block text-[#4F4F4F] mb-2">First Name</label>
                     <input
                     type="text"
+                    name="first_name"
                     className="w-full border border-[#BDBDBD] px-4 py-4 rounded text-[#4F4F4F]"
-                    defaultValue={user?.first_name || ""}
+                    value={formData.first_name}
+                    onChange={handleChange}
+                    disabled={loading}
                     />
                 </div>
 
@@ -69,8 +110,11 @@ export default function AdminProfile() {
                     <label className="block text-[#4F4F4F] mb-2">Last Name</label>
                     <input
                     type="text"
+                    name="last_name"
                     className="w-full border border-[#BDBDBD] px-4 py-4 rounded text-[#4F4F4F]"
-                    defaultValue={user?.last_name || ""}
+                    value={formData.last_name}
+                    onChange={handleChange}
+                    disabled={loading}
                     />
                 </div>
 
@@ -78,22 +122,17 @@ export default function AdminProfile() {
                     <label className="block text-[#4F4F4F] mb-2">Username</label>
                     <input
                     type="text"
+                    name="username"
                     className="w-full border border-[#BDBDBD] px-4 py-4 rounded text-[#4F4F4F]"
-                    defaultValue={user?.username || ""}
+                    value={formData.username}
+                    onChange={handleChange}
+                    disabled={loading}
                     />
                 </div>
 
                 <div>
                     <label className="block text-[#4F4F4F] mb-2">Gender</label>
-                    {/* <select
-                    className="w-full border border-[#BDBDBD] pl-4 py-4 pr-10 rounded text-[#4F4F4F] bg-white"
-                    defaultValue={user?.gender || "Other"}
-                    >
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                    </select> */}
-                    <Select onValueChange={(value) => setFormData({ ...formData, gender: value })} defaultValue={formData.gender}>
+                    <Select onValueChange={handleGenderChange} defaultValue={formData.gender} disabled={loading}>
                         <SelectTrigger className="w-full border cursor-pointer border-[#BDBDBD] px-4 py-7 rounded text-base text-[#4F4F4F] bg-white">
                             <SelectValue placeholder="Select gender" />
                         </SelectTrigger>
@@ -109,8 +148,11 @@ export default function AdminProfile() {
                     <label className="block text-[#4F4F4F] mb-2">Email</label>
                     <input
                     type="email"
+                    name="email"
                     className="w-full border border-[#BDBDBD] px-4 py-4 rounded text-[#4F4F4F]"
-                    defaultValue={user?.email || ""}
+                    value={formData.email}
+                    onChange={handleChange}
+                    disabled={loading}
                     />
                 </div>
 
@@ -118,21 +160,30 @@ export default function AdminProfile() {
                     <label className="block text-[#4F4F4F] mb-2">Phone Number</label>
                     <input
                     type="tel"
+                    name="phone_number"
                     className="w-full border border-[#BDBDBD] px-4 py-4 rounded text-[#4F4F4F]"
-                    defaultValue={user?.phone_number || ""}
+                    value={formData.phone_number}
+                    onChange={handleChange}
+                    disabled={loading}
                     />
                 </div>
 
-                {/* <button
-                    type="button"
-                    className="w-full cursor-pointer bg-[#FDCB07] hover:bg-[#E5B606] text-white py-4 rounded text-lg font-semibold mt-4"
-                >
-                    Edit Profile
-                </button> */}
-
                 <div className="flex gap-4">
-                    <button className="w-full cursor-pointer bg-[#C0C0C0] hover:bg-[#A9A9A9] text-white py-4 rounded text-lg font-semibold mt-4" onClick={() => navigate("/profile")}>Discard</button>
-                    <button className="w-full cursor-pointer bg-[#FDCB07] hover:bg-[#E5B606] text-white py-4 rounded text-lg font-semibold mt-4" onClick={handleSave}>Save</button>
+                    <button 
+                        className="w-full cursor-pointer bg-[#C0C0C0] hover:bg-[#A9A9A9] text-white py-4 rounded text-lg font-semibold mt-4" 
+                        onClick={() => navigate("/profile")} 
+                        disabled={loading}
+                    >
+                        Discard
+                    </button>
+                    <button 
+                        className={`w-full cursor-pointer py-4 rounded text-lg font-semibold mt-4 transition-all 
+                            ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-[#FDCB07] hover:bg-[#E5B606] text-white"}`}
+                        onClick={handleSave} 
+                        disabled={loading}
+                    >
+                        {loading ? "Saving..." : "Save"}
+                    </button>
                 </div>
             </div>
           </div>
