@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
-const Chat = require("../Models/chat.model"); // ✅ Use require instead of import
+const Chat = require("../Models/chat.model");
+const User = require("../Models/user.model");
 
 const sendMessage = async (req, res) => {
   try {
@@ -39,4 +40,34 @@ const getMessages = async (req, res) => {
   }
 };
 
-module.exports = { sendMessage, getMessages };
+const getSendersByReceiver = async (req, res) => {
+  try {
+    const { receiverId } = req.params;
+
+    // Validate receiverId
+    if (!mongoose.Types.ObjectId.isValid(receiverId)) {
+      console.log("Invalid receiver ID received:", receiverId);
+      return res.status(400).json({ error: "Invalid receiver ID" });
+    }
+
+    // Find all messages where this receiverId is the recipient
+    const messages = await Chat.find({ receiverId: new mongoose.Types.ObjectId(receiverId) }).select("senderId");
+
+    if (messages.length === 0) {
+      return res.status(404).json({ message: "No messages found for this receiver." });
+    }
+
+    // Extract unique sender IDs
+    const senderIds = [...new Set(messages.map(msg => msg.senderId.toString()))];
+
+    // Fetch user details for the unique sender IDs
+    const senders = await User.find({ _id: { $in: senderIds } }).select("name email"); // Adjust fields as needed
+
+    res.status(200).json({ senders });
+  } catch (error) {
+    console.error("Error fetching senders:", error);
+    res.status(500).json({ error: "Error fetching senders" });
+  }
+};
+
+module.exports = { sendMessage, getMessages, getSendersByReceiver };

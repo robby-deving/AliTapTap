@@ -20,39 +20,66 @@ const SOCKET_URL = `http://${SERVER_IP}:${SERVER_PORT}`;
 export default function ChatScreen() {
   const [chatMessage, setChatMessage] = useState("");
   const [socket, setSocket] = useState<Socket | null>(null);
-  const [messages, setMessages] = useState<string[]>([]);
+  const [messages, setMessages] = useState<
+    { senderId: string; receiverId: string; message: string }[]
+  >([]);
+  const [senderId, setSenderId] = useState<string | null>(null);
+  const receiverId = "67c00e4097fb8a5aeb426db5"; // Fixed receiverId
 
   useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const storedSenderId = await AsyncStorage.getItem("userId");
+        if (!storedSenderId) {
+          console.error("User ID not found. Make sure the user is logged in.");
+          return;
+        }
+        setSenderId(storedSenderId);
+  
+        const response = await fetch(
+          `${API_BASE_URL}/api/v1/chat/messages/${storedSenderId}/${receiverId}`
+        );
+        const data = await response.json();
+        if (response.ok) {
+          setMessages(data.messages);
+        } else {
+          console.error("Failed to fetch messages:", data);
+        }
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+      }
+    };
+  
+    fetchMessages();
+  
     const newSocket = io(SOCKET_URL);
     setSocket(newSocket);
-
+  
     newSocket.on("connect", () => {
       console.log("✅ Connected to server");
     });
-
+  
     newSocket.on("message", (msg) => {
-      setMessages((prevMessages) => [...prevMessages, msg]); // Append messages normally
+      console.log("Received message:", msg);
+  
+      // Ensure the message is not already in the state
+      setMessages((prevMessages) => {
+        if (!prevMessages.some((m) => m.message === msg.message)) {
+          return [...prevMessages, msg];
+        }
+        return prevMessages;
+      });
     });
-
+  
     return () => {
       newSocket.disconnect();
     };
   }, []);
 
   const submitChatMessage = async () => {
-    if (!socket || chatMessage.trim() === "") return;
-
+    if (!socket || chatMessage.trim() === "" || !senderId) return;
+  
     try {
-      // Retrieve the senderId from AsyncStorage (or wherever you store auth data)
-      const senderId = await AsyncStorage.getItem("userId");
-      console.log("Retrieved senderId:", senderId);
-      const receiverId = "67c00e4097fb8a5aeb426db5"; // Fixed receiverId
-
-      if (!senderId) {
-        console.error("User ID not found. Make sure the user is logged in.");
-        return;
-      }
-
       const response = await fetch(`${API_BASE_URL}/api/v1/chat/send`, {
         method: "POST",
         headers: {
@@ -64,16 +91,16 @@ export default function ChatScreen() {
           message: chatMessage,
         }),
       });
-
+  
       const data = await response.json();
       console.log("Response from backend:", data);
-
+  
       if (!response.ok) {
-        console.error("Failed to send message to backend:", data);
+        console.error("Failed to send message:", data);
         return;
       }
-
-      socket.emit("message", data.message);
+  
+      socket.emit("message", { senderId, receiverId, message: chatMessage }); // Emit message to socket
       setChatMessage("");
     } catch (error) {
       console.error("Error sending message:", error);
@@ -87,19 +114,29 @@ export default function ChatScreen() {
       </View>
 
       <View className="flex-1 bg-white p-5">
-        {/* Messages List (Appears Just Above Input Box) */}
+        {/* Messages List */}
         <View className="flex-1 w-full">
           <FlatList
             data={messages}
             keyExtractor={(item, index) => index.toString()}
             renderItem={({ item }) => (
-              <View className="flex-row justify-end mb-2">
-                <Text className="bg-yellow-200 py-3 rounded-2xl min-h-12 text-xl px-4 max-w-[75%] text-black">
-                  {item}
+              <View
+                className={`flex-row ${
+                  item.senderId === senderId ? "justify-end" : "justify-start"
+                } mb-2`}
+              >
+                <Text
+                  className={`${
+                    item.senderId === senderId
+                      ? "bg-yellow-200"
+                      : "bg-gray-300"
+                  } py-3 rounded-2xl min-h-12 text-xl px-4 max-w-[75%] text-black`}
+                >
+                  {item.message}
                 </Text>
               </View>
             )}
-            contentContainerStyle={{ flexGrow: 1, justifyContent: "flex-end" }} // Moves messages to the bottom
+            contentContainerStyle={{ flexGrow: 1, justifyContent: "flex-end" }}
             keyboardShouldPersistTaps="handled"
           />
         </View>
@@ -112,7 +149,7 @@ export default function ChatScreen() {
             onChangeText={setChatMessage}
             placeholder="Type a message..."
             className="flex-1 border border-gray-300 p-2 rounded h-12 text-gray-700"
-            onSubmitEditing={submitChatMessage} // ⬅️ Press Enter to send
+            onSubmitEditing={submitChatMessage}
           />
           <TouchableOpacity onPress={submitChatMessage} className="ml-2">
             <Image

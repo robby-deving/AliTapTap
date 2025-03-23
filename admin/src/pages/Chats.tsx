@@ -1,29 +1,44 @@
 import React from "react";import { useState, useEffect } from "react";
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:4000"); // Replace with your actual backend URL
+const socket = io("http://192.168.1.9:4000"); // Replace with your actual backend URL
 
 export default function Chats() {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<string[]>([]);
 
   useEffect(() => {
-    // ✅ Listen for incoming messages from server
     socket.on("message", (msg) => {
-      setMessages((prevMessages) => [...prevMessages, msg]);
+      console.log("Received message:", msg); // ✅ Debugging
+  
+      if (!msg || typeof msg !== "object" || !msg.message) {
+        console.error("Invalid message received:", msg);
+        return;
+      }
+  
+      // ✅ Extract only the message content and store it
+      setMessages((prevMessages) => [...prevMessages, msg.message]);
     });
-
+  
     return () => {
-      socket.off("message"); // ✅ Clean up on unmount
+      socket.off("message"); // ✅ Cleanup
     };
   }, []);
 
   const sendMessage = () => {
     if (message.trim() !== "") {
-      socket.emit("message", message); // ✅ Send message to server
+      const msgObject = {
+        senderId: "admin123", // Replace with actual sender ID
+        receiverId: "user456", // Replace with actual receiver ID
+        message: message, // ✅ Send as an object
+      };
+  
+      console.log("Sending message:", msgObject); // ✅ Debugging
+      socket.emit("message", msgObject);
       setMessage(""); // ✅ Clear input
     }
   };
+
   return (
     <div className="p-4">
       <h1 className="text-3xl font-semibold m-5">Chats</h1>
