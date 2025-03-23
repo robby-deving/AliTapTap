@@ -9,11 +9,12 @@ export default function Chats() {
     { senderId: string; message: string }[]
   >([]);
   const [senders, setSenders] = useState<
-    { id: string; name: string; email: string }[]
-  >([]);
+  { _id: string; name: string; email: string }[] // ✅ Use `_id` instead of `id`
+>([]);
   const [selectedSender, setSelectedSender] = useState<{
-    id: string;
+    _id: string;
     name: string;
+    email: string;
   } | null>(null);
 
   const userId = localStorage.getItem("userId"); // Logged-in user's ID
@@ -35,7 +36,13 @@ export default function Chats() {
         const data = await response.json();
         console.log("Fetched senders:", data);
 
-        setSenders(data.senders || []);
+        setSenders(
+          data.senders.map((sender: any) => ({
+            _id: sender._id, // ✅ Ensure `_id` is used
+            name: sender.name,
+            email: sender.email,
+          }))
+        );
       } catch (error) {
         console.error("Error fetching senders:", error);
       }
@@ -47,23 +54,26 @@ export default function Chats() {
   // Fetch chat messages when a sender is selected
   useEffect(() => {
     if (!selectedSender) return;
-
+  
     const fetchMessages = async () => {
       try {
+        console.log("Fetching messages for sender:", selectedSender._id, "and receiver:", userId);
+  
         const response = await fetch(
-          `http://localhost:4000/api/v1/chat/messages/${userId}/${selectedSender.id}`
+          `http://localhost:4000/api/v1/chat/messages/${selectedSender._id}/${userId}`
         );
+  
         if (!response.ok) throw new Error("Failed to fetch messages");
-
+  
         const data = await response.json();
         console.log("Fetched messages:", data);
-
+  
         setMessages(data.messages || []);
       } catch (error) {
         console.error("Error fetching messages:", error);
       }
     };
-
+  
     fetchMessages();
   }, [selectedSender, userId]);
 
@@ -131,12 +141,13 @@ export default function Chats() {
           <div className="flex-1 flex flex-col gap-2 p-3 overflow-auto">
             {senders.map((sender) => (
               <div
-                key={sender.id} // Ensure correct ID key
-                className={`flex items-center gap-2 border-b-2 border-gray-200 p-3 w-full cursor-pointer ${
-                  selectedSender?.id === sender.id ? "bg-gray-100" : ""
-                }`}
-                onClick={() => setSelectedSender(sender)}
-              >
+              key={sender._id} // ✅ Use `_id`
+              className={`flex items-center gap-2 border-b-2 border-gray-200 p-3 w-full cursor-pointer ${
+                selectedSender?._id === sender._id ? "bg-gray-100" : ""
+              }`}
+              onClick={() => setSelectedSender(sender)} // ✅ Matches expected type
+            >
+              <p>{sender.name}</p>
                 {/* Profile Icon (Replace with sender.image if available) */}
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
