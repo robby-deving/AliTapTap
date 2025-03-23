@@ -33,7 +33,10 @@ export default function Topbar() {
                 strokeLinejoin="round"
               />
             </svg>
-            <h1 className="font-semibold">{user.username || 'User'}</h1>
+            <a href="/profile">
+                <h1 className="font-semibold">{user.username || 'User'}</h1>
+            </a>
+            
           </div>
           
         </div>

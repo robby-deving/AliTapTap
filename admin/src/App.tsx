@@ -7,6 +7,7 @@ import Orders from './pages/Orders';
 import Products from './pages/Products';
 import Topbar from './components/Topbar';
 import Login from './pages/Login';
+import Profile from './pages/Profile';
 import {  useAuth } from './context/AuthContext';
 
 function App() {
@@ -24,7 +25,10 @@ function App() {
                                     <Route path="/dashboard" element={<Dashboard />} />
                                     <Route path="/orders" element={<Orders />} />
                                     <Route path="/products" element={<Products />} />
-                                    <Route path="/chats" element={<Chats />} />                                </Routes>
+                                    <Route path="/chats" element={<Chats />} />
+                                    <Route path="/profile" element={<Profile />} />
+
+                                </Routes>
                             </div>
                         </div>
                     </div>
