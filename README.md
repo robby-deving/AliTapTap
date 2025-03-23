@@ -103,8 +103,6 @@ Inside the `server` directory, create a `.env` file and add:
 ```ini
 DB_URL=mongodb+srv://admin2:newpassword@alitaptap.uu5j7.mongodb.net/AliTapTapdb 
 PORT = 4000
-PAYMONGO_SECRET_KEY=sk_test_ud4EFbLxhHYzYPTLRQaue6wF
-PAYMONGO_PUBLIC_KEY=pk_test_nsm6ji7LNchBRpGRQedARonR
 JWT_KEY=crashout
 ```
 
