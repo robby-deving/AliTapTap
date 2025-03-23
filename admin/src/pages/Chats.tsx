@@ -15,7 +15,7 @@ export default function Chats() {
       last_name: string;
       email: string;
       latestMessage: string;
-      timestamp: string; // Changed from createdAt to timestamp
+      timestamp: string;
       latestMessageTimeFormatted?: string;
     }[]
   >([]);
@@ -26,6 +26,7 @@ export default function Chats() {
     email: string;
     name: string;
   } | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const userId = localStorage.getItem("userId"); // Logged-in user's ID
 
@@ -47,7 +48,7 @@ export default function Chats() {
         console.log("Fetched senders:", data);
 
         // Format the time in AM/PM format
-        const formatTime = (dateString: string): string => { 
+        const formatTime = (dateString: string): string => {
           if (!dateString) {
             console.error("Invalid date string:", dateString);
             return "Invalid Time"; // Return a fallback value in case of invalid date
@@ -62,14 +63,15 @@ export default function Chats() {
 
           let hours = date.getHours();
           let minutes = date.getMinutes();
-          const ampm = hours >= 12 ? 'PM' : 'AM';
-          
+          const ampm = hours >= 12 ? "PM" : "AM";
+
           // Convert 24-hour time to 12-hour time
           hours = hours % 12;
           hours = hours ? hours : 12; // the hour '0' should be '12'
-          
+
           // Ensure minutes are always displayed as two digits
-          const formattedMinutes = minutes < 10 ? '0' + minutes : String(minutes); // Ensure it's a string
+          const formattedMinutes =
+            minutes < 10 ? "0" + minutes : String(minutes); // Ensure it's a string
 
           const formattedTime = `${hours}:${formattedMinutes} ${ampm}`;
           return formattedTime;
@@ -83,13 +85,13 @@ export default function Chats() {
               `http://localhost:4000/api/v1/chat/latest/${sender._id}/${userId}`
             );
             const latestMessageData = await latestMessageResponse.json();
-            
+
             console.log("Latest message data:", latestMessageData); // Log this to inspect the API response
 
             const latestMessage =
               latestMessageData.message || "No messages yet";
             const latestMessageTime = latestMessageData.timestamp || ""; // Check if timestamp is returned properly
-            
+
             // If the timestamp is missing, log an error and skip processing this sender
             if (!latestMessageTime) {
               console.error("No timestamp found for sender:", sender._id);
@@ -143,6 +145,18 @@ export default function Chats() {
 
     fetchMessages();
   }, [selectedSender, userId]);
+
+  // Function to handle search input changes
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  // Filter senders based on the search query
+  const filteredSenders = senders.filter((sender) =>
+    `${sender.first_name} ${sender.last_name}`
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase())
+  );
 
   const sendMessage = async () => {
     if (!message.trim() || !selectedSender || !userId) return;
@@ -202,9 +216,9 @@ export default function Chats() {
   return (
     <div className="p-4">
       <h1 className="text-3xl font-semibold m-5">Chats</h1>
-      <div className="flex gap-4 ml-5">
+      <div className="flex gap-4 ml-5 h-screen">
         {/* Chat Sidebar */}
-        <div className="w-1/3 h-full rounded-2xl border-2 border-gray-200 flex flex-col">
+        <div className="w-1/3 h-3/4 rounded-2xl border-2 border-gray-200 flex flex-col">
           {/* Search Box */}
           <div className="flex items-center gap-2 border-b-2 border-gray-200 px-3 py-2">
             <svg
@@ -223,12 +237,15 @@ export default function Chats() {
               type="text"
               placeholder="Search"
               className="outline-none w-full text-gray-600 bg-transparent"
+              value={searchQuery} // Bind the input to searchQuery
+              onChange={handleSearchChange} // Update the search query on change
             />
           </div>
 
           {/* Messages List */}
-          <div className="flex-1 flex flex-col p-1 overflow-auto">
-            {senders.map((sender) => (
+          <div className="flex-1 flex flex-col pt-0 p-1 overflow-auto">
+            {/* Render filtered senders */}
+            {filteredSenders.map((sender) => (
               <div
                 key={sender._id} // ✅ Use `_id`
                 className={`flex items-center gap-2 border-b-2 border-gray-200 p-3 w-full cursor-pointer ${
@@ -322,7 +339,7 @@ export default function Chats() {
         </div>
 
         {/* Chat Window */}
-        <div className="w-3/5 h-full rounded-2xl border-2 border-gray-200 flex flex-col">
+        <div className="w-3/5 h-3/4 rounded-2xl border-2 border-gray-200 flex flex-col">
           {/* Chat Info Section */}
           <div className="flex items-center gap-3 p-4 border-b border-gray-300 px-7">
             <svg
