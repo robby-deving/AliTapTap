@@ -95,6 +95,7 @@ npm install body-parser
 npm install bcrypt      
 npm install jsonwebtoken 
 npm install express@4 socket.io
+npm install moment
 ```
 
 ### **4️⃣ Create a `.env` File**

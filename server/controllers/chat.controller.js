@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Chat = require("../Models/chat.model");
 const User = require("../Models/user.model");
+const moment = require('moment');
 
 const sendMessage = async (req, res) => {
   try {
@@ -78,55 +79,45 @@ const getSendersByReceiver = async (req, res) => {
   }
 };
 
-const getSendersWithLastMessage = async (req, res) => {
+const getLatestMessage = async (req, res) => {
+  const { senderId, receiverId } = req.params;
+
   try {
-    const userId = req.params.userId;
+    // Fetch the latest chat message between the sender and receiver, sorted by `createdAt`
+    const latestChat = await Chat.findOne({
+      $or: [
+        { senderId, receiverId },
+        { senderId: receiverId, receiverId: senderId }
+      ]
+    })
+      .sort({ createdAt: -1 }) // Sort by createdAt to get the latest message
+      .limit(1) // Limit to only the latest chat message
+      .populate("senderId", "first_name last_name"); // Populate sender's first and last name
 
-    // Ensure userId is a valid ObjectId
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(400).json({ error: "Invalid user ID" });
+    if (!latestChat) {
+      return res.status(404).json({ message: "No messages found." });
     }
 
-    const sendersWithLastMessage = await Chat.aggregate([
-      { $match: { receiverId: new mongoose.Types.ObjectId(userId) } }, // Match messages sent to the logged-in user
-      { $sort: { createdAt: -1 } }, // Sort by newest first
-      {
-        $group: {
-          _id: "$senderId",
-          lastMessage: { $first: "$message" }, // Get the most recent message
-          lastMessageTime: { $first: "$createdAt" }, // Get last message timestamp
-        },
-      },
-      {
-        $lookup: {
-          from: "users", // Join with the users collection
-          localField: "_id", // senderId from messages
-          foreignField: "_id", // _id from users
-          as: "senderInfo",
-        },
-      },
-      { $unwind: "$senderInfo" }, // Convert array to object
-      {
-        $project: {
-          _id: "$senderInfo._id",
-          name: "$senderInfo.name",
-          email: "$senderInfo.email",
-          lastMessage: 1,
-          lastMessageTime: 1,
-        },
-      },
-      { $sort: { lastMessageTime: -1 } }, // Sort senders by most recent message
-    ]);
+    // Format the createdAt timestamp using moment.js for a readable format
+    const formattedTime = moment(latestChat.createdAt).format("YYYY-MM-DD HH:mm:ss");
 
-    if (!sendersWithLastMessage.length) {
-      return res.status(404).json({ success: false, message: "No senders found with messages." });
+    // If the message is from admin, show "You: {message}"
+    if (latestChat.fromAdmin) {
+      return res.json({
+        message: `You: ${latestChat.message}`,
+        timestamp: formattedTime, // Add formatted timestamp
+      });
     }
 
-    res.status(200).json({ success: true, senders: sendersWithLastMessage });
+    // If the message is from a regular user, show the message without the sender's name
+    return res.json({
+      message: latestChat.message, // Only return the message (without sender name)
+      timestamp: formattedTime, // Add formatted timestamp
+    });
   } catch (error) {
-    console.error("Error fetching senders:", error);
-    res.status(500).json({ message: "Server error" });
+    console.error("Error fetching the latest message:", error);
+    return res.status(500).json({ message: "Server error." });
   }
 };
 
-module.exports = { sendMessage, getMessages, getSendersByReceiver, getSendersWithLastMessage };
+module.exports = { sendMessage, getMessages, getSendersByReceiver, getLatestMessage };

@@ -9,7 +9,15 @@ export default function Chats() {
     { senderId: string; message: string; fromAdmin?: boolean }[]
   >([]);
   const [senders, setSenders] = useState<
-    { _id: string; first_name: string; last_name: string; email: string }[]
+    {
+      _id: string;
+      first_name: string;
+      last_name: string;
+      email: string;
+      latestMessage: string;
+      timestamp: string; // Changed from createdAt to timestamp
+      latestMessageTimeFormatted?: string;
+    }[]
   >([]);
   const [selectedSender, setSelectedSender] = useState<{
     _id: string;
@@ -38,14 +46,65 @@ export default function Chats() {
         const data = await response.json();
         console.log("Fetched senders:", data);
 
-        setSenders(
-          data.senders.map((sender: any) => ({
-            _id: sender._id, // ✅ Ensure `_id` is used
-            first_name: sender.first_name, // ✅ Fetch `first_name`
-            last_name: sender.last_name, // ✅ Fetch `last_name`
-            email: sender.email,
-          }))
+        // Format the time in AM/PM format
+        const formatTime = (dateString: string): string => { 
+          if (!dateString) {
+            console.error("Invalid date string:", dateString);
+            return "Invalid Time"; // Return a fallback value in case of invalid date
+          }
+
+          const date = new Date(dateString.replace(" ", "T")); // Convert to ISO format
+
+          if (isNaN(date.getTime())) {
+            console.error("Invalid date string:", dateString);
+            return "Invalid Time"; // Return a fallback value in case of invalid date
+          }
+
+          let hours = date.getHours();
+          let minutes = date.getMinutes();
+          const ampm = hours >= 12 ? 'PM' : 'AM';
+          
+          // Convert 24-hour time to 12-hour time
+          hours = hours % 12;
+          hours = hours ? hours : 12; // the hour '0' should be '12'
+          
+          // Ensure minutes are always displayed as two digits
+          const formattedMinutes = minutes < 10 ? '0' + minutes : String(minutes); // Ensure it's a string
+
+          const formattedTime = `${hours}:${formattedMinutes} ${ampm}`;
+          return formattedTime;
+        };
+
+        // For each sender, fetch the latest message and format the timestamp time
+        const sendersWithMessages = await Promise.all(
+          data.senders.map(async (sender: any) => {
+            console.log("Sender data:", sender); // Debug the sender data to check the timestamp field
+            const latestMessageResponse = await fetch(
+              `http://localhost:4000/api/v1/chat/latest/${sender._id}/${userId}`
+            );
+            const latestMessageData = await latestMessageResponse.json();
+            
+            console.log("Latest message data:", latestMessageData); // Log this to inspect the API response
+
+            const latestMessage =
+              latestMessageData.message || "No messages yet";
+            const latestMessageTime = latestMessageData.timestamp || ""; // Check if timestamp is returned properly
+            
+            // If the timestamp is missing, log an error and skip processing this sender
+            if (!latestMessageTime) {
+              console.error("No timestamp found for sender:", sender._id);
+            }
+
+            return {
+              ...sender,
+              latestMessage,
+              timestamp: latestMessageTime, // Adding timestamp here
+              latestMessageTimeFormatted: formatTime(latestMessageTime), // Format time here
+            };
+          })
         );
+
+        setSenders(sendersWithMessages);
       } catch (error) {
         console.error("Error fetching senders:", error);
       }
@@ -168,7 +227,7 @@ export default function Chats() {
           </div>
 
           {/* Messages List */}
-          <div className="flex-1 flex flex-col gap-2 p-1 overflow-auto">
+          <div className="flex-1 flex flex-col p-1 overflow-auto">
             {senders.map((sender) => (
               <div
                 key={sender._id} // ✅ Use `_id`
@@ -209,15 +268,22 @@ export default function Chats() {
                   />
                 </svg>
 
-                {/* Sender First & Last Name and Email */}
-                <div className="ml-2 flex-1">
-                  <p className="font-medium text-gray-800">
-                    {sender.first_name && sender.last_name
-                      ? `${sender.first_name} ${sender.last_name}`
-                      : "Unknown"}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {sender.email || "No Email"}
+                {/* Sender First & Last Name and Latest Message */}
+                <div className="ml-2 flex-1 flex flex-col">
+                  <div className="flex justify-between items-center">
+                    <p className="font-medium text-gray-800">
+                      {sender.first_name && sender.last_name
+                        ? `${sender.first_name} ${sender.last_name}`
+                        : "Unknown"}
+                    </p>
+                    <p className="text-sm text-gray-500 ml-auto">
+                      {sender.latestMessageTimeFormatted}
+                    </p>
+                  </div>
+
+                  {/* Latest message below the name */}
+                  <p className="text-sm text-gray-500 mt-1">
+                    {sender.latestMessage || "No message yet"}
                   </p>
                 </div>
               </div>
