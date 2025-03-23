@@ -2,7 +2,7 @@ import React from "react";
 import { useAuth } from "@/context/AuthContext";
 
 export default function Topbar() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   return (
     <div className="h-[6.25rem] border-b border-gray-200 flex items-center justify-between px-[3.94rem]">
@@ -36,12 +36,6 @@ export default function Topbar() {
             <h1 className="font-semibold">{user.username || 'User'}</h1>
           </div>
           
-          <button 
-            onClick={logout}
-            className="text-sm text-gray-600 hover:text-gray-900"
-          >
-            Logout
-          </button>
         </div>
       ) : (
         <div>

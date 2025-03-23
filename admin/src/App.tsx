@@ -7,26 +7,31 @@ import Orders from './pages/Orders';
 import Products from './pages/Products';
 import Topbar from './components/Topbar';
 import Login from './pages/Login';
+import {  useAuth } from './context/AuthContext';
 
 function App() {
+    const { isAuthenticated } = useAuth();
+
     return (
-        <Router>
-            <div className="flex flex-row h-screen overflow-hidden">
-                <Sidebar />
-                <div className="flex-grow flex flex-col">
-                  <Topbar />
-                  <div className=' flex-grow overflow-auto h-full'>
-                    <Routes>
-                          <Route path="/dashboard" element={<Dashboard />} />
-                          <Route path="/orders" element={<Orders />} />
-                          <Route path="/products" element={<Products />} />
-                          <Route path="/chats" element={<Chats />} />
-                            <Route path="/" element={<Login />} />
-                      </Routes>
-                  </div>
-                </div>
-            </div>
-        </Router>
+            <Router>
+                {isAuthenticated ? (
+                    <div className="flex flex-row h-screen overflow-hidden">
+                        <Sidebar />
+                        <div className="flex-grow flex flex-col">
+                            <Topbar />
+                            <div className="flex-grow overflow-auto h-full">
+                                <Routes>
+                                    <Route path="/dashboard" element={<Dashboard />} />
+                                    <Route path="/orders" element={<Orders />} />
+                                    <Route path="/products" element={<Products />} />
+                                    <Route path="/chats" element={<Chats />} />                                </Routes>
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <Login />
+                )}
+            </Router>
     );
 }
 

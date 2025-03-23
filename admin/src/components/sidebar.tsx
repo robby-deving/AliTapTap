@@ -1,5 +1,7 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
+import { useAuth } from "@/context/AuthContext";
+
 
 export default function Sidebar() {
     const location = useLocation();
@@ -8,6 +10,8 @@ export default function Sidebar() {
     const isProducts = location.pathname === '/products';
     const isChats = location.pathname === '/chats';
     const isLogout = location.pathname === '/logout';
+    const { logout } = useAuth();
+    
 
     return (
         <div className='bg-white h-full min-w-[14rem] max-w-3xs border-r border-gray-300'>
@@ -91,12 +95,15 @@ export default function Sidebar() {
                     </li>
                     <li className='flex items-center gap-8'>
                         <div className={`h-[60px] w-[6px] rounded-r-lg ${isLogout ? 'bg-[#FEE803]' : 'bg-white'}`}></div>
-                        <a href='/logout' className='flex gap-5'>
+                        <button 
+                            onClick={logout}
+                            className='flex gap-5 cursor-pointer hover:opacity-80'
+                        >
                             <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25" fill="none">
                                 <path d="M0 25V0H12.5V2.77778H2.77778V22.2222H12.5V25H0ZM18.0556 19.4444L16.1458 17.4306L19.6875 13.8889H8.33333V11.1111H19.6875L16.1458 7.56944L18.0556 5.55556L25 12.5L18.0556 19.4444Z" fill="#232323"/>
                             </svg>
                             <h1 className={`text-lg font-semibold ${isLogout ? 'text-[#FEE803]' : 'text-[#231F20]'}`}>Logout</h1>
-                        </a>
+                        </button>
                     </li>
                 </ul>
             </div>
