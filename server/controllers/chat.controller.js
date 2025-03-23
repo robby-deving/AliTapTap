@@ -69,7 +69,7 @@ const getSendersByReceiver = async (req, res) => {
     const senderIds = [...new Set(messages.map(msg => msg.senderId.toString()))];
 
     // Fetch user details for the unique sender IDs
-    const senders = await User.find({ _id: { $in: senderIds } }).select("name email"); // Adjust fields as needed
+    const senders = await User.find({ _id: { $in: senderIds } }).select("_id first_name last_name email");
 
     res.status(200).json({ senders });
   } catch (error) {
@@ -78,4 +78,55 @@ const getSendersByReceiver = async (req, res) => {
   }
 };
 
-module.exports = { sendMessage, getMessages, getSendersByReceiver };
+const getSendersWithLastMessage = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    // Ensure userId is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ error: "Invalid user ID" });
+    }
+
+    const sendersWithLastMessage = await Chat.aggregate([
+      { $match: { receiverId: new mongoose.Types.ObjectId(userId) } }, // Match messages sent to the logged-in user
+      { $sort: { createdAt: -1 } }, // Sort by newest first
+      {
+        $group: {
+          _id: "$senderId",
+          lastMessage: { $first: "$message" }, // Get the most recent message
+          lastMessageTime: { $first: "$createdAt" }, // Get last message timestamp
+        },
+      },
+      {
+        $lookup: {
+          from: "users", // Join with the users collection
+          localField: "_id", // senderId from messages
+          foreignField: "_id", // _id from users
+          as: "senderInfo",
+        },
+      },
+      { $unwind: "$senderInfo" }, // Convert array to object
+      {
+        $project: {
+          _id: "$senderInfo._id",
+          name: "$senderInfo.name",
+          email: "$senderInfo.email",
+          lastMessage: 1,
+          lastMessageTime: 1,
+        },
+      },
+      { $sort: { lastMessageTime: -1 } }, // Sort senders by most recent message
+    ]);
+
+    if (!sendersWithLastMessage.length) {
+      return res.status(404).json({ success: false, message: "No senders found with messages." });
+    }
+
+    res.status(200).json({ success: true, senders: sendersWithLastMessage });
+  } catch (error) {
+    console.error("Error fetching senders:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+module.exports = { sendMessage, getMessages, getSendersByReceiver, getSendersWithLastMessage };

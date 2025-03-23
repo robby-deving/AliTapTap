@@ -6,15 +6,17 @@ const socket = io("http://localhost:4000"); // Backend URL
 export default function Chats() {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<
-  { senderId: string; message: string; fromAdmin?: boolean }[]
->([]);
+    { senderId: string; message: string; fromAdmin?: boolean }[]
+  >([]);
   const [senders, setSenders] = useState<
-    { _id: string; name: string; email: string }[] // ✅ Use `_id` instead of `id`
+    { _id: string; first_name: string; last_name: string; email: string }[]
   >([]);
   const [selectedSender, setSelectedSender] = useState<{
     _id: string;
-    name: string;
+    first_name: string;
+    last_name: string;
     email: string;
+    name: string;
   } | null>(null);
 
   const userId = localStorage.getItem("userId"); // Logged-in user's ID
@@ -39,7 +41,8 @@ export default function Chats() {
         setSenders(
           data.senders.map((sender: any) => ({
             _id: sender._id, // ✅ Ensure `_id` is used
-            name: sender.name,
+            first_name: sender.first_name, // ✅ Fetch `first_name`
+            last_name: sender.last_name, // ✅ Fetch `last_name`
             email: sender.email,
           }))
         );
@@ -172,9 +175,16 @@ export default function Chats() {
                 className={`flex items-center gap-2 border-b-2 border-gray-200 p-3 w-full cursor-pointer ${
                   selectedSender?._id === sender._id ? "bg-gray-100" : ""
                 }`}
-                onClick={() => setSelectedSender(sender)} // ✅ Matches expected type
+                onClick={() =>
+                  setSelectedSender({
+                    _id: sender._id,
+                    first_name: sender.first_name,
+                    last_name: sender.last_name,
+                    email: sender.email,
+                    name: `${sender.first_name} ${sender.last_name}`, // Add name
+                  })
+                }
               >
-                <p>{sender.name}</p>
                 {/* Profile Icon (Replace with sender.image if available) */}
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -199,10 +209,12 @@ export default function Chats() {
                   />
                 </svg>
 
-                {/* Sender Name & Email */}
+                {/* Sender First & Last Name and Email */}
                 <div className="ml-2 flex-1">
                   <p className="font-medium text-gray-800">
-                    {sender.name || "Unknown"}
+                    {sender.first_name && sender.last_name
+                      ? `${sender.first_name} ${sender.last_name}`
+                      : "Unknown"}
                   </p>
                   <p className="text-sm text-gray-500">
                     {sender.email || "No Email"}
@@ -270,7 +282,11 @@ export default function Chats() {
               />
             </svg>
             <div className="leading-tight ml-1.5">
-              <p className="text-lg font-semibold">Shakira Regalado</p>
+              <p className="text-lg font-semibold">
+                {selectedSender
+                  ? `${selectedSender.first_name} ${selectedSender.last_name}`
+                  : "Unknown"}
+              </p>
               <p className="text-sm text-gray-500">Active Now</p>
             </div>
           </div>
