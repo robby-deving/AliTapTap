@@ -157,7 +157,7 @@ export default function login() {
                       type='password'
                     />
 
-                    <TouchableOpacity className="self-end mt-4">
+                    <TouchableOpacity className="self-end mt-4" onPress={() => router.push('/forgotPassword')}>
                       <Text className="text-gray-500">Forgot Password?</Text>
                     </TouchableOpacity>
 
