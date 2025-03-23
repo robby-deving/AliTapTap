@@ -77,18 +77,40 @@ export default function Chats() {
     fetchMessages();
   }, [selectedSender, userId]);
 
-  const sendMessage = () => {
-    if (message.trim() !== "") {
-      const testMessage = {
-        senderId: "67caa10d3e7138c6cf4d6101",
-        receiverId: "67c00e4097fb8a5aeb426db5",
-        message: message,
-      };
+  const sendMessage = async () => {
+    if (!message.trim() || !selectedSender || !userId) return;
   
-      console.log("Sending test message:", testMessage);
+    const chatMessage = {
+      senderId: selectedSender._id, // ✅ Sender is the selected sender
+      receiverId: userId, // ✅ Receiver is the logged-in user
+      message: message,
+      fromAdmin: true, // ✅ Hardcoded as true
+    };
   
-      socket.emit("message", testMessage); // ✅ Send message
+    try {
+      // Send message to backend
+      const response = await fetch("http://localhost:4000/api/v1/chat/send", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(chatMessage),
+      });
+  
+      const data = await response.json();
+      console.log("Response from backend:", data);
+  
+      if (!response.ok) {
+        console.error("Failed to send message:", data);
+        return;
+      }
+  
+      // Emit message to socket
+      socket.emit("message", chatMessage);
+  
       setMessage(""); // ✅ Clear input
+    } catch (error) {
+      console.error("Error sending message:", error);
     }
   };
   

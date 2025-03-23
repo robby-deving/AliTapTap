@@ -12,7 +12,7 @@ import { Header } from "../components/Header";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Define constants for IP address and host
-const SERVER_IP = "192.168.1.9"; // Change this when needed
+const SERVER_IP = "192.168.1.4"; // Change this when needed
 const SERVER_PORT = "4000";
 const API_BASE_URL = `http://${SERVER_IP}:${SERVER_PORT}`;
 const SOCKET_URL = `http://${SERVER_IP}:${SERVER_PORT}`;
@@ -21,7 +21,12 @@ export default function ChatScreen() {
   const [chatMessage, setChatMessage] = useState("");
   const [socket, setSocket] = useState<Socket | null>(null);
   const [messages, setMessages] = useState<
-    { senderId: string; receiverId: string; message: string }[]
+    {
+      senderId: string;
+      receiverId: string;
+      message: string;
+      fromAdmin?: boolean;
+    }[]
   >([]);
   const [senderId, setSenderId] = useState<string | null>(null);
   const receiverId = "67c00e4097fb8a5aeb426db5"; // Fixed receiverId
@@ -35,7 +40,7 @@ export default function ChatScreen() {
           return;
         }
         setSenderId(storedSenderId);
-  
+
         const response = await fetch(
           `${API_BASE_URL}/api/v1/chat/messages/${storedSenderId}/${receiverId}`
         );
@@ -49,19 +54,19 @@ export default function ChatScreen() {
         console.error("Error fetching messages:", error);
       }
     };
-  
+
     fetchMessages();
-  
+
     const newSocket = io(SOCKET_URL);
     setSocket(newSocket);
-  
+
     newSocket.on("connect", () => {
       console.log("✅ Connected to server");
     });
-  
+
     newSocket.on("message", (msg) => {
       console.log("Received message:", msg);
-  
+
       // Ensure the message is not already in the state
       setMessages((prevMessages) => {
         if (!prevMessages.some((m) => m.message === msg.message)) {
@@ -70,7 +75,7 @@ export default function ChatScreen() {
         return prevMessages;
       });
     });
-  
+
     return () => {
       newSocket.disconnect();
     };
@@ -78,7 +83,7 @@ export default function ChatScreen() {
 
   const submitChatMessage = async () => {
     if (!socket || chatMessage.trim() === "" || !senderId) return;
-  
+
     try {
       const response = await fetch(`${API_BASE_URL}/api/v1/chat/send`, {
         method: "POST",
@@ -89,18 +94,26 @@ export default function ChatScreen() {
           senderId,
           receiverId,
           message: chatMessage,
+          fromAdmin: false, // Hardcoded to false
         }),
       });
-  
+
       const data = await response.json();
       console.log("Response from backend:", data);
-  
+
       if (!response.ok) {
         console.error("Failed to send message:", data);
         return;
       }
-  
-      socket.emit("message", { senderId, receiverId, message: chatMessage }); // Emit message to socket
+
+      // Emit message to socket
+      socket.emit("message", {
+        senderId,
+        receiverId,
+        message: chatMessage,
+        fromAdmin: false, // Ensuring consistency in socket message
+      });
+
       setChatMessage("");
     } catch (error) {
       console.error("Error sending message:", error);
@@ -119,23 +132,25 @@ export default function ChatScreen() {
           <FlatList
             data={messages}
             keyExtractor={(item, index) => index.toString()}
-            renderItem={({ item }) => (
-              <View
-                className={`flex-row ${
-                  item.senderId === senderId ? "justify-end" : "justify-start"
-                } mb-2`}
-              >
-                <Text
-                  className={`${
-                    item.senderId === senderId
-                      ? "bg-yellow-200"
-                      : "bg-gray-300"
-                  } py-3 rounded-2xl min-h-12 text-xl px-4 max-w-[75%] text-black`}
+            renderItem={({ item }) => {
+              const isLeftAligned = item.fromAdmin;
+
+              return (
+                <View
+                  className={`flex-row ${
+                    isLeftAligned ? "justify-start" : "justify-end"
+                  } mb-2`}
                 >
-                  {item.message}
-                </Text>
-              </View>
-            )}
+                  <Text
+                    className={`${
+                      isLeftAligned ? "bg-gray-200" : "bg-yellow-200"
+                    } py-3 rounded-2xl min-h-12 text-xl px-4 max-w-[75%] text-black`}
+                  >
+                    {item.message}
+                  </Text>
+                </View>
+              );
+            }}
             contentContainerStyle={{ flexGrow: 1, justifyContent: "flex-end" }}
             keyboardShouldPersistTaps="handled"
           />

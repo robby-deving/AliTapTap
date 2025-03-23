@@ -4,9 +4,17 @@ const User = require("../Models/user.model");
 
 const sendMessage = async (req, res) => {
   try {
-    const { senderId, receiverId, message } = req.body;
-    const newMessage = new Chat({ senderId, receiverId, message });
+    const { senderId, receiverId, message, fromAdmin } = req.body; 
+
+    const newMessage = new Chat({ 
+      senderId, 
+      receiverId, 
+      message, 
+      fromAdmin 
+    });
+
     await newMessage.save();
+    
     res.status(201).json(newMessage);
   } catch (error) {
     res.status(500).json({ error: error.message });
