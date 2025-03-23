@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import Orders from './pages/Orders';
 import Products from './pages/Products';
 import Login from './pages/Login';
+import Chattry from './pages/chattry';
 import Topbar from './components/Topbar';
 
 function Layout() {
@@ -25,6 +26,7 @@ function Layout() {
                         <Route path="/products" element={<Products />} />
                         <Route path="/chats" element={<Chats />} />
                         <Route path="/login" element={<Login />} />
+                        <Route path="/chattry" element={<Chattry />} />
                     </Routes>
                 </div>
             </div>

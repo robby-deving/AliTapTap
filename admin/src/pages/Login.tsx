@@ -14,20 +14,23 @@ export default function Login() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-
-      const data = await response.json();
-
+  
+      const result = await response.json();
+      console.log("Login response:", result); // Debugging
+  
       if (!response.ok) {
-        throw new Error(data.message || "Login failed");
+        throw new Error(result.message || "Login failed");
       }
-
-      // ✅ Store user data in localStorage
-      localStorage.setItem("userData", JSON.stringify(data));
-      localStorage.setItem("userId", data._id);
-
-      alert("Login Successful!"); // or use a better UI feedback
-
-      navigate("/dashboard");
+  
+      if (!result.data || !result.data._id) {
+        throw new Error("User ID is missing in response");
+      }
+  
+      localStorage.setItem("userData", JSON.stringify(result.data)); // Store the entire user object
+      localStorage.setItem("userId", result.data._id); // Store only the userId separately
+  
+      alert("Login Successful!");
+      navigate("/chats");
     } catch (err: any) {
       setError(err.message);
     }
