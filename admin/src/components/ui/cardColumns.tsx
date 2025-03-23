@@ -1,10 +1,14 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Edit, Trash } from "lucide-react"; // Removed Share icon
+import { MoreHorizontal, Edit, Trash } from "lucide-react";
 import { ArrowUpDown } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+import { ModalOverlay, SuccessModalContent } from '../AddModalDesign';
+import productDeleteConfirmationImage from '../../assets/deleteconfirmsvg.svg';
+import productDeleteSuccessImage from '../../assets/deletesuccess.svg';
+import { EditCardModal } from "@/components/ui/EditProductModal";
 
-// CardDesign type definition
+// Defining the types for CardDesign
 export type CardDesign = {
   _id: string;
   front_image: string;
@@ -12,11 +16,14 @@ export type CardDesign = {
   name: string;
   materials: Record<string, { price_per_unit: number }>;
   created_at: string;
-  modified_at?: string; // Added Modified At
+  modified_at?: string;
 };
 
+// ActionDropdown component for the "Edit" and "Delete" options
 const ActionDropdown = ({ onEdit, onDelete, cardId }: { onEdit: () => void; onDelete: () => void; cardId: string }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); 
+  const [isDeleteSuccessModalOpen, setIsDeleteSuccessModalOpen] = useState(false); 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -31,25 +38,34 @@ const ActionDropdown = ({ onEdit, onDelete, cardId }: { onEdit: () => void; onDe
     };
   }, []);
 
-  const handleDelete = async () => {
-    try {
-      if (window.confirm("Are you sure you want to delete this item?")) {
-        const response = await fetch(`http://localhost:4000/api/v1/card-designs/admin/delete-card-product/${cardId}`, {
-          method: "DELETE",
-        });
-        const data = await response.json();
+  const handleDelete = () => {
+    setIsDeleteModalOpen(true); 
+  };
 
-        if (response.ok) {
-          onDelete();
-          alert("Product successfully deleted");
-        } else {
-          alert(`Failed to delete: ${data.message}`);
-        }
+  const handleCloseDeleteModal = () => {
+    setIsDeleteModalOpen(false); 
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      const response = await fetch(`http://localhost:4000/api/v1/card-designs/admin/delete-card-product/${cardId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        onDelete(); 
+        setIsDeleteModalOpen(false); 
+        setTimeout(() => {
+          setIsDeleteSuccessModalOpen(true); 
+        }, 300); 
       }
     } catch (error) {
       console.error("Error deleting product:", error);
-      alert("An error occurred while deleting the product.");
     }
+  };
+
+  const handleCloseDeleteSuccessModal = () => {
+    setIsDeleteSuccessModalOpen(false); 
   };
 
   return (
@@ -69,11 +85,94 @@ const ActionDropdown = ({ onEdit, onDelete, cardId }: { onEdit: () => void; onDe
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      {isDeleteModalOpen && (
+        <ModalOverlay zIndex={1000}>
+          <SuccessModalContent>
+            <img
+              src={productDeleteConfirmationImage}
+              alt="Delete Confirmation"
+              style={{ width: '1190px', height: '115px', marginBottom: '50px', marginTop: '50px'}} // Adjusted size
+            />
+            <Button
+              onClick={handleCloseDeleteModal}
+              className="custom-close-btn"
+              style={{
+                backgroundColor: '#E4E4E7',
+                color: '#FFFFFF',
+                transition: 'background-color 0.3s ease',
+                width: '150px',
+                height: '40px',
+                marginRight: '20px',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#333';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#E4E4E7';
+              }}
+            >
+              Discard
+            </Button>
+            <Button
+              onClick={handleConfirmDelete} 
+              className="custom-close-btn"
+              style={{
+                backgroundColor: '#F15A29',
+                color: '#FFFFFF',
+                transition: 'background-color 0.3s ease',
+                width: '150px',
+                height: '40px',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#F13B00';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#F15A29';
+              }}
+            >
+              Yes
+            </Button>
+          </SuccessModalContent>
+        </ModalOverlay>
+      )}
+
+      {/* Success Confirmation Modal */}
+      {isDeleteSuccessModalOpen && (
+        <ModalOverlay zIndex={2000}>
+          <SuccessModalContent>
+            <img
+              src={productDeleteSuccessImage}
+              alt="Delete Success"
+              style={{ width: '1190px', height: '115px', marginBottom: '50px', marginTop: '50px'}} // Adjusted size
+            />
+            <Button
+              onClick={handleCloseDeleteSuccessModal}
+              className="custom-close-btn"
+              style={{
+                backgroundColor: '#E4E4E7',
+                color: '#FFFFFF',
+                transition: 'background-color 0.3s ease',
+                width: '150px',
+                height: '40px',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#333';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#E4E4E7';
+              }}
+            >
+              Close
+            </Button>
+          </SuccessModalContent>
+        </ModalOverlay>
+      )}
     </div>
   );
 };
 
-// Column definition for the table
 export const cardColumns: ColumnDef<CardDesign>[] = [
   {
     accessorKey: "_id",
@@ -182,17 +281,33 @@ export const cardColumns: ColumnDef<CardDesign>[] = [
     id: "actions",
     header: "Actions",
     cell: ({ row }) => {
+      const [isEditOpen, setIsEditOpen] = useState(false);
+      const [cardData, setCardData] = useState<CardDesign | null>(null);
+
       const handleEdit = () => {
-        console.log("Edit clicked", row.original); // Replace with actual edit functionality
+        setCardData(row.original);
+        setIsEditOpen(true);
       };
 
       const handleDelete = () => {
-        if (window.confirm("Are you sure you want to delete this item?")) {
-          console.log("Delete clicked", row.original); // Replace with actual delete functionality
-        }
+        // Handle delete logic here
       };
 
-      return <ActionDropdown onEdit={handleEdit} onDelete={handleDelete} cardId={row.original._id} />;
+      return (
+        <>
+          <ActionDropdown onEdit={handleEdit} onDelete={handleDelete} cardId={row.original._id} />
+          {isEditOpen && cardData && (
+            <EditCardModal
+              card={cardData}
+              onClose={() => setIsEditOpen(false)}
+              onSuccess={() => {
+                setIsEditOpen(false);
+                onUpdate(); // refresh list after success
+              }}
+            />
+          )}
+        </>
+      );
     },
   },
 ];

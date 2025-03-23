@@ -1,33 +1,4 @@
-// ModalDesign.tsx
-
 import styled from 'styled-components';
-
-export const Dropzone = styled.div`
-  border: 2px dashed #ddd;
-  border-radius: 10px;
-  padding: 20px;
-  text-align: center;
-  cursor: pointer;
-  background-color: #f9f9f9;
-  transition: border-color 0.3s;
-  &:hover {
-    border-color: #007bff;
-  }
-`;
-
-export const ImagePreview = styled.img`
-  max-width: 100px;
-  height: auto;
-  margin-top: 10px;
-`;
-
-export const UploadText = styled.p`
-  color: #949494;
-  font-size: 12px;
-  margin-top: 20px;
-  height: 40px; /* Set a larger height if needed */
-  
-`;
 
 export const ModalOverlay = styled.div<{ zIndex: number }>`
   position: fixed;
@@ -72,7 +43,7 @@ export const CloseButton = styled.button`
   position: absolute;
   top: 15px;
   right: 15px;
-  font-size: 24px;
+  font-size: 16px;
   cursor: pointer;
   color: #888;
   background-color: transparent;
@@ -80,6 +51,15 @@ export const CloseButton = styled.button`
   &:hover {
     color: #333;
   }
+`;
+
+export const ModalTitle = styled.h2`
+  font-size: 22px;
+  font-weight: bold;
+  color: #000000;
+  text-align: left;
+  margin-bottom: 12px;
+  font-family: 'Helvetica', 'Arial', sans-serif;
 `;
 
 export const Input = styled.input`
@@ -108,7 +88,7 @@ export const Button = styled.button`
   padding: 12px;
   font-size: 16px;
   color: white;
-  background-color: #FDDF05;
+  background-color: #fdff05;
   border-radius: 8px;
   border: none;
   cursor: pointer;
@@ -120,23 +100,30 @@ export const Button = styled.button`
   }
 `;
 
-export const CloseButtonStyled = styled(Button)`
-  background-color: #C0C0C0; /* gray background */
-  color: #FFFFFF; /* white text */
-  margin-top: 10px; /* Adjust margin if needed */
-
+export const Dropzone = styled.div`
+  border: 2px dashed #ddd;
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  background-color: #f9f9f9;
+  transition: border-color 0.3s;
   &:hover {
-    background-color: #A0A0A0; /* darker gray on hover */
+    border-color: #007bff;
   }
 `;
 
-export const ModalTitle = styled.h2`
-  font-size: 22px;
-  font-weight: bold; 
-  color: #000000; /* Black color */
-  text-align: left; /* Aligns text to the left */
-  margin-bottom: 12px;
-  font-family: 'Helvetica', 'Arial', sans-serif; /* Default general sans-serif font */
+export const ImagePreview = styled.img`
+  max-width: 100px;
+  height: auto;
+  margin-top: 10px;
+`;
+
+export const UploadText = styled.p`
+  color: #949494;
+  font-size: 12px;
+  margin-top: 20px;
+  height: 40px; /* Adjust height as needed */
 `;
 
 export const SuccessModalContent = styled.div`
@@ -149,4 +136,14 @@ export const SuccessModalContent = styled.div`
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
   z-index: 60;
   text-align: center;
+`;
+
+export const CloseButtonStyled = styled(Button)`
+  background-color: #c0c0c0; /* gray background */
+  color: #ffffff; /* white text */
+  margin-top: 10px; /* Adjust margin if needed */
+
+  &:hover {
+    background-color: #a0a0a0; /* darker gray on hover */
+  }
 `;
