@@ -341,93 +341,103 @@ export default function Chats() {
         {/* Chat Window */}
         <div className="w-3/5 h-3/4 rounded-2xl border-2 border-gray-200 flex flex-col">
           {/* Chat Info Section */}
-          <div className="flex items-center gap-3 p-4 border-b border-gray-300 px-7">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="44"
-              height="44"
-              viewBox="0 0 44 44"
-              fill="none"
-            >
-              <path
-                d="M22 2C10.954 2 2 10.954 2 22C2 33.046 10.954 42 22 42C33.046 42 42 33.046 42 22C42 10.954 33.046 2 22 2Z"
-                stroke="#232323"
-                stroke-width="3"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-              <path
-                d="M6.54199 34.6921C6.54199 34.6921 11 29.0001 22 29.0001C33 29.0001 37.46 34.6921 37.46 34.6921M22 22.0001C23.5913 22.0001 25.1174 21.368 26.2426 20.2428C27.3679 19.1175 28 17.5914 28 16.0001C28 14.4088 27.3679 12.8827 26.2426 11.7575C25.1174 10.6323 23.5913 10.0001 22 10.0001C20.4087 10.0001 18.8826 10.6323 17.7574 11.7575C16.6321 12.8827 16 14.4088 16 16.0001C16 17.5914 16.6321 19.1175 17.7574 20.2428C18.8826 21.368 20.4087 22.0001 22 22.0001Z"
-                stroke="#232323"
-                stroke-width="3"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-            <div className="leading-tight ml-1.5">
-              <p className="text-lg font-semibold">
-                {selectedSender
-                  ? `${selectedSender.first_name} ${selectedSender.last_name}`
-                  : "Unknown"}
-              </p>
-              <p className="text-sm text-gray-500">Active Now</p>
+          {selectedSender && (
+            <div className="flex items-center gap-3 p-4 border-b border-gray-300 px-7">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="44"
+                height="44"
+                viewBox="0 0 44 44"
+                fill="none"
+              >
+                <path
+                  d="M22 2C10.954 2 2 10.954 2 22C2 33.046 10.954 42 22 42C33.046 42 42 33.046 42 22C42 10.954 33.046 2 22 2Z"
+                  stroke="#232323"
+                  stroke-width="3"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M6.54199 34.6921C6.54199 34.6921 11 29.0001 22 29.0001C33 29.0001 37.46 34.6921 37.46 34.6921M22 22.0001C23.5913 22.0001 25.1174 21.368 26.2426 20.2428C27.3679 19.1175 28 17.5914 28 16.0001C28 14.4088 27.3679 12.8827 26.2426 11.7575C25.1174 10.6323 23.5913 10.0001 22 10.0001C20.4087 10.0001 18.8826 10.6323 17.7574 11.7575C16.6321 12.8827 16 14.4088 16 16.0001C16 17.5914 16.6321 19.1175 17.7574 20.2428C18.8826 21.368 20.4087 22.0001 22 22.0001Z"
+                  stroke="#232323"
+                  stroke-width="3"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              <div className="leading-tight ml-1.5">
+                <p className="text-lg font-semibold">
+                  {selectedSender
+                    ? `${selectedSender.first_name} ${selectedSender.last_name}`
+                    : "Unknown"}
+                </p>
+                <p className="text-sm text-gray-500">Active Now</p>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Chat Content */}
           <div className="flex-1 p-4 overflow-y-auto">
-            {messages.map((msg, index) => {
-              const isAdmin = msg.fromAdmin; // ✅ Check if message is from admin
-              return (
-                <div
-                  key={index}
-                  className={`flex ${
-                    isAdmin ? "justify-end" : "justify-start"
-                  } mb-2`}
-                >
-                  <p
-                    className={`${
-                      isAdmin
-                        ? "bg-yellow-100 text-black"
-                        : "bg-gray-100 text-black"
-                    } py-2 px-4 rounded-lg max-w-[75%]`}
+            {!selectedSender ? (
+              <div className="flex items-center justify-center h-full">
+                <p className="text-center text-gray-500">Select a chat</p>
+              </div>
+            ) : (
+              messages.map((msg, index) => {
+                const isAdmin = msg.fromAdmin; // ✅ Check if message is from admin
+                return (
+                  <div
+                    key={index}
+                    className={`flex ${
+                      isAdmin ? "justify-end" : "justify-start"
+                    } mb-2`}
                   >
-                    {msg.message}
-                  </p>
-                </div>
-              );
-            })}
+                    <p
+                      className={`${
+                        isAdmin
+                          ? "bg-yellow-100 text-black"
+                          : "bg-gray-100 text-black"
+                      } py-2 px-4 rounded-lg max-w-[75%]`}
+                    >
+                      {msg.message}
+                    </p>
+                  </div>
+                );
+              })
+            )}
           </div>
 
           {/* Message Input Section */}
-          <div className="flex items-center gap-3 p-4 border-t border-gray-300 px-7">
-            <input
-              type="text"
-              placeholder="Type a message..."
-              className="flex-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-              value={message}
-              onChange={(e) => {
-                console.log("Message input:", e.target.value);
-                setMessage(e.target.value);
-              }}
-            />
-            <button type="button" onClick={sendMessage} className="p-2">
-              <span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="20"
-                  viewBox="0 0 24 20"
-                  fill="none"
-                >
-                  <path
-                    d="M0 20V0L24 10L0 20ZM2.52632 16.25L17.4947 10L2.52632 3.75V8.125L10.1053 10L2.52632 11.875V16.25Z"
-                    fill="black"
-                  />
-                </svg>
-              </span>
-            </button>
-          </div>
+          {selectedSender && (
+            <div className="flex items-center gap-3 p-4 border-t border-gray-300 px-7">
+              <input
+                type="text"
+                placeholder="Type a message..."
+                className="flex-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                value={message}
+                onChange={(e) => {
+                  console.log("Message input:", e.target.value);
+                  setMessage(e.target.value);
+                }}
+              />
+              <button type="button" onClick={sendMessage} className="p-2">
+                <span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="20"
+                    viewBox="0 0 24 20"
+                    fill="none"
+                  >
+                    <path
+                      d="M0 20V0L24 10L0 20ZM2.52632 16.25L17.4947 10L2.52632 3.75V8.125L10.1053 10L2.52632 11.875V16.25Z"
+                      fill="black"
+                    />
+                  </svg>
+                </span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
