@@ -6,11 +6,11 @@ const socket = io("http://localhost:4000"); // Backend URL
 export default function Chats() {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<
-    { senderId: string; message: string }[]
-  >([]);
-  const [senders, setSenders] = useState<
-  { _id: string; name: string; email: string }[] // ✅ Use `_id` instead of `id`
+  { senderId: string; message: string; fromAdmin?: boolean }[]
 >([]);
+  const [senders, setSenders] = useState<
+    { _id: string; name: string; email: string }[] // ✅ Use `_id` instead of `id`
+  >([]);
   const [selectedSender, setSelectedSender] = useState<{
     _id: string;
     name: string;
@@ -54,39 +54,44 @@ export default function Chats() {
   // Fetch chat messages when a sender is selected
   useEffect(() => {
     if (!selectedSender) return;
-  
+
     const fetchMessages = async () => {
       try {
-        console.log("Fetching messages for sender:", selectedSender._id, "and receiver:", userId);
-  
+        console.log(
+          "Fetching messages for sender:",
+          selectedSender._id,
+          "and receiver:",
+          userId
+        );
+
         const response = await fetch(
           `http://localhost:4000/api/v1/chat/messages/${selectedSender._id}/${userId}`
         );
-  
+
         if (!response.ok) throw new Error("Failed to fetch messages");
-  
+
         const data = await response.json();
         console.log("Fetched messages:", data);
-  
+
         setMessages(data.messages || []);
       } catch (error) {
         console.error("Error fetching messages:", error);
       }
     };
-  
+
     fetchMessages();
   }, [selectedSender, userId]);
 
   const sendMessage = async () => {
     if (!message.trim() || !selectedSender || !userId) return;
-  
+
     const chatMessage = {
       senderId: selectedSender._id, // ✅ Sender is the selected sender
       receiverId: userId, // ✅ Receiver is the logged-in user
       message: message,
       fromAdmin: true, // ✅ Hardcoded as true
     };
-  
+
     try {
       // Send message to backend
       const response = await fetch("http://localhost:4000/api/v1/chat/send", {
@@ -96,37 +101,37 @@ export default function Chats() {
         },
         body: JSON.stringify(chatMessage),
       });
-  
+
       const data = await response.json();
       console.log("Response from backend:", data);
-  
+
       if (!response.ok) {
         console.error("Failed to send message:", data);
         return;
       }
-  
+
       // Emit message to socket
       socket.emit("message", chatMessage);
-  
+
       setMessage(""); // ✅ Clear input
     } catch (error) {
       console.error("Error sending message:", error);
     }
   };
-  
+
   // ✅ Only update messages inside the socket listener
   useEffect(() => {
     socket.on("message", (msg) => {
       console.log("Received message:", msg);
-  
+
       if (!msg || typeof msg !== "object" || !msg.message) {
         console.error("Invalid message received:", msg);
         return;
       }
-  
+
       setMessages((prevMessages) => [...prevMessages, msg]); // ✅ Append only once
     });
-  
+
     return () => {
       socket.off("message"); // Cleanup on unmount
     };
@@ -160,16 +165,16 @@ export default function Chats() {
           </div>
 
           {/* Messages List */}
-          <div className="flex-1 flex flex-col gap-2 p-3 overflow-auto">
+          <div className="flex-1 flex flex-col gap-2 p-1 overflow-auto">
             {senders.map((sender) => (
               <div
-              key={sender._id} // ✅ Use `_id`
-              className={`flex items-center gap-2 border-b-2 border-gray-200 p-3 w-full cursor-pointer ${
-                selectedSender?._id === sender._id ? "bg-gray-100" : ""
-              }`}
-              onClick={() => setSelectedSender(sender)} // ✅ Matches expected type
-            >
-              <p>{sender.name}</p>
+                key={sender._id} // ✅ Use `_id`
+                className={`flex items-center gap-2 border-b-2 border-gray-200 p-3 w-full cursor-pointer ${
+                  selectedSender?._id === sender._id ? "bg-gray-100" : ""
+                }`}
+                onClick={() => setSelectedSender(sender)} // ✅ Matches expected type
+              >
+                <p>{sender.name}</p>
                 {/* Profile Icon (Replace with sender.image if available) */}
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -272,40 +277,55 @@ export default function Chats() {
 
           {/* Chat Content */}
           <div className="flex-1 p-4 overflow-y-auto">
-            {messages.map((msg, index) => (
-              <p key={index} className="text-gray-700 mb-2">
-                <span className="font-bold">{msg.senderId}: </span>{" "}
-                {msg.message}
-              </p>
-            ))}
+            {messages.map((msg, index) => {
+              const isAdmin = msg.fromAdmin; // ✅ Check if message is from admin
+              return (
+                <div
+                  key={index}
+                  className={`flex ${
+                    isAdmin ? "justify-end" : "justify-start"
+                  } mb-2`}
+                >
+                  <p
+                    className={`${
+                      isAdmin
+                        ? "bg-yellow-100 text-black"
+                        : "bg-gray-100 text-black"
+                    } py-2 px-4 rounded-lg max-w-[75%]`}
+                  >
+                    {msg.message}
+                  </p>
+                </div>
+              );
+            })}
           </div>
 
           {/* Message Input Section */}
           <div className="flex items-center gap-3 p-4 border-t border-gray-300 px-7">
-          <input
-  type="text"
-  placeholder="Type a message..."
-  className="flex-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-  value={message}
-  onChange={(e) => {
-    console.log("Message input:", e.target.value);
-    setMessage(e.target.value);
-  }}
-/>
+            <input
+              type="text"
+              placeholder="Type a message..."
+              className="flex-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              value={message}
+              onChange={(e) => {
+                console.log("Message input:", e.target.value);
+                setMessage(e.target.value);
+              }}
+            />
             <button type="button" onClick={sendMessage} className="p-2">
               <span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="20"
-                viewBox="0 0 24 20"
-                fill="none"
-              >
-                <path
-                  d="M0 20V0L24 10L0 20ZM2.52632 16.25L17.4947 10L2.52632 3.75V8.125L10.1053 10L2.52632 11.875V16.25Z"
-                  fill="black"
-                />
-              </svg>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="20"
+                  viewBox="0 0 24 20"
+                  fill="none"
+                >
+                  <path
+                    d="M0 20V0L24 10L0 20ZM2.52632 16.25L17.4947 10L2.52632 3.75V8.125L10.1053 10L2.52632 11.875V16.25Z"
+                    fill="black"
+                  />
+                </svg>
               </span>
             </button>
           </div>
