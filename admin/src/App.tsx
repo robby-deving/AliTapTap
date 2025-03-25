@@ -8,6 +8,7 @@ import Products from './pages/Products';
 import Login from './pages/Login';
 import Topbar from './components/Topbar';
 import Profile from './pages/Profile';
+import EditProfile from './pages/EditProfile';
 import {  useAuth } from './context/AuthContext';
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
                                     <Route path="/products" element={<Products />} />
                                     <Route path="/chats" element={<Chats />} />
                                     <Route path="/profile" element={<Profile />} />
+                                    <Route path="/edit-profile" element={<EditProfile />} />
 
                                 </Routes>
                             </div>
