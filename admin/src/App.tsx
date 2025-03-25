@@ -1,12 +1,12 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import Sidebar from './components/sidebar';
 import Chats from './pages/Chats';
 import Dashboard from './pages/Dashboard';
 import Orders from './pages/Orders';
 import Products from './pages/Products';
-import Topbar from './components/Topbar';
 import Login from './pages/Login';
+import Topbar from './components/Topbar';
 import Profile from './pages/Profile';
 import {  useAuth } from './context/AuthContext';
 

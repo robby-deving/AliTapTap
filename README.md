@@ -100,14 +100,15 @@ npm install body-parser
 npm install bcrypt      
 npm install jsonwebtoken 
 npm install express@4 socket.io
+npm install moment
 ```
 
 ### **4️⃣ Create a `.env` File**
 Inside the `server` directory, create a `.env` file and add:
 
 ```ini
-DB_URL=mongodb+srv://admin2:newpassword@alitaptap.uu5j7.mongodb.net/AliTapTapdb
-PORT=4000
+DB_URL=mongodb+srv://admin2:newpassword@alitaptap.uu5j7.mongodb.net/AliTapTapdb 
+PORT = 4000
 JWT_KEY=crashout
 ```
 

@@ -14,7 +14,6 @@ export default function Login() {
     e.preventDefault(); // Prevent form submission refresh
     setIsLoading(true);
     setError("");
-
     try {
       const response = await fetch("http://localhost:4000/api/v1/auth/login", {
         method: "POST",

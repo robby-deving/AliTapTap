@@ -1,7 +1,11 @@
-const mongoose = require("mongoose"); // ✅ Use require instead of import
+const mongoose = require("mongoose");
 
 const chatSchema = new mongoose.Schema(
   {
+    fromAdmin: {
+      type: Boolean,
+      default: false, // False means message is from a regular user
+    },
     senderId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -20,4 +24,4 @@ const chatSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Chat", chatSchema); // ✅ Use module.exports instead of export default
+module.exports = mongoose.model("Chat", chatSchema); 
