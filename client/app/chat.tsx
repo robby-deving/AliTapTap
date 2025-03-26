@@ -14,9 +14,13 @@ import io, { Socket } from "socket.io-client";
 import { Header } from "../components/Header";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Vector1 from "../assets/images/Vector1.svg";
+import axios from "axios";
+import { uploadImageToChat } from "@/services/helperFunctions";
+import { launchImageLibrary } from "react-native-image-picker";
+import * as ImagePicker from "expo-image-picker";
 
 // Define constants for IP address and host
-const SERVER_IP = "192.168.1.4"; // Change this when needed
+const SERVER_IP = "192.168.1.9"; // Change this when needed
 const SERVER_PORT = "4000";
 const API_BASE_URL = `http://${SERVER_IP}:${SERVER_PORT}`;
 const SOCKET_URL = `http://${SERVER_IP}:${SERVER_PORT}`;
@@ -132,6 +136,75 @@ export default function ChatScreen() {
     }
   }, [messages]);
 
+  const submitImageMessage = async (imageUrl: string) => {
+    if (!socket || !imageUrl || !senderId) return;
+  
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/chat/send`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          senderId,
+          receiverId,
+          message: imageUrl, // ✅ Store the Cloudinary URL as the message
+          fromAdmin: false,  // Hardcoded to false
+          isImage: true,     // ✅ Add a flag for image messages
+        }),
+      });
+  
+      const data = await response.json();
+      console.log("Response from backend:", data);
+  
+      if (!response.ok) {
+        console.error("Failed to send image message:", data);
+        return;
+      }
+  
+      // Emit image message to socket
+      socket.emit("message", {
+        senderId,
+        receiverId,
+        message: imageUrl, // ✅ Send Cloudinary URL as message
+        fromAdmin: false,
+        isImage: true,
+      });
+  
+    } catch (error) {
+      console.error("Error sending image message:", error);
+    }
+  };
+
+  const handleImagePicker = async () => {
+    try {
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 1,
+      });
+  
+      if (!result.canceled) {
+        const uri = result.assets[0].uri; // ✅ Correct way to get image URI
+  
+        if (uri && senderId) {
+          console.log("Image URI:", uri);
+  
+          const uploadedUrl = await uploadImageToChat(uri, senderId, receiverId);
+  
+          if (uploadedUrl) {
+            console.log("Image uploaded:", uploadedUrl);
+            submitImageMessage(uploadedUrl);
+          }
+        }
+      } else {
+        console.log("User cancelled image picker");
+      }
+    } catch (error) {
+      console.error("ImagePicker Error: ", error);
+    }
+  };
+
   return (
     <View className="flex-1 relative bg-white">
       <View className="bg-[#231F20]">
@@ -200,7 +273,7 @@ export default function ChatScreen() {
 
           {/* Message Input & Send Button */}
           <View className="flex-row items-center w-full p-2 pb-0 border-t border-gray-300">
-            <TouchableOpacity className="mr-3">
+            <TouchableOpacity className="mr-3" onPress={handleImagePicker}>
               <Vector1 width={24} height={20} fill="black" />
             </TouchableOpacity>
 

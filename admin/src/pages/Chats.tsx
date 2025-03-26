@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { io } from "socket.io-client";
+import { uploadImageToChat } from "../hooks/cloudinary.ts";
 
 const socket = io("http://localhost:4000"); // Backend URL
 
 export default function Chats() {
   const [message, setMessage] = useState("");
+  const [image, setImage] = useState<File | null>(null);
   const [messages, setMessages] = useState<
-    { senderId: string; message: string; fromAdmin?: boolean }[]
+    {
+      senderId: string;
+      message: string;
+      imageUrl?: string;
+      fromAdmin?: boolean;
+    }[]
   >([]);
   const [senders, setSenders] = useState<
     {
@@ -158,60 +165,100 @@ export default function Chats() {
       .includes(searchQuery.toLowerCase())
   );
 
-  const sendMessage = async () => {
-    if (!message.trim() || !selectedSender || !userId) return;
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const selectedFile = e.target.files[0];
+      console.log("Selected file:", selectedFile);
+
+      setImage(selectedFile); // Store for potential preview
+
+      try {
+        console.log("Uploading image...");
+        const imageUrl = await uploadImageToChat(selectedFile);
+        console.log("Uploaded image URL:", imageUrl); // Debugging
+
+        if (!imageUrl) {
+          console.error("Upload failed: No URL returned");
+          return;
+        }
+
+        sendMessage(imageUrl); // Ensure this function actually gets called
+      } catch (error) {
+        console.error("Image upload failed:", error);
+      }
+    }
+  };
+
+  const sendMessage = async (uploadedImageUrl: string = "") => {
+    console.log("Sending message with image URL:", uploadedImageUrl);
+
+    const trimmedMessage = message.trim();
+    const finalMessage = trimmedMessage || uploadedImageUrl; // Use image URL if no text
+
+    if (!finalMessage) return; // Prevent sending empty messages
+
+    if (!selectedSender?._id || !userId) {
+      console.error("Missing sender or receiver ID");
+      return;
+    }
 
     const chatMessage = {
-      senderId: selectedSender._id, // ✅ Sender is the selected sender
-      receiverId: userId, // ✅ Receiver is the logged-in user
-      message: message,
-      fromAdmin: true, // ✅ Hardcoded as true
+      senderId: selectedSender._id,
+      receiverId: userId,
+      message: finalMessage, // Ensure message always has content
+      fromAdmin: true,
     };
 
     try {
-      // Send message to backend
       const response = await fetch("http://localhost:4000/api/v1/chat/send", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(chatMessage),
       });
 
-      const data = await response.json();
-      console.log("Response from backend:", data);
+      if (!response.ok) throw new Error("Failed to send message");
 
-      if (!response.ok) {
-        console.error("Failed to send message:", data);
-        return;
-      }
-
-      // Emit message to socket
       socket.emit("message", chatMessage);
-
-      setMessage(""); // ✅ Clear input
+      setMessage(""); // Clear message input
+      setImage(null);
     } catch (error) {
       console.error("Error sending message:", error);
     }
   };
 
-  // ✅ Only update messages inside the socket listener
   useEffect(() => {
     socket.on("message", (msg) => {
-      console.log("Received message:", msg);
-
-      if (!msg || typeof msg !== "object" || !msg.message) {
-        console.error("Invalid message received:", msg);
+      console.log("New message received via socket:", msg); // Debugging
+      if (!msg || typeof msg !== "object" || (!msg.message && !msg.imageUrl))
         return;
-      }
-
-      setMessages((prevMessages) => [...prevMessages, msg]); // ✅ Append only once
+      setMessages((prevMessages) => [...prevMessages, msg]);
     });
 
     return () => {
-      socket.off("message"); // Cleanup on unmount
+      socket.off("message");
     };
   }, []);
+
+  //   const testUpload = async () => {
+  //   const input = document.createElement("input");
+  //   input.type = "file";
+  //   input.accept = "image/*";
+
+  //   input.onchange = async (e: Event) => {
+  //     const target = e.target as HTMLInputElement;
+  //     if (target.files && target.files[0]) {
+  //       const testFile = target.files[0]; // Get a real image file
+  //       console.log("Testing upload with file:", testFile);
+
+  //       const result = await uploadImageToChat(testFile);
+  //       console.log("Test upload result:", result);
+  //     }
+  //   };
+
+  //   input.click(); // Open file picker
+  // };
+
+  // testUpload();
 
   return (
     <div className="p-4">
@@ -300,7 +347,11 @@ export default function Chats() {
 
                   {/* Latest message below the name */}
                   <p className="text-sm text-gray-500 mt-1">
-                    {sender.latestMessage || "No message yet"}
+                    {sender.latestMessage
+                      ? sender.latestMessage.length > 30
+                        ? `${sender.latestMessage.slice(0, 30)}...`
+                        : sender.latestMessage
+                      : "No message yet"}
                   </p>
                 </div>
               </div>
@@ -384,7 +435,9 @@ export default function Chats() {
               </div>
             ) : (
               messages.map((msg, index) => {
-                const isAdmin = msg.fromAdmin; // ✅ Check if message is from admin
+                const isAdmin = msg.fromAdmin;
+                const isImage = msg.message.startsWith("http"); // ✅ Check if it's an image URL
+
                 return (
                   <div
                     key={index}
@@ -392,15 +445,23 @@ export default function Chats() {
                       isAdmin ? "justify-end" : "justify-start"
                     } mb-2`}
                   >
-                    <p
-                      className={`${
-                        isAdmin
-                          ? "bg-yellow-100 text-black"
-                          : "bg-gray-100 text-black"
-                      } py-2 px-4 rounded-lg max-w-[75%]`}
-                    >
-                      {msg.message}
-                    </p>
+                    {isImage ? (
+                      <img
+                        src={msg.message}
+                        alt="Sent Image"
+                        className="max-w-xs rounded-lg"
+                      />
+                    ) : (
+                      <p
+                        className={`${
+                          isAdmin
+                            ? "bg-yellow-100 text-black"
+                            : "bg-gray-100 text-black"
+                        } py-2 px-4 rounded-lg max-w-[75%]`}
+                      >
+                        {msg.message}
+                      </p>
+                    )}
                   </div>
                 );
               })
@@ -411,18 +472,27 @@ export default function Chats() {
           {selectedSender && (
             <div className="flex items-center gap-3 p-4 border-t border-gray-300 px-7">
               <div className="mb-1 mr-2">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="22"
-                  height="22"
-                  viewBox="0 0 22 22"
-                  fill="none"
-                >
-                  <path
-                    d="M0 0H22V22H0V0ZM2.2 19.8H17.1446L7.7 10.3554L2.2 15.8554V19.8ZM19.8 19.3446V2.2H2.2V12.7446L7.7 7.2446L19.8 19.3446ZM14.9017 5.5C14.61 5.5 14.3302 5.61589 14.1239 5.82218C13.9176 6.02847 13.8017 6.30826 13.8017 6.6C13.8017 6.89174 13.9176 7.17153 14.1239 7.37782C14.3302 7.58411 14.61 7.7 14.9017 7.7C15.1934 7.7 15.4732 7.58411 15.6795 7.37782C15.8858 7.17153 16.0017 6.89174 16.0017 6.6C16.0017 6.30826 15.8858 6.02847 15.6795 5.82218C15.4732 5.61589 15.1934 5.5 14.9017 5.5ZM11.6017 6.6C11.6017 5.72479 11.9494 4.88542 12.5682 4.26655C13.1871 3.64768 14.0265 3.3 14.9017 3.3C15.7769 3.3 16.6163 3.64768 17.2352 4.26655C17.854 4.88542 18.2017 5.72479 18.2017 6.6C18.2017 7.47521 17.854 8.31458 17.2352 8.93345C16.6163 9.55232 15.7769 9.9 14.9017 9.9C14.0265 9.9 13.1871 9.55232 12.5682 8.93345C11.9494 8.31458 11.6017 7.47521 11.6017 6.6Z"
-                    fill="#BEBEBE"
-                  />
-                </svg>
+                <label htmlFor="upload-input" className="cursor-pointer">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="22"
+                    height="22"
+                    viewBox="0 0 22 22"
+                    fill="none"
+                  >
+                    <path
+                      d="M0 0H22V22H0V0ZM2.2 19.8H17.1446L7.7 10.3554L2.2 15.8554V19.8ZM19.8 19.3446V2.2H2.2V12.7446L7.7 7.2446L19.8 19.3446ZM14.9017 5.5C14.61 5.5 14.3302 5.61589 14.1239 5.82218C13.9176 6.02847 13.8017 6.30826 13.8017 6.6C13.8017 6.89174 13.9176 7.17153 14.1239 7.37782C14.3302 7.58411 14.61 7.7 14.9017 7.7C15.1934 7.7 15.4732 7.58411 15.6795 7.37782C15.8858 7.17153 16.0017 6.89174 16.0017 6.6C16.0017 6.30826 15.8858 6.02847 15.6795 5.82218C15.4732 5.61589 15.1934 5.5 14.9017 5.5ZM11.6017 6.6C11.6017 5.72479 11.9494 4.88542 12.5682 4.26655C13.1871 3.64768 14.0265 3.3 14.9017 3.3C15.7769 3.3 16.6163 3.64768 17.2352 4.26655C17.854 4.88542 18.2017 5.72479 18.2017 6.6C18.2017 7.47521 17.854 8.31458 17.2352 8.93345C16.6163 9.55232 15.7769 9.9 14.9017 9.9C14.0265 9.9 13.1871 9.55232 12.5682 8.93345C11.9494 8.31458 11.6017 7.47521 11.6017 6.6Z"
+                      fill="#BEBEBE"
+                    />
+                  </svg>
+                </label>
+                <input
+                  id="upload-input"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageChange}
+                />
               </div>
               <input
                 type="text"
@@ -434,7 +504,11 @@ export default function Chats() {
                   setMessage(e.target.value);
                 }}
               />
-              <button type="button" onClick={sendMessage} className="p-2">
+              <button
+                type="button"
+                onClick={() => sendMessage()}
+                className="p-2"
+              >
                 <span>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
