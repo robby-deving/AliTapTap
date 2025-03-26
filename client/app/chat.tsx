@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   View,
   TextInput,
@@ -6,10 +6,14 @@ import {
   FlatList,
   Image,
   TouchableOpacity,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import io, { Socket } from "socket.io-client";
 import { Header } from "../components/Header";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Vector1 from "../assets/images/Vector1.svg";
 
 // Define constants for IP address and host
 const SERVER_IP = "192.168.1.4"; // Change this when needed
@@ -30,6 +34,8 @@ export default function ChatScreen() {
   >([]);
   const [senderId, setSenderId] = useState<string | null>(null);
   const receiverId = "67c00e4097fb8a5aeb426db5"; // Fixed receiverId
+  const flatListRef = useRef<FlatList<any>>(null);
+  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -120,20 +126,32 @@ export default function ChatScreen() {
     }
   };
 
+  useEffect(() => {
+    if (flatListRef.current) {
+      flatListRef.current.scrollToEnd({ animated: true });
+    }
+  }, [messages]);
+
   return (
     <View className="flex-1 relative bg-white">
       <View className="bg-[#231F20]">
         <Header />
       </View>
 
-      <View className="flex-1 bg-white p-5">
-        {/* Messages List */}
-        <View className="flex-1 w-full">
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        className="flex-1"
+      >
+        <View className="flex-1 bg-white p-5 pb-3 pt-0">
+          {/* FlatList directly inside KeyboardAvoidingView */}
           <FlatList
+            ref={flatListRef} // Attach the ref
             data={messages}
             keyExtractor={(item, index) => index.toString()}
             renderItem={({ item }) => {
               const isLeftAligned = item.fromAdmin;
+              const isImageMessage =
+                item.isImage || item.message.startsWith("http"); // Fallback check
 
               return (
                 <View
@@ -141,39 +159,69 @@ export default function ChatScreen() {
                     isLeftAligned ? "justify-start" : "justify-end"
                   } mb-2`}
                 >
-                  <Text
-                    className={`${
-                      isLeftAligned ? "bg-gray-200" : "bg-yellow-200"
-                    } py-3 rounded-2xl min-h-12 text-xl px-4 max-w-[75%] text-black`}
-                  >
-                    {item.message}
-                  </Text>
+                  {isImageMessage ? (
+                    <View
+                      className={`${
+                        isLeftAligned ? "bg-gray-200" : "bg-yellow-200"
+                      } py-2 rounded-2xl px-2 max-w-[75%]`}
+                    >
+                      {item.message ? (
+                        <Image
+                          source={{ uri: item.message }}
+                          className="rounded-xl"
+                          style={{
+                            width: 200,
+                            height: 200,
+                            resizeMode: "contain",
+                            backgroundColor: "#f3f3f3",
+                          }}
+                        />
+                      ) : (
+                        <Text className="text-gray-500">
+                          [Image not available]
+                        </Text>
+                      )}
+                    </View>
+                  ) : (
+                    <Text
+                      className={`${
+                        isLeftAligned ? "bg-gray-200" : "bg-yellow-200"
+                      } py-3 rounded-2xl min-h-12 text-xl px-4 max-w-[75%] text-black`}
+                    >
+                      {item.message}
+                    </Text>
+                  )}
                 </View>
               );
             }}
             contentContainerStyle={{ flexGrow: 1, justifyContent: "flex-end" }}
             keyboardShouldPersistTaps="handled"
           />
-        </View>
 
-        {/* Message Input & Send Button */}
-        <View className="flex-row items-center w-full p-2">
-          <TextInput
-            autoCorrect={false}
-            value={chatMessage}
-            onChangeText={setChatMessage}
-            placeholder="Type a message..."
-            className="flex-1 border border-gray-300 p-2 rounded h-12 text-gray-700"
-            onSubmitEditing={submitChatMessage}
-          />
-          <TouchableOpacity onPress={submitChatMessage} className="ml-2">
-            <Image
-              source={require("../assets/images/Vector.png")}
-              style={{ width: 24, height: 20 }}
+          {/* Message Input & Send Button */}
+          <View className="flex-row items-center w-full p-2 pb-0 border-t border-gray-300">
+            <TouchableOpacity className="mr-3">
+              <Vector1 width={24} height={20} fill="black" />
+            </TouchableOpacity>
+
+            <TextInput
+              autoCorrect={false}
+              value={chatMessage}
+              onChangeText={setChatMessage}
+              placeholder="Type a message..."
+              className="flex-1 border border-gray-300 p-2 rounded h-12 text-gray-700"
+              onSubmitEditing={submitChatMessage}
             />
-          </TouchableOpacity>
+
+            <TouchableOpacity onPress={submitChatMessage} className="ml-2">
+              <Image
+                source={require("../assets/images/Vector.png")}
+                style={{ width: 24, height: 20 }}
+              />
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </View>
   );
 }
