@@ -18,45 +18,45 @@ const cardDesignModel = new Schema(
   {
     name: {
       type: String,
-      required: true,  // This is required for admin when creating a product
+      required: true,  
     },
     front_image: {
       type: String,
-      required: true,  // Admin needs to upload the front image
+      required: true,  
     },
     back_image: {
       type: String,
-      required: true,  // Admin needs to upload the back image
+      required: true,  
     },
     created_by: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,  // Admin creating the product (should be a valid user)
+      required: false,  
     },
     details: {
       front_info: {
-        type: [elementSchema],  // This stays for user customization
+        type: [elementSchema],  
         required: false,  
       },
       back_info: {
-        type: [elementSchema],  // This stays for user customization
+        type: [elementSchema],  
         required: false,  
       },
     },
     materials: {
       PVC: {
-        price_per_unit: { type: Number, required: true },  // Admin sets pricing for PVC
+        price_per_unit: { type: Number, required: true },  
       },
       Metal: {
-        price_per_unit: { type: Number, required: true },  // Admin sets pricing for Metal
+        price_per_unit: { type: Number, required: true },  
       },
       Wood: {
-        price_per_unit: { type: Number, required: true },  // Admin sets pricing for Wood
+        price_per_unit: { type: Number, required: true },  
       },
     },
     deleted_at: {
       type: Date,
-      default: null,  // Default value for "deleted" flag
+      default: null,  
     },
   },
   {

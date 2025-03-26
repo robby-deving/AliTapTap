@@ -2,25 +2,18 @@ const cloudinary = require("../cloudinary");
 const CardDesign = require("../Models/carddesign.model");
 const User = require("../Models/user.model");
 
-// Admin: Create a new card (product) with images and material pricing
 const createCardAdmin = async (req, res) => {
   try {
-    const { name, front_image, back_image, created_by, materials } = req.body;
+    const { name, front_image, back_image, materials } = req.body;
 
     // Validate required fields
-    if (!name || !front_image || !back_image || !created_by || !materials) {
-      return res.status(400).json({ message: "Name, images, created_by, and materials are required." });
+    if (!name || !front_image || !back_image || !materials) {
+      return res.status(400).json({ message: "Name, images, and materials are required." });
     }
 
     // Validate if materials have all pricing fields
     if (!materials.PVC || !materials.Metal || !materials.Wood) {
       return res.status(400).json({ message: "Materials pricing for PVC, Metal, and Wood is required." });
-    }
-
-    // Check if user exists
-    const userExists = await User.findById(created_by);
-    if (!userExists) {
-      return res.status(400).json({ message: "Invalid user ID, user not found" });
     }
 
     // Upload images to Cloudinary
@@ -29,25 +22,25 @@ const createCardAdmin = async (req, res) => {
 
     if (front_image) {
       const frontImageUpload = await cloudinary.uploader.upload(front_image, {
-        folder: "card_designs",  // Specify a folder in Cloudinary
+        folder: "card_designs",
       });
-      frontImageUrl = frontImageUpload.secure_url;  // Cloudinary URL for the front image
+      frontImageUrl = frontImageUpload.secure_url;
     }
 
     if (back_image) {
       const backImageUpload = await cloudinary.uploader.upload(back_image, {
-        folder: "card_designs",  // Specify a folder in Cloudinary
+        folder: "card_designs",
       });
-      backImageUrl = backImageUpload.secure_url;  // Cloudinary URL for the back image
+      backImageUrl = backImageUpload.secure_url;
     }
 
     // Create the card design (product)
     const newCardDesign = new CardDesign({
-      name,  // Include name now
-      front_image: frontImageUrl,  // Cloudinary URL
-      back_image: backImageUrl,    // Cloudinary URL
-      created_by,
-      materials: materials,  // Materials with prices (PVC, Metal, Wood)
+      name,
+      front_image: frontImageUrl,
+      back_image: backImageUrl,
+      materials: materials,
+      created_at: new Date(), // Save the timestamp
     });
 
     await newCardDesign.save();
@@ -65,10 +58,14 @@ const createCardAdmin = async (req, res) => {
   }
 };
 
+
 // Get all card products (admin products)
 const getCardProducts = async (req, res) => {
   try {
-    const cardProducts = await CardDesign.find({ deleted_at: null });  // Fetch all card products
+    const cardProducts = await CardDesign.find({ deleted_at: null }) // Only fetch non-deleted products
+      .select("_id name front_image back_image materials created_at modified_at") // Removed deleted_at
+      .populate("created_by", "name email"); // Optional: Include creator details
+
     res.status(200).json({
       message: "Card products retrieved successfully",
       data: cardProducts,
@@ -81,6 +78,8 @@ const getCardProducts = async (req, res) => {
     });
   }
 };
+
+
 
 // Get a specific card product (product) by ID (admin view)
 const getCardProductById = async (req, res) => {
@@ -115,18 +114,49 @@ const updateCardProduct = async (req, res) => {
       return res.status(404).json({ message: "Card product not found" });
     }
 
-    // Update card product details
+    // Check if materials have valid pricing fields
+    if (materials) {
+      // Ensure that all required materials are updated with price_per_unit
+      const requiredMaterials = ["PVC", "Metal", "Wood"];
+      for (const material of requiredMaterials) {
+        if (!materials[material] || !materials[material].price_per_unit) {
+          return res.status(400).json({
+            message: `Materials pricing for ${material} with price_per_unit is required.`,
+          });
+        }
+      }
+    }
+
+    // Upload new images if provided
+    let frontImageUrl = existingCardProduct.front_image;
+    let backImageUrl = existingCardProduct.back_image;
+
+    if (front_image) {
+      const frontImageUpload = await cloudinary.uploader.upload(front_image, {
+        folder: "card_designs",
+      });
+      frontImageUrl = frontImageUpload.secure_url;
+    }
+
+    if (back_image) {
+      const backImageUpload = await cloudinary.uploader.upload(back_image, {
+        folder: "card_designs",
+      });
+      backImageUrl = backImageUpload.secure_url;
+    }
+
     const updatedCardProduct = await CardDesign.findByIdAndUpdate(
       req.params.id,
       {
         $set: {
           name: name || existingCardProduct.name,
-          front_image: front_image || existingCardProduct.front_image,
-          back_image: back_image || existingCardProduct.back_image,
-          materials: materials || existingCardProduct.materials,
-        }
+          front_image: frontImageUrl,  
+          back_image: backImageUrl,    
+          materials: materials || existingCardProduct.materials,  
+          modified_at: new Date(),  
+        },
       },
-      { new: true }
+      { new: true } 
     );
 
     res.status(200).json({
@@ -142,18 +172,20 @@ const updateCardProduct = async (req, res) => {
   }
 };
 
-// Delete a card product (admin side)
 const deleteCardProduct = async (req, res) => {
   try {
     const deletedCardProduct = await CardDesign.findByIdAndUpdate(
       req.params.id,
-      { deleted_at: new Date() },  // Mark the card product as deleted
+      { deleted_at: new Date() },  
       { new: true }
     );
 
     if (!deletedCardProduct) {
       return res.status(404).json({ message: "Card product not found" });
     }
+
+    const io = req.app.get('io');
+    io.emit('product_deleted', deletedCardProduct);  
 
     res.status(200).json({
       message: "Card product marked as deleted",
@@ -167,24 +199,17 @@ const deleteCardProduct = async (req, res) => {
   }
 };
 
-// Customer: Create or Update the card design with front_info and back_info (customizations)
 const createCardDesign = async (req, res) => {
   try {
     const { front_info, back_info } = req.body;
-
-    // Validate required fields (for customer design customization)
     if (!Array.isArray(front_info) || !Array.isArray(back_info)) {
       return res.status(400).json({ message: "front_info and back_info must be arrays." });
     }
-
-    // Find the card design based on its ID (admin-created card)
     const cardDesign = await CardDesign.findById(req.params.id);
 
     if (!cardDesign) {
       return res.status(404).json({ message: "Card design not found" });
     }
-
-    // Update card design with the customer's front_info and back_info
     cardDesign.details = {
       front_info,
       back_info,
@@ -204,8 +229,6 @@ const createCardDesign = async (req, res) => {
     });
   }
 };
-
-// Get all card designs (products)
 const getCardDesigns = async (req, res) => {
   try {
     const cardDesigns = await CardDesign.find({ deleted_at: null }).populate("created_by");
@@ -222,7 +245,6 @@ const getCardDesigns = async (req, res) => {
   }
 };
 
-// Get a specific card design (product) by ID
 const getCardDesignById = async (req, res) => {
   try {
     const cardDesign = await CardDesign.findById(req.params.id).populate("created_by");
@@ -244,7 +266,6 @@ const getCardDesignById = async (req, res) => {
   }
 };
 
-// Update a card design (product)
 const updateCardDesign = async (req, res) => {
   try {
     const { details, materials } = req.body;
@@ -254,7 +275,6 @@ const updateCardDesign = async (req, res) => {
       return res.status(404).json({ message: "Card design not found" });
     }
 
-    // Merge existing details but replace front_info and back_info if provided
     const updatedDetails = {
       ...existingCardDesign.details,
       ...details,
@@ -262,7 +282,6 @@ const updateCardDesign = async (req, res) => {
       back_info: details.back_info ? details.back_info : existingCardDesign.details.back_info,
     };
 
-    // Update card design with new details and materials
     const updatedCardDesign = await CardDesign.findByIdAndUpdate(
       req.params.id,
       { $set: { details: updatedDetails, materials: materials || existingCardDesign.materials } },
@@ -282,7 +301,6 @@ const updateCardDesign = async (req, res) => {
   }
 };
 
-// Delete a card design (product)
 const deleteCardDesign = async (req, res) => {
   try {
     const deletedCardDesign = await CardDesign.findByIdAndUpdate(
@@ -307,16 +325,15 @@ const deleteCardDesign = async (req, res) => {
   }
 };
 
-// Export the controller methods for both admin and customer sides
 module.exports = {
   createCardAdmin,
-  getCardProducts,  // Admin: Get all card products
-  getCardProductById,  // Admin: Get a specific card product by ID
-  updateCardProduct,  // Admin: Update a card product
-  deleteCardProduct,  // Admin: Delete a card product
-  createCardDesign,  // Customer: Create or update a card design
-  getCardDesigns,  // Customer: Get all card designs
-  getCardDesignById,  // Customer: Get a specific card design by ID
-  updateCardDesign,  // Customer: Update a card design
-  deleteCardDesign,  // Customer: Delete a card design
+  getCardProducts, 
+  getCardProductById, 
+  updateCardProduct,  
+  deleteCardProduct,  
+  createCardDesign,  
+  getCardDesigns,  
+  getCardDesignById,  
+  updateCardDesign,  
+  deleteCardDesign,  
 };
