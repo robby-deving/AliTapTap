@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, Modal, ActivityIndicator } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import StepperComponent from '../components/StepperComponent';
 import { Header } from '../components/Header';
@@ -29,6 +29,7 @@ export default function Review() {
   const [cardImage, setCardImage] = useState({ front: '', back: '' });
   const [paymentIntentIds, setPaymentIntentId] = useState<string | ''>('');
   const [totalAmount, setTotalAmount] = useState<number>(0);
+  const [shipping_cost, setShippingCost] = useState<number>(0);
 
   useEffect(() => {
     const fetchCardImage = async () => {
@@ -50,6 +51,7 @@ export default function Review() {
           const parsedDetails = JSON.parse(orderDetails);
           const total = parsedDetails.total_price || 0;
           const toPay = total + parsedDetails.shipping_method.price;
+          setShippingCost(parsedDetails.shipping_method.price);
           setTotalAmount(toPay);
           console.log('Total Amount:', toPay);
         }
@@ -208,17 +210,37 @@ export default function Review() {
         <StepperComponent currentStep="review" />
 
         <View className="mt-8">
-          <Text className="text-lg font-semibold mb-4">Payment Details</Text>
-          {parsedPaymentData?.paymentMethod === 'card' ? (
-            <>
-              <Text>Card Holder: {parsedPaymentData?.cardDetails?.cardHolderName}</Text>
-              <Text>Card Number: •••• •••• •••• {parsedPaymentData?.cardDetails?.cardNumber.slice(-4)}</Text>
-              <Text>Expiry Date: {parsedPaymentData?.cardDetails?.expiryDate}</Text>
-            </>
-          ) : (
-            <Text className="capitalize">Payment Method: {parsedPaymentData?.paymentMethod}</Text>
-          )}
-        </View>
+            <Text className="text-lg font-semibold mb-4">Payment Details</Text>
+            {parsedPaymentData?.paymentMethod === 'card' ? (
+              <>
+                <Text>Card Holder: {parsedPaymentData?.cardDetails?.cardHolderName}</Text>
+                <Text>Card Number: •••• •••• •••• {parsedPaymentData?.cardDetails?.cardNumber.slice(-4)}</Text>
+                <Text>Expiry Date: {parsedPaymentData?.cardDetails?.expiryDate}</Text>
+              </>
+            ) : (
+              <Text className="capitalize">Payment Method: {parsedPaymentData?.paymentMethod}</Text>
+            )}
+
+            {/* Add Order Summary Section */}
+            <View className="mt-6">
+              <Text className="text-lg font-semibold mb-4">Order Summary</Text>
+              <View className="space-y-2">
+                <View className="flex-row justify-between">
+                  <Text className="text-gray-600">Subtotal</Text>
+                  <Text>₱ {totalAmount.toFixed(2)}</Text>
+                </View>
+                <View className="flex-row justify-between">
+                  <Text className="text-gray-600">Shipping Fee</Text>
+                  <Text>₱ {shipping_cost.toFixed(2)}</Text>
+                </View>
+                <View className="h-[1px] bg-gray-200 my-2" />
+                <View className="flex-row justify-between">
+                  <Text className="font-semibold">Total Amount</Text>
+                  <Text className="font-semibold">₱ {totalAmount.toFixed(2)}</Text>
+                </View>
+              </View>
+            </View>
+          </View>
       </View>
 
       <View className="absolute bottom-0 w-full p-10 bg-white">
@@ -228,9 +250,22 @@ export default function Review() {
           disabled={isLoading}
         >
           <Text className="text-white text-center text-xl font-semibold">
-            {isLoading ? 'Processing Payment...' : 'Checkout'}
+            Checkout
           </Text>
         </TouchableOpacity>
+
+        <Modal
+          transparent={true}
+          animationType="fade"
+          visible={isLoading}
+        >
+          <View className="flex-1 justify-center items-center bg-black/50 ">
+            <View className="bg-white p-6 rounded-lg items-center">
+              <ActivityIndicator size="large" color="#FDCB07" />
+              <Text className="mt-2 text-gray-600">Processing Payment...</Text>
+            </View>
+          </View>
+        </Modal>
       </View>
     </View>
   );

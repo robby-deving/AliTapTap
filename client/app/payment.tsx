@@ -135,14 +135,17 @@ export default function Payment() {
 
         {/* Fixed Bottom Button */}
         <View className="absolute bottom-0 w-full p-10  bg-white">
-          <TouchableOpacity 
-            className="bg-[#FDCB07] w-full p-4 rounded"
-            onPress={handleContinue}
-          >
-            <Text className="text-white text-center text-xl font-semibold">
-              Continue to Review
-            </Text>
-          </TouchableOpacity>
+        <TouchableOpacity 
+          className={`w-full p-4 rounded ${
+            paymentMethod ? 'bg-[#FDCB07] opacity-100' : 'bg-[#FDCB07] opacity-50'
+          }`}
+          onPress={handleContinue}
+          disabled={!paymentMethod}
+        >
+          <Text className="text-white text-center text-xl font-semibold">
+            Continue to Review
+          </Text>
+        </TouchableOpacity>
         </View>
       </View>
     </KeyboardAvoidingView>

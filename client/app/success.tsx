@@ -53,11 +53,14 @@ export default function SuccessScreen() {
             router.replace('/');
         }
     };
-    
+
+    const handleHeaderPress = () => {
+        router.push('/productcatalogue'); // or whatever your home route is
+    };
 
     return (
         <View style={styles.container}>
-            <Header />
+            <Header onPress={handleHeaderPress} />
 
             <View style={styles.content}>
                 {/* Success Icon & Message */}
