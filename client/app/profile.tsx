@@ -40,7 +40,8 @@ export default function Profile() {
   }, []);
 
   const handleLogout = () => {
-    // Add logout logic here (e.g., clear user session)
+    AsyncStorage.removeItem('token');
+    AsyncStorage.removeItem('userData');
     router.push("/login"); // Redirect to login screen after logout
   };
 

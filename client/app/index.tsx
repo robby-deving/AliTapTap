@@ -2,11 +2,12 @@ import React, { useEffect, useRef } from "react";
 import { Text, View, TouchableOpacity, Image, Animated } from "react-native";
 import { useRouter } from "expo-router";
 import { LinearGradient } from 'expo-linear-gradient';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Index() {
   const router = useRouter();
   const logoPosition = useRef(new Animated.Value(500)).current;
-
+  
   useEffect(() => {
     // Animate logo
     Animated.spring(logoPosition, {
@@ -16,27 +17,24 @@ export default function Index() {
       friction: 8
     }).start();
 
-    // Check internet connection and navigate after animation
-    const checkConnectionAndNavigate = async () => {
+    const checkAndNavigate = async () => {
       try {
-        const response = await fetch('https://www.google.com');
-        if (response.ok) {
-          // Wait for 2 seconds to show splash screen
-          setTimeout(() => {
-            // more security logic here check if user is logged in or not maybe check if token is still valid, if yes redirect to product if not to login
-            router.replace('/login');
-          }, 1000);
+        const token = await AsyncStorage.getItem("token");
+        
+        if (token) {
+          router.replace("/productcatalogue");
+        } else {
+          router.replace("/login");
         }
       } catch (error) {
-        // Show error message if no internet
-        alert('Please check your internet connection');
+        console.error("Navigation error:", error);
+        router.replace("/login");
       }
     };
 
     // Start checking after logo animation
-    setTimeout(checkConnectionAndNavigate, 1000);
+    setTimeout(checkAndNavigate, 1000);
   }, []);
-
   return (
     <View className="flex-1 relative">
       <LinearGradient

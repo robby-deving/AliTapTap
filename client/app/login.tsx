@@ -40,17 +40,6 @@ export default function login() {
       checkAuth();
     }, []);
 
-    useEffect(() => {
-      const handleAppClose = async (nextAppState: AppStateStatus) => {
-        if (nextAppState === "inactive" || nextAppState === "background") {
-          await AsyncStorage.removeItem("token");
-          setIsAuthenticated(false);
-        }
-      };
-    
-      const appStateListener = AppState.addEventListener("change", handleAppClose);
-      return () => appStateListener.remove();
-    }, []);
 
     const handleLogin = async () => {
       setLoading(true);
@@ -82,6 +71,8 @@ export default function login() {
         }
     
         await AsyncStorage.setItem("userData", JSON.stringify(userData));
+        await AsyncStorage.setItem("token", userData.token);
+
     
         setIsAuthenticated(true);
         router.push("/productcatalogue");
