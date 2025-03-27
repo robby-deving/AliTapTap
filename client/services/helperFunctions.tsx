@@ -17,6 +17,7 @@ interface OrderDetails {
   quantity: number;
   payment_method: string;
   shipping_method: ShippingMethod;
+  total_price: number;
 
 }
 

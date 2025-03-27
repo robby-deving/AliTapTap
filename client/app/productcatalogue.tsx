@@ -31,8 +31,8 @@ const ProductCatalogue: React.FC = () => {
   }, []);
 
   const handleUploadPress = () => {
-    console.log("Upload button clicked");
-  };
+    router.push("/UploadDesignScreen" );
+  }
 
   const handleFilterPress = () => {
     setFilterVisible(true);
