@@ -3,10 +3,12 @@ import { View, Text, TouchableOpacity, Alert, Modal, ActivityIndicator } from 'r
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import StepperComponent from '../components/StepperComponent';
 import { Header } from '../components/Header';
-import { createPaymentIntent, createPaymentMethod, attachPaymentMethod } from '../services/paymentService';
+import { createPaymentIntent, createPaymentMethod, attachPaymentMethod , retrievePaymentIntent } from '../services/paymentService';
 import { WebView } from 'react-native-webview';
-import { uploadImageToCloudinary, updateOrderDetails, saveOrderAndTransaction } from '@/services/helperFunctions';
+import { uploadImageToCloudinary, updateOrderDetails, saveOrderAndTransaction,   } from '@/services/helperFunctions';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import FailedPaymentModal from '../components/FailedPaymentModal';
+
 
 interface PaymentData {
   paymentMethod: 'card' | 'gcash' | 'grab_pay';
@@ -30,6 +32,8 @@ export default function Review() {
   const [paymentIntentIds, setPaymentIntentId] = useState<string | ''>('');
   const [totalAmount, setTotalAmount] = useState<number>(0);
   const [shipping_cost, setShippingCost] = useState<number>(0);
+  const [isFailedModalVisible, setIsFailedModalVisible] = useState(false);
+
 
   useEffect(() => {
     const fetchCardImage = async () => {
@@ -75,6 +79,16 @@ export default function Review() {
       console.error('Failed to log AsyncStorage content', error);
     }
   };
+
+  const checkPayment = async () => {
+    try {
+    const paymentIntent = await retrievePaymentIntent(paymentIntentIds);
+      return paymentIntent.data.attributes.status;
+    } catch (error) {
+      console.error('Error retrieving payment intent:', error);
+    }
+  }
+
 
   const handleUpload = async () => {
     setIsLoading(true);
@@ -172,13 +186,20 @@ export default function Review() {
                 <Text className="text-gray-600">Loading payment page...</Text>
               </View>
             )}
+
             onNavigationStateChange={async (navState) => {
-              // Handle return URL from payment
               if (navState.url.includes('success')) {
                 setRedirectUrl(null);
+                setIsFailedModalVisible(false);
+                const status = await checkPayment();
+                if (status === 'awaiting_next_action') {
+                  setIsFailedModalVisible(true);
+                  return;
+                }
+                // Only handle success navigation, don't check payment status here
                 await handleUpload(); 
                 await saveOrderAndTransaction();
-
+                setRedirectUrl(null);
                 router.push('/success');
               } else if (navState.url.includes('cancel')) {
                 setRedirectUrl(null);
@@ -267,6 +288,17 @@ export default function Review() {
           </View>
         </Modal>
       </View>
+      <FailedPaymentModal 
+        isVisible={isFailedModalVisible}
+        onTryAgain={() => {
+          setIsFailedModalVisible(false);
+          router.push('/payment');
+        }}
+        onCancel={() => {
+          setIsFailedModalVisible(false);
+          router.push('/productcatalogue');
+        }}
+      />
     </View>
   );
 }

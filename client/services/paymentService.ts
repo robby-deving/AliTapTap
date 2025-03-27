@@ -84,3 +84,19 @@ export const attachPaymentMethod = async (intentId: string, methodId: string) =>
     throw error;
   }
 };
+
+export const retrievePaymentIntent = async (paymentIntentId: string) => {
+  console.log('Retrieving payment intent:', paymentIntentId);
+
+  try {
+    const response = await axios.get(
+      `${BASE_URL}/api/v1/pay/payment-intents/${paymentIntentId}`
+    );
+
+    console.log('Payment intent retrieved:', response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error('Payment intent retrieval failed:', error.response?.data || error.message);
+    throw error;
+  }
+};
