@@ -13,7 +13,7 @@ interface PaymentMethodDetails {
 }
 
 // Replace localhost with your computer's IP address
-const BASE_URL = 'http://192.168.137.1:4000';
+const BASE_URL = 'http://192.168.231.87:4000';
 
 export const createPaymentIntent = async (amount: number, description: string) => {
   try {

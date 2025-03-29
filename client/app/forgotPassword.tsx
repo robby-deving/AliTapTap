@@ -1,21 +1,10 @@
 import React, { useState, useRef } from 'react';
-import {
-  Text,
-  View,
-  Image,
-  TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Dimensions,
-  TextInput,
-} from 'react-native';
+import {Text, View, Image, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Dimensions, TextInput,} from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 
-const InputField = ({ label, placeholder, value, onChangeText, secureTextEntry, toggleSecureEntry, showToggle, error,
-}) => (
+const InputField = ({ label, placeholder, value, onChangeText, secureTextEntry, toggleSecureEntry, showToggle, error }) => (
   <View className="mb-4">
     <Text className="text-base font-medium mb-1">{label}</Text>
     <View className="relative">
@@ -31,7 +20,7 @@ const InputField = ({ label, placeholder, value, onChangeText, secureTextEntry, 
       />
       {showToggle && (
         <TouchableOpacity onPress={toggleSecureEntry} className="absolute right-5 top-3">
-          <Ionicons name={secureTextEntry ? 'eye-off' : 'eye'} size={22} color="gray"/>
+          <Ionicons name={secureTextEntry ? 'eye-off' : 'eye'} size={22} color="gray" />
         </TouchableOpacity>
       )}
     </View>
@@ -53,13 +42,11 @@ export default function ForgotPassword() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [newPasswordError, setNewPasswordError] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
+  const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   // Refs for each pin code input field
   const pinCodeRefs = useRef(pinCode.map(() => React.createRef())).current;
-
-  // Temporary handlers to simulate navigation between steps (for UI testing)
-  const goToStep2 = () => setStep(2);
-  const goToStep3 = () => setStep(3);
 
   // Handle pin code input change and auto-focus
   const handlePinChange = (text, index) => {
@@ -103,39 +90,81 @@ export default function ForgotPassword() {
     }
   };
 
-  // Validate Step 3 fields and handle submission
-  const handleSetNewPassword = () => {
-    let hasError = false;
-    setNewPasswordError('');
-    setConfirmPasswordError('');
+// Handle email submission for forgot password
+const handleForgotPassword = async () => {
+  try {
+    const response = await fetch("http://192.168.231.87:4000/api/v1/auth/forgot-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
 
-    // Check if fields are empty
-    if (!newPassword) {
-      setNewPasswordError('New Password is required');
-      hasError = true;
-    }
-    if (!confirmPassword) {
-      setConfirmPasswordError('Confirm Password is required');
-      hasError = true;
-    }
+    const data = await response.json();
 
-    // Check password length
-    if (newPassword && newPassword.length < 8) {
-      setNewPasswordError('Password must be at least 8 characters');
-      hasError = true;
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to send pin code.");
     }
 
-    // Check if passwords match
-    if (newPassword && confirmPassword && newPassword !== confirmPassword) {
-      setConfirmPasswordError('Passwords do not match');
-      hasError = true;
-    }
+    // If email was sent successfully, transition to step 2 (pin code input)
+    setStep(2); // Transition to step 2 (Pin code)
+  } catch (err) {
+    setError(err.message || "An error occurred."); // Display error message if user is not found
+  }
+};
 
-    // If no errors, proceed to login (simulated)
-    if (!hasError) {
-      router.push('/login');
+// Handle password reset submission
+const handleSetNewPassword = async () => {
+  let hasError = false;
+  setNewPasswordError('');
+  setConfirmPasswordError('');
+  setSuccessMessage(''); // Clear any previous success message
+
+  // Check if fields are empty or passwords do not match
+  if (!newPassword) {
+    setNewPasswordError('New Password is required');
+    hasError = true;
+  }
+  if (!confirmPassword) {
+    setConfirmPasswordError('Confirm Password is required');
+    hasError = true;
+  }
+
+  if (newPassword && newPassword.length < 8) {
+    setNewPasswordError('Password must be at least 8 characters');
+    hasError = true;
+  }
+
+  if (newPassword && confirmPassword && newPassword !== confirmPassword) {
+    setConfirmPasswordError('Passwords do not match');
+    hasError = true;
+  }
+
+  // If no errors, proceed to reset password
+  if (!hasError) {
+    try {
+      const response = await fetch("http://192.168.231.87:4000/api/v1/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          pinCode: pinCode.join(""), // Join the pin code array into a string
+          newPassword,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to reset password.");
+      }
+
+      // If successful, set the success message
+      setSuccessMessage("Password Successfully Changed");
+    } catch (err) {
+      setError(err.message || "An error occurred while resetting the password.");
     }
-  };
+  }
+};
+
 
   return (
     <View className="flex-1 bg-[#2C2C2C]">
@@ -166,149 +195,160 @@ export default function ForgotPassword() {
                 className="self-center mb-5 w-[88px] h-[125px]"
               />
 
-              {step === 1 && (
-                <>
-                  <Text className="text-3xl font-semibold text-center mb-2">
-                    Forgot Password?
-                  </Text>
-                  <Text className="text-gray-500 text-center mb-8">
-                    No worries, we’ll send you reset instructions.
-                  </Text>
-                  <InputField
-                    label="Email"
-                    placeholder="Enter Email"
-                    value={email}
-                    onChangeText={setEmail}
-                  />
-                  <TouchableOpacity
-                    className="bg-yellow-400 p-4 rounded-lg mt-6"
-                    onPress={goToStep2}
-                  >
-                    <Text className="text-white text-center font-semibold">
-                      Reset Password
+                {step === 1 && (
+                  <>
+                    <Text className="text-3xl font-semibold text-center mb-2">
+                      Forgot Password?
                     </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    className="mt-8 flex-row justify-center items-center"
-                    onPress={() => router.push('/login')}
-                  >
-                    <Image
-                      className="mr-2"
-                      source={require('../assets/images/backBTN.png')}
-                      style={{ width: 13, height: 13, tintColor: 'gray' }}
+                    <Text className="text-gray-500 text-center mb-8">
+                      No worries, we’ll send you reset instructions.
+                    </Text>
+                    <InputField
+                      label="Email"
+                      placeholder="Enter Email"
+                      value={email}
+                      onChangeText={(text) => {
+                        setEmail(text);  // Update the email state
+                        setError('');     // Clear the error message when user starts typing
+                      }}
                     />
-                    <Text className="text-gray-500 mr-1">Back to</Text>
-                    <Text className="text-gray-500 font-semibold">Log In</Text>
-                  </TouchableOpacity>
-                </>
-              )}
-
-              {step === 2 && (
-                <>
-                  <Text className="text-3xl font-semibold text-center mb-2">
-                    Enter Pin Code
-                  </Text>
-                  <Text className="text-gray-500 text-center mb-8">
-                    We sent a code to{' '}
-                    <Text className="text-400 font-bold">{email}</Text>
-                  </Text>
-                  <View className="flex-row justify-between mb-6">
-                    {pinCode.map((digit, index) => (
-                      <TextInput
-                        key={index}
-                        ref={pinCodeRefs[index]}
-                        value={digit}
-                        onChangeText={(text) => handlePinChange(text, index)}
-                        onKeyPress={(e) => handleKeyPress(e, index)}
-                        onFocus={() => handleFocus(index)}
-                        onBlur={() => handleBlur(index)}
-                        keyboardType="numeric"
-                        maxLength={1}
-                        className="border border-gray-300 rounded-lg bg-white p-4 w-14 text-center text-3xl"
-                        placeholder="0"
-                        placeholderTextColor="#A0A0A0"
+                    {error && <Text className="text-red-500 text-sm mt-1">{error}</Text>}
+                    <TouchableOpacity
+                      className="bg-yellow-400 p-4 rounded-lg mt-6"
+                      onPress={handleForgotPassword}
+                    >
+                      <Text className="text-white text-center font-semibold">
+                        Reset Password
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      className="mt-8 flex-row justify-center items-center"
+                      onPress={() => router.push('/login')}
+                    >
+                      <Image
+                        className="mr-2"
+                        source={require('../assets/images/backBTN.png')}
+                        style={{ width: 13, height: 13, tintColor: 'gray' }}
                       />
-                    ))}
-                  </View>
-                  <TouchableOpacity
-                    className="bg-yellow-400 p-4 rounded-lg mt-6"
-                    onPress={goToStep3}
-                  >
-                    <Text className="text-white text-center font-semibold">
-                      Continue
+                      <Text className="text-gray-500 mr-1">Back to</Text>
+                      <Text className="text-gray-500 font-semibold">Log In</Text>
+                    </TouchableOpacity>
+                  </>
+                )}
+                {step === 2 && (
+                  <>
+                    <Text className="text-3xl font-semibold text-center mb-2">
+                      Enter Pin Code
                     </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    className="mt-8 flex-row justify-center items-center"
-                    onPress={() => router.push('/login')}
-                  >
-                    <Image
-                      className="mr-2"
-                      source={require('../assets/images/backBTN.png')}
-                      style={{ width: 13, height: 13, tintColor: 'gray' }}
-                    />
-                    <Text className="text-gray-500 mr-1">Back to</Text>
-                    <Text className="text-gray-500 font-semibold">Log In</Text>
-                  </TouchableOpacity>
-                </>
-              )}
-
-              {step === 3 && (
+                    <Text className="text-gray-500 text-center mb-8">
+                          We sent a code to
+                          <Text className="text-400 font-bold">{email}</Text>
+                        </Text>
+                    <View className="flex-row justify-between mb-6">
+                      {pinCode.map((digit, index) => (
+                        <TextInput
+                          key={index}
+                          ref={pinCodeRefs[index]}
+                          value={digit}
+                          onChangeText={(text) => handlePinChange(text, index)}
+                          onKeyPress={(e) => handleKeyPress(e, index)}
+                          onFocus={() => handleFocus(index)}
+                          onBlur={() => handleBlur(index)}
+                          keyboardType="numeric"
+                          maxLength={1}
+                          className="border border-gray-300 rounded-lg bg-white p-4 w-14 text-center text-3xl"
+                          placeholder="0"
+                          placeholderTextColor="#A0A0A0"
+                        />
+                      ))}
+                    </View>
+                    <TouchableOpacity
+                        className="bg-yellow-400 p-4 rounded-lg mt-6"
+                        onPress={() => setStep(3)} // Update this to use setStep
+                    >
+                      <Text className="text-white text-center font-semibold">
+                        Continue
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      className="mt-8 flex-row justify-center items-center"
+                      onPress={() => router.push('/login')}
+                    >
+                      <Image
+                        className="mr-2"
+                        source={require('../assets/images/backBTN.png')}
+                        style={{ width: 13, height: 13, tintColor: 'gray' }}
+                      />
+                      <Text className="text-gray-500 mr-1">Back to</Text>
+                      <Text className="text-gray-500 font-semibold">Log In</Text>
+                    </TouchableOpacity>
+                  </>
+                )}
+                {step === 3 && (
                 <>
-                  <Text className="text-3xl font-semibold text-center mb-2">
-                    Set a New Password
-                  </Text>
-                  <Text className="text-gray-500 text-center mb-8">
-                    Must be at least 8 characters.
-                  </Text>
-                  <InputField
-                    label="New Password"
-                    placeholder="Enter New Password"
-                    value={newPassword}
-                    onChangeText={(text) => {
-                      setNewPassword(text);
-                      setNewPasswordError(''); // Clear error on change
-                    }}
-                    secureTextEntry={!showPassword}
-                    toggleSecureEntry={() => setShowPassword(!showPassword)}
-                    showToggle={true}
-                    error={newPasswordError}
-                  />
-                  <InputField
-                    label="Confirm Password"
-                    placeholder="Confirm Password"
-                    value={confirmPassword}
-                    onChangeText={(text) => {
-                      setConfirmPassword(text);
-                      setConfirmPasswordError(''); // Clear error on change
-                    }}
-                    secureTextEntry={!showConfirmPassword}
-                    toggleSecureEntry={() => setShowConfirmPassword(!showConfirmPassword)}
-                    showToggle={true}
-                    error={confirmPasswordError}
-                  />
-                  <TouchableOpacity
-                    className="bg-yellow-400 p-4 rounded-lg mt-6"
-                    onPress={handleSetNewPassword}
-                  >
-                    <Text className="text-white text-center font-semibold">
-                      Reset Password
+                    <Text className="text-3xl font-semibold text-center mb-2">
+                      Set a New Password
                     </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    className="mt-8 flex-row justify-center items-center"
-                    onPress={() => router.push('/login')}
-                  >
-                    <Image
-                      className="mr-2"
-                      source={require('../assets/images/backBTN.png')}
-                      style={{ width: 13, height: 13, tintColor: 'gray' }}
+                    <Text className="text-gray-500 text-center mb-8">
+                      Must be at least 8 characters.
+                    </Text>
+
+                    <InputField
+                      label="New Password"
+                      placeholder="Enter New Password"
+                      value={newPassword}
+                      onChangeText={(text) => {
+                        setNewPassword(text);
+                        setNewPasswordError('');
+                      }}
+                      secureTextEntry={!showPassword}
+                      toggleSecureEntry={() => setShowPassword(!showPassword)}
+                      showToggle={true}
+                      error={newPasswordError}
                     />
-                    <Text className="text-gray-500 mr-1">Back to</Text>
-                    <Text className="text-gray-500 font-semibold">Log In</Text>
-                  </TouchableOpacity>
-                </>
-              )}
+                    <InputField
+                      label="Confirm Password"
+                      placeholder="Confirm Password"
+                      value={confirmPassword}
+                      onChangeText={(text) => {
+                        setConfirmPassword(text);
+                        setConfirmPasswordError('');
+                      }}
+                      secureTextEntry={!showConfirmPassword}
+                      toggleSecureEntry={() => setShowConfirmPassword(!showConfirmPassword)}
+                      showToggle={true}
+                      error={confirmPasswordError}
+                    />
+                    {/* Success Message */}
+                    {successMessage ? (
+                      <Text className="text-green-500 text-sm mt-1">
+                        {successMessage}
+                      </Text>
+                    ) : null}
+
+                    <TouchableOpacity
+                      className="bg-yellow-400 p-4 rounded-lg mt-6"
+                      onPress={handleSetNewPassword}
+                    >
+                      <Text className="text-white text-center font-semibold">
+                        Reset Password
+                      </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      className="mt-8 flex-row justify-center items-center"
+                      onPress={() => router.push('/login')}
+                    >
+                      <Image
+                        className="mr-2"
+                        source={require('../assets/images/backBTN.png')}
+                        style={{ width: 13, height: 13, tintColor: 'gray' }}
+                      />
+                      <Text className="text-gray-500 mr-1">Back to</Text>
+                      <Text className="text-gray-500 font-semibold">Log In</Text>
+                    </TouchableOpacity>
+                  </>
+                )}
             </View>
           </LinearGradient>
         </ScrollView>

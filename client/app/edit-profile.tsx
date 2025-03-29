@@ -56,7 +56,7 @@ export default function EditProfile() {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [isGenderModalVisible, setIsGenderModalVisible] = useState(false);
-  const Base_Url = 'http://192.168.137.1:4000';
+  const Base_Url = 'http://192.168.231.87:4000';
 
   useEffect(() => {
     const initializeUser = async () => {

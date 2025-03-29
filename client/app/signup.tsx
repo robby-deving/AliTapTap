@@ -59,7 +59,7 @@ export default function SignupScreen() {
 
   const router = useRouter();
   const windowHeight = Dimensions.get('window').height;
-  const Base_Url = 'http://192.168.137.1:4000';
+  const Base_Url = 'http://192.168.231.87:4000';
 
   const handleSignup = async () => {
     if (!isTermsAccepted) {

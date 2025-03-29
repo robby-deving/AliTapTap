@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://192.168.137.1:4000/api/v1/card-designs/admin/get-card-products";
+const API_URL = "http://192.168.231.87:4000/api/v1/card-designs/admin/get-card-products";
 
 export const fetchProducts = async () => {
   try {

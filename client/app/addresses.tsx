@@ -43,7 +43,7 @@ export default function Addresses() {
   const [zipCode, setZipCode] = useState("");
 
   const router = useRouter();
-  const Base_URL = 'http://192.168.137.1:4000';
+  const Base_URL = 'http://192.168.231.87:4000';
 
   const loadAddresses = async () => {
     try {

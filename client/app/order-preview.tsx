@@ -17,7 +17,7 @@ import { AirbnbRating } from "react-native-ratings";
 import axios from 'axios';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const Base_Url = 'http://192.168.137.1:4000';
+const Base_Url = 'http://192.168.231.87:4000';
 
 export default function OrderPreview() {
   const router = useRouter();

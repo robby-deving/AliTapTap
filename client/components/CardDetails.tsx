@@ -31,7 +31,7 @@ const CardDetails = ({ product }: CardDetailsProps) => {
   const [totalPrice, setTotalPrice] = useState(0);
   const [reviews, setReviews] = useState<Review[]>([]);
   const router = useRouter();
-  const Base_Url = 'http://192.168.137.1:4000';
+  const Base_Url = 'http://192.168.231.87:4000';
 
 
   // Calculate total price when quantity or material changes
