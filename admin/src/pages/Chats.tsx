@@ -35,15 +35,24 @@ export default function Chats() {
   } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const chatContainerRef = useRef<HTMLDivElement | null>(null);
+  const [pendingImage, setPendingImage] = useState<string | null>(null);
 
   const userId = localStorage.getItem("userId"); // Logged-in user's ID
 
+  // Scroll function
+  const scrollToBottom = () => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  // Run effect when messages update
   useEffect(() => {
-    setTimeout(() => {
-      if (messagesEndRef.current) {
-        messagesEndRef.current.scrollIntoView({ block: "end" });
-      }
-    }, 50);
+    setTimeout(scrollToBottom, 100);
   }, [messages]);
 
   useEffect(() => {
@@ -179,21 +188,24 @@ export default function Chats() {
       const selectedFile = e.target.files[0];
       console.log("Selected file:", selectedFile);
 
-      setImage(selectedFile); // Store for potential preview
+      setPendingImage("Sending image..."); // Show placeholder text
 
       try {
         console.log("Uploading image...");
         const imageUrl = await uploadImageToChat(selectedFile);
-        console.log("Uploaded image URL:", imageUrl); // Debugging
+        console.log("Uploaded image URL:", imageUrl);
 
         if (!imageUrl) {
           console.error("Upload failed: No URL returned");
+          setPendingImage(null); // Remove placeholder if upload fails
           return;
         }
 
-        sendMessage(imageUrl); // Ensure this function actually gets called
+        setPendingImage(null); // Remove placeholder
+        sendMessage(imageUrl);
       } catch (error) {
         console.error("Image upload failed:", error);
+        setPendingImage(null); // Remove placeholder on failure
       }
     }
   };
@@ -437,13 +449,24 @@ export default function Chats() {
           )}
 
           {/* Chat Content */}
-          <div className="flex-1 p-4 overflow-y-auto max-h-[70vh]">
+          <div
+            ref={chatContainerRef}
+            className="flex-1 p-4 overflow-y-auto max-h-[70vh]"
+          >
             {!selectedSender ? (
               <div className="flex items-center justify-center h-full">
                 <p className="text-center text-gray-500">Select a chat</p>
               </div>
             ) : (
               <>
+                {pendingImage && (
+                  <div className="flex justify-end mb-2">
+                    <p className="bg-yellow-100 text-black py-2 px-4 rounded-lg max-w-[75%]">
+                      {pendingImage}
+                    </p>
+                  </div>
+                )}
+
                 {messages.map((msg, index) => {
                   const isAdmin = msg.fromAdmin;
                   const isImage = msg.message.startsWith("http");
@@ -460,6 +483,7 @@ export default function Chats() {
                           src={msg.message}
                           alt="Sent Image"
                           className="max-w-xs rounded-lg"
+                          onLoad={scrollToBottom}
                         />
                       ) : (
                         <p
@@ -475,8 +499,6 @@ export default function Chats() {
                     </div>
                   );
                 })}
-                {/* Invisible div at the bottom to auto-scroll */}
-                <div ref={messagesEndRef} />
               </>
             )}
           </div>

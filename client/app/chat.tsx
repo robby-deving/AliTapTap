@@ -40,6 +40,7 @@ export default function ChatScreen() {
   const receiverId = "67c00e4097fb8a5aeb426db5"; // Fixed receiverId
   const flatListRef = useRef<FlatList<any>>(null);
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+  const [sendingImage, setSendingImage] = useState(false);
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -139,6 +140,8 @@ export default function ChatScreen() {
   const submitImageMessage = async (imageUrl: string) => {
     if (!socket || !imageUrl || !senderId) return;
 
+    setSendingImage(true); // ✅ Show "Sending Image..."
+
     try {
       const response = await fetch(`${API_BASE_URL}/api/v1/chat/send`, {
         method: "POST",
@@ -148,9 +151,9 @@ export default function ChatScreen() {
         body: JSON.stringify({
           senderId,
           receiverId,
-          message: imageUrl, // ✅ Store the Cloudinary URL as the message
-          fromAdmin: false, // Hardcoded to false
-          isImage: true, // ✅ Add a flag for image messages
+          message: imageUrl,
+          fromAdmin: false,
+          isImage: true,
         }),
       });
 
@@ -166,12 +169,15 @@ export default function ChatScreen() {
       socket.emit("message", {
         senderId,
         receiverId,
-        message: imageUrl, // ✅ Send Cloudinary URL as message
+        message: imageUrl,
         fromAdmin: false,
         isImage: true,
       });
+
+      setSendingImage(false); // ✅ Hide "Sending Image..."
     } catch (error) {
       console.error("Error sending image message:", error);
+      setSendingImage(false); // ✅ Hide on error
     }
   };
 
@@ -182,15 +188,19 @@ export default function ChatScreen() {
         allowsEditing: true,
         quality: 1,
       });
-  
+
       if (!result.canceled) {
         const uri = result.assets[0].uri; // ✅ Get correct URI
-  
+
         if (uri && senderId) {
           console.log("Image URI:", uri);
-  
-          const uploadedUrl = await uploadImageToChat(uri, senderId, receiverId);
-  
+
+          const uploadedUrl = await uploadImageToChat(
+            uri,
+            senderId,
+            receiverId
+          );
+
           if (uploadedUrl) {
             console.log("Image uploaded:", uploadedUrl);
             submitImageMessage(uploadedUrl);
@@ -218,7 +228,10 @@ export default function ChatScreen() {
           {/* FlatList directly inside KeyboardAvoidingView */}
           <FlatList
             ref={flatListRef}
-            data={messages}
+            data={[
+              ...messages,
+              ...(sendingImage ? [{ isImage: true, message: "sending" }] : []),
+            ]}
             keyExtractor={(item, index) => index.toString()}
             renderItem={({ item }) => {
               const isLeftAligned = item.fromAdmin;
@@ -237,7 +250,11 @@ export default function ChatScreen() {
                         isLeftAligned ? "bg-gray-200" : "bg-yellow-200"
                       } py-2 rounded-2xl px-2 max-w-[75%]`}
                     >
-                      {item.message ? (
+                      {item.message === "sending" ? (
+                        <Text className="text-gray-500 italic">
+                          Sending Image...
+                        </Text> // ✅ Show while uploading
+                      ) : (
                         <Image
                           source={{ uri: item.message }}
                           className="rounded-xl"
@@ -248,10 +265,6 @@ export default function ChatScreen() {
                             backgroundColor: "#f3f3f3",
                           }}
                         />
-                      ) : (
-                        <Text className="text-gray-500">
-                          [Image not available]
-                        </Text>
                       )}
                     </View>
                   ) : (
@@ -271,7 +284,7 @@ export default function ChatScreen() {
             onContentSizeChange={() => {
               setTimeout(() => {
                 flatListRef.current?.scrollToEnd({ animated: true });
-              }, 100); // Add a small delay
+              }, 100);
             }}
           />
 
