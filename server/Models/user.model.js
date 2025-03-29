@@ -59,6 +59,15 @@ const userModel = new Schema(
       type: Date,
       default: null,
     },
+    // New fields
+    resetPinCode: {
+      type: String, 
+      default: null,
+    },
+    resetPinCodeExpiration: {
+      type: Date, 
+      default: null,
+    },
   },
   {
     timestamps: {
