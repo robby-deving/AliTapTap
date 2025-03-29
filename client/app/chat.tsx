@@ -138,7 +138,7 @@ export default function ChatScreen() {
 
   const submitImageMessage = async (imageUrl: string) => {
     if (!socket || !imageUrl || !senderId) return;
-  
+
     try {
       const response = await fetch(`${API_BASE_URL}/api/v1/chat/send`, {
         method: "POST",
@@ -149,19 +149,19 @@ export default function ChatScreen() {
           senderId,
           receiverId,
           message: imageUrl, // ✅ Store the Cloudinary URL as the message
-          fromAdmin: false,  // Hardcoded to false
-          isImage: true,     // ✅ Add a flag for image messages
+          fromAdmin: false, // Hardcoded to false
+          isImage: true, // ✅ Add a flag for image messages
         }),
       });
-  
+
       const data = await response.json();
       console.log("Response from backend:", data);
-  
+
       if (!response.ok) {
         console.error("Failed to send image message:", data);
         return;
       }
-  
+
       // Emit image message to socket
       socket.emit("message", {
         senderId,
@@ -170,7 +170,6 @@ export default function ChatScreen() {
         fromAdmin: false,
         isImage: true,
       });
-  
     } catch (error) {
       console.error("Error sending image message:", error);
     }
@@ -183,15 +182,19 @@ export default function ChatScreen() {
         allowsEditing: true,
         quality: 1,
       });
-  
+
       if (!result.canceled) {
         const uri = result.assets[0].uri; // ✅ Correct way to get image URI
-  
+
         if (uri && senderId) {
           console.log("Image URI:", uri);
-  
-          const uploadedUrl = await uploadImageToChat(uri, senderId, receiverId);
-  
+
+          const uploadedUrl = await uploadImageToChat(
+            uri,
+            senderId,
+            receiverId
+          );
+
           if (uploadedUrl) {
             console.log("Image uploaded:", uploadedUrl);
             submitImageMessage(uploadedUrl);
@@ -218,13 +221,13 @@ export default function ChatScreen() {
         <View className="flex-1 bg-white p-5 pb-3 pt-0">
           {/* FlatList directly inside KeyboardAvoidingView */}
           <FlatList
-            ref={flatListRef} // Attach the ref
+            ref={flatListRef}
             data={messages}
             keyExtractor={(item, index) => index.toString()}
             renderItem={({ item }) => {
               const isLeftAligned = item.fromAdmin;
               const isImageMessage =
-                item.isImage || item.message.startsWith("http"); // Fallback check
+                item.isImage || item.message.startsWith("http");
 
               return (
                 <View
@@ -269,7 +272,11 @@ export default function ChatScreen() {
             }}
             contentContainerStyle={{ flexGrow: 1, justifyContent: "flex-end" }}
             keyboardShouldPersistTaps="handled"
-            inverted
+            onContentSizeChange={() => {
+              setTimeout(() => {
+                flatListRef.current?.scrollToEnd({ animated: true });
+              }, 100); // Add a small delay
+            }}
           />
 
           {/* Message Input & Send Button */}
