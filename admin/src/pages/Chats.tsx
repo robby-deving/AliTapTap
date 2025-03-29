@@ -529,14 +529,17 @@ export default function Chats() {
                   onChange={handleImageChange}
                 />
               </div>
-              <input
-                type="text"
+              <textarea
                 placeholder="Type a message..."
-                className="flex-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="flex-1 h-11 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
                 value={message}
-                onChange={(e) => {
-                  console.log("Message input:", e.target.value);
-                  setMessage(e.target.value);
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault(); // Prevents default Enter behavior
+                    sendMessage(message); // Send message as-is (with new lines)
+                    setMessage(""); // Clear input after sending
+                  }
                 }}
               />
               <button
