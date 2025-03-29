@@ -1,41 +1,63 @@
-import React from "react";
-import { Text, View, Image, TouchableOpacity } from "react-native";
+import React, { useEffect, useRef } from "react";
+import { Text, View, TouchableOpacity, Image, Animated } from "react-native";
 import { useRouter } from "expo-router";
+import { LinearGradient } from 'expo-linear-gradient';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Index() {
   const router = useRouter();
+  const logoPosition = useRef(new Animated.Value(500)).current;
+  
+  useEffect(() => {
+    // Animate logo
+    Animated.spring(logoPosition, {
+      toValue: 0,
+      useNativeDriver: true,
+      tension: 10,
+      friction: 8
+    }).start();
 
+    const checkAndNavigate = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        
+        if (token) {
+          router.replace("/productcatalogue");
+        } else {
+          router.replace("/login");
+        }
+      } catch (error) {
+        console.error("Navigation error:", error);
+        router.replace("/login");
+      }
+    };
+
+    // Start checking after logo animation
+    setTimeout(checkAndNavigate, 1000);
+  }, []);
   return (
-    <View className="flex-1 relative bg-white">
-      <View className="bg-[#231F20] w-full p-4 flex flex-row items-center pt-20">
-        <Image
-          source={require("../assets/images/logo.png")}
-          style={{ width: 27.61, height: 38 }}
-          className="mx-auto"
-        />
-      </View>
-
-      <View className="flex-1 justify-center items-center p-10">
-        <Text className="text-2xl font-semibold mb-10">Welcome to AliTapTap</Text>
-        <TouchableOpacity 
-          className="bg-[#FDCB07] w-full p-4 rounded"
-          onPress={() => router.push('/edit')}
-        >
-          <Text className="text-white text-center text-xl font-semibold">
-            Start Payment
-          </Text>
-        </TouchableOpacity>
-
-        {/* Go to Chat Button */}
-        <TouchableOpacity
-          className="bg-[#007AFF] w-full p-4 rounded"
-          onPress={() => router.push("/chat")} // Navigate to Chat
-        >
-          <Text className="text-white text-center text-xl font-semibold">
-            Go to Chat
-          </Text>
-        </TouchableOpacity>
-      </View>
+    <View className="flex-1 relative">
+      <LinearGradient
+        colors={['#FFE300', '#FFFFFF','#FFFFFF']}
+        style={{ flex: 1 }}
+      >
+        {/* Main Content */}
+        <View className="flex-1 justify-center items-center p-10">
+          <Animated.Image
+            source={require('../assets/images/logoBlack.png')}
+            style={[
+              {
+                width: 200,
+                height: 200,
+                marginBottom: 20,
+                transform: [{ translateY: logoPosition }]
+              }
+            ]}
+            resizeMode="contain"
+          />
+          
+        </View>
+      </LinearGradient>
     </View>
   );
 }

@@ -1,172 +1,222 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
+import { Header } from '../components/Header';
 
-const SuccessScreen: React.FC = () => {
+interface TransactionData {
+  transaction: {
+    transaction_number: string;
+    created_at: string;
+    payment_method: string;
+    quantity: number;
+    shipping_subtotal: number;
+    total_amount: number;
+  };
+}
+
+export default function SuccessScreen() {
     const router = useRouter();
-    const navigation = useNavigation();
-    const { orderNumber, paymentTime, quantity, totalAmount } = useLocalSearchParams();
+    const [transactionData, setTransactionData] = useState<TransactionData | null>(null);
 
-    const handleGoBack = () => {
-        router.push('/');
+    useEffect(() => {
+        const fetchOrderSummary = async () => {
+            try {
+                const orderSummaryString = await AsyncStorage.getItem('orderSummary');
+                if (orderSummaryString) {
+                    const orderSummary = JSON.parse(orderSummaryString);
+                    setTransactionData({
+                        transaction: {
+                            transaction_number: orderSummary.transaction_number || 'N/A',
+                            created_at: orderSummary.created_at || new Date().toISOString(),
+                            payment_method: orderSummary.payment_method || 'N/A',
+                            quantity: orderSummary.quantity || 0,
+                            shipping_subtotal: orderSummary.shipping_subtotal || 0,
+                            total_amount: orderSummary.total_amount || 0
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching order summary:', error);
+            }
+        };
+
+        fetchOrderSummary();
+    }, []);
+
+    const handleGoBack = async () => {
+        try {
+            await AsyncStorage.removeItem('orderSummary');
+            router.replace('/productcatalogue');
+        } catch (error) {
+            console.error('Error clearing order summary:', error);
+            router.replace('/');
+        }
+    };
+
+    const handleHeaderPress = () => {
+        router.push('/productcatalogue'); // or whatever your home route is
     };
 
     return (
         <View style={styles.container}>
-            {/* Header Section */}
-            <View style={styles.header}>
-                <TouchableOpacity onPress={handleGoBack}>
-                    <Ionicons name="arrow-back" size={24} color="white" />
-                </TouchableOpacity>
-                <Image 
-                    source={require('../assets/images/logo.png')} 
-                    style={styles.logo}
-                    resizeMode="contain"
-                />
-            </View>
+            <Header onPress={handleHeaderPress} />
 
-            {/* Success Icon & Message */}
-            <View style={styles.successContainer}>
-                <Image 
-                    source={require('../assets/images/success.png')} 
-                    style={styles.successImage}
-                />
-                <Text style={styles.successText}>Order Success!</Text>
-            </View>
+            <View style={styles.content}>
+                {/* Success Icon & Message */}
+                <View style={styles.successContainer}>
+                    <Image 
+                        source={require('../assets/images/success.png')} 
+                        style={styles.successImage}
+                        resizeMode="contain"
+                    />
+                    <Text style={styles.successText}>Order Success!</Text>
+                </View>
 
-            {/* Order Details */}
-            <View style={styles.detailsContainer}>
-                <View style={styles.detailRow}>
-                    <Text style={styles.label}>Order Number</Text>
-                    <Text style={styles.value}>{orderNumber}</Text>
-                </View>
-                <View style={styles.detailRow}>
-                    <Text style={styles.label}>Payment Time</Text>
-                    <Text style={styles.value}>{paymentTime}</Text>
-                </View>
-                <View style={styles.detailRow}>
-                    <Text style={styles.label}>Payment Method</Text>
-                    <Text style={styles.value}>Card</Text>
-                </View>
-                <View style={styles.separator} />
-                <View style={styles.detailRow}>
-                    <Text style={styles.label}>Quantity</Text>
-                    <Text style={styles.value}>{quantity}</Text>
-                </View>
-                <View style={styles.totalRow}>
-                    <Text style={styles.totalLabel}>Total Amount</Text>
-                    <Text style={styles.totalValue}>P{totalAmount}</Text>
+                {/* Order Details */}
+                <View style={styles.detailsContainer}>
+                    <View style={styles.detailRow}>
+                        <Text style={styles.label}>Order Number</Text>
+                        <Text style={styles.value}>{transactionData?.transaction?.transaction_number || 'N/A'}</Text>
+                    </View>
+                    <View style={styles.detailRow}>
+                        <Text style={styles.label}>Payment Time</Text>
+                        <Text style={styles.value}>
+                            {transactionData?.transaction?.created_at ? 
+                                new Date(transactionData.transaction.created_at).toLocaleString() : 'N/A'}
+                        </Text>
+                    </View>
+                    <View style={styles.detailRow}>
+                        <Text style={styles.label}>Payment Method</Text>
+                        <Text style={styles.value}>{transactionData?.transaction?.payment_method || 'N/A'}</Text>
+                    </View>
+                    <View style={styles.separator} />
+                    <View style={styles.detailRow}>
+                        <Text style={styles.label}>Quantity</Text>
+                        <Text style={styles.value}>{transactionData?.transaction?.quantity || 'N/A'}</Text>
+                    </View>
+                    <View style={styles.detailRow}>
+                        <Text style={styles.label}>Shipping Cost</Text>
+                        <Text style={styles.value}>₱{transactionData?.transaction?.shipping_subtotal?.toFixed(2) || 'N/A'}</Text>
+                    </View>
+                    <View style={styles.totalRow}>
+                        <Text style={styles.totalLabel}>Total Amount</Text>
+                        <Text style={styles.totalValue}>₱{transactionData?.transaction?.total_amount?.toFixed(2) || 'N/A'}</Text>
+                    </View>
                 </View>
             </View>
 
             {/* Buttons */}
-            <TouchableOpacity style={styles.homeButton} onPress={handleGoBack}>
-                <Text style={styles.homeButtonText}>Back to Home</Text>
-            </TouchableOpacity>
+            <View style={styles.buttonContainer}>
+                <TouchableOpacity style={styles.homeButton} onPress={handleGoBack}>
+                    <Text style={styles.homeButtonText}>Back to Home</Text>
+                </TouchableOpacity>
 
-            <TouchableOpacity style={styles.viewOrderButton}>
-                <Text style={styles.viewOrderText}>View Order</Text>
-            </TouchableOpacity>
+                <TouchableOpacity style={styles.viewOrderButton} onPress={() => router.push('/orders')}>
+                    <Text style={styles.viewOrderText}>View Order</Text>
+                </TouchableOpacity>
+            </View>
         </View>
     );
-};
+}
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
-        alignItems: 'center',
     },
-    header: {
-        width: '100%',
-        height: 80,
-        backgroundColor: '#1C1C1C',
-        flexDirection: 'row',
+    content: {
+        flex: 1,
         alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingTop: 40,
-    },
-    logo: {
-        height: 30,
-        width: 30,
-        marginLeft: 'auto',
-        marginRight: 'auto',
     },
     successContainer: {
         alignItems: 'center',
-        marginTop: 20,
+        padding: 40,
     },
     successImage: {
-        width: 60,
-        height: 60,
-        marginBottom: 10,
+        width: 120,
+        height: 120,
+        marginBottom: 20,
     },
     successText: {
-        fontSize: 18,
+        fontSize: 24,
         fontWeight: 'bold',
-        color: '#FFC107',
+        color: '#FEE308',
     },
     detailsContainer: {
         width: '90%',
         backgroundColor: '#fff',
-        paddingVertical: 20,
-        paddingHorizontal: 15,
+        padding: 20,
+        borderRadius: 10,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
     },
     detailRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: 8,
+        marginBottom: 12,
     },
     label: {
         fontSize: 14,
-        color: '#333',
+        color: '#666',
     },
     value: {
         fontSize: 14,
-        fontWeight: 'bold',
+        fontWeight: '600',
+        color: '#333',
     },
     separator: {
         height: 1,
-        backgroundColor: '#ccc',
-        marginVertical: 10,
+        backgroundColor: '#E5E5E5',
+        marginVertical: 15,
     },
     totalRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginTop: 10,
+        marginTop: 15,
+        paddingTop: 15,
+        borderTopWidth: 1,
+        borderTopColor: '#E5E5E5',
     },
     totalLabel: {
         fontSize: 16,
         fontWeight: 'bold',
+        color: '#333',
     },
     totalValue: {
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: 'bold',
-        color: '#000',
+        color: '#FFC107',
+    },
+    buttonContainer: {
+        width: '100%',
+        padding: 20,
+        backgroundColor: '#fff',
     },
     homeButton: {
-        width: '90%',
         backgroundColor: '#FFC107',
-        paddingVertical: 12,
-        borderRadius: 5,
+        paddingVertical: 15,
+        borderRadius: 8,
         alignItems: 'center',
-        marginTop: 20,
+        marginBottom: 12,
     },
     homeButtonText: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: '#000',
+        color: '#fff',
     },
     viewOrderButton: {
-        width: '90%',
-        paddingVertical: 12,
-        borderRadius: 5,
+        paddingVertical: 15,
+        borderRadius: 8,
         alignItems: 'center',
         borderWidth: 1,
         borderColor: '#FFC107',
-        marginTop: 10,
     },
     viewOrderText: {
         fontSize: 16,
@@ -174,5 +224,3 @@ const styles = StyleSheet.create({
         color: '#FFC107',
     },
 });
-
-export default SuccessScreen;

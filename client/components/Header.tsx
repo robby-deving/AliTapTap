@@ -3,13 +3,17 @@ import { View, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
-export const Header = () => {
+interface HeaderProps {
+    onPress?: () => void;
+}
+
+export const Header: React.FC<HeaderProps> = ({ onPress }) => {
   const router = useRouter();
   
   return (
-    <SafeAreaView edges={['top']} className="bg-[#231F20]">
+    <SafeAreaView edges={['top']} style={{ backgroundColor: '#231F20' }}>
       <View className="w-full p-4 flex-row items-center justify-between">
-        <TouchableOpacity onPress={() => router.back()} className="p-2">
+        <TouchableOpacity onPress={onPress || (() => router.back())} className="p-2">
           <Image
             source={require('../assets/images/backBTN.png')}
             style={{ width: 20, height: 20 }}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect , useCallback} from "react";
 import {
   Text,
   View,
@@ -10,17 +10,23 @@ import {
   Modal,
   TextInput,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import InputField from "../components/InputField";
 import StepperComponent from "../components/StepperComponent";
 import { Header } from "../components/Header";
-import { Asset } from "expo-asset";
+import { useFocusEffect } from 'expo-router';
+import { updateOrderDetails } from "../services/helperFunctions";
+
 
 export default function Shipping() {
   const [fullName, setFullName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [shippingAddresses, setShippingAddresses] = useState<string[]>([]);
+  const [shippingAddresses, setShippingAddresses] = useState<Address[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [selectedAddressIndex, setSelectedAddressIndex] = useState<number>(0);
+  const [selectedShipping, setSelectedShipping] = useState("standard");
+  const [shippingModalVisible, setShippingModalVisible] = useState(false);
 
   // Address fields
   const [street, setStreet] = useState("");
@@ -31,47 +37,74 @@ export default function Shipping() {
 
   const router = useRouter();
 
-  const handleAddAddress = () => {
-    if (!street || !barangay || !city || !province || !zipCode) {
-      alert("Please complete all address fields");
-      return;
-    }
+  const shippingCost =[
+    {name: "standard", price: 58 , duration: "10 to 15 days"},
+    {name: "express", price: 150 , duration: "5 to 7 days"},
+    {name: "priority", price: 220 , duration: "3 to 4 day"}
+  ]
 
-    const newAddress = `${street}, ${barangay}, ${city}, ${province}, ${zipCode}`;
-    setShippingAddresses((prevAddresses) => [...prevAddresses, newAddress]); // Correctly update state
-
-    // Reset fields
-    setStreet("");
-    setBarangay("");
-    setCity("");
-    setProvince("");
-    setZipCode("");
-    setModalVisible(false);
+  type Address = {
+    _id?: string;
+    street: string;
+    barangay: string;
+    city: string;
+    province: string;
+    zip: string;
   };
 
-  const handleContinue = () => {
-    if (!fullName || !phoneNumber || shippingAddresses.length === 0) {
-      alert(
-        "Please enter your full name, phone number, and at least one shipping address"
-      );
-      return;
+  const getSelectedShippingDetails = () => {
+    const selectedOption = shippingCost.find(option => option.name === selectedShipping);
+    if (!selectedOption) {
+      return shippingCost[0];
     }
+  
+    updateOrderDetails('shipping_method', {
+        name: selectedOption?.name,
+        price: selectedOption?.price,
+        duration: selectedOption?.duration
+    });    
+    return selectedOption;
+};
 
-    const shippingData = {
-      fullName,
-      phoneNumber,
-      shippingAddresses, // Pass the array instead of a single value
-    };
+  useFocusEffect(
+    useCallback(() => {
+      const loadUserData = async () => {
+        try {
+          const userDataString = await AsyncStorage.getItem("userData");
+          if (userDataString) {
+            const userData = JSON.parse(userDataString);
+            
+            if (Array.isArray(userData.address)) {
+              setShippingAddresses(userData.address);
+            }
+            setSelectedAddressIndex(userData.selectedAddressIndex || 0);
+            
+            if (userData.first_name || userData.last_name) {
+              setFullName(`${userData.first_name || ''} ${userData.last_name || ''}`.trim());
+            }
+            
+            if (userData.phone_number) {
+              setPhoneNumber(userData.phone_number);
+            }
+          }
+        } catch (error) {
+          console.error("Error reloading user data:", error);
+        }
+      };
 
-    router.push({
-      pathname: "/payment",
-      params: {
-        shippingData: JSON.stringify(shippingData),
-      },
-    });
-  };
+      loadUserData();
+    }, [])
+  );
 
-  const groupIcon = Asset.fromModule(require("../assets/images/Group.png")).uri;
+  const handleContinue = async () => {
+    router.push("/payment");
+  }
+
+  useEffect(() => {
+    console.log('Current shipping addresses:', shippingAddresses);
+    console.log('Selected address index:', selectedAddressIndex);
+    console.log('Selected address:', shippingAddresses[selectedAddressIndex]);
+  }, [shippingAddresses, selectedAddressIndex]);
 
   return (
     <KeyboardAvoidingView
@@ -124,29 +157,126 @@ export default function Shipping() {
                 </Text>
 
                 {shippingAddresses.length > 0 ? (
-                  shippingAddresses.map((address, index) => (
-                    <View
-                      key={index}
-                      className="border border-gray-200 p-4 rounded-lg bg-white mb-2"
-                    >
-                      <Text className="text-black text-sm">{address}</Text>
-                    </View>
-                  ))
+                  <TouchableOpacity
+                    className="border border-gray-200 p-4 rounded-lg bg-white mb-2"
+                    onPress={() => {
+                      console.log('Navigating to addresses with index:', selectedAddressIndex);
+                      router.push("/addresses");
+                    }}
+                  >
+                    {shippingAddresses[selectedAddressIndex] ? (
+                      <View className="flex-row items-center justify-between">
+                        <Text className="text-black text-sm flex-1">
+                          {`${shippingAddresses[selectedAddressIndex]?.street || ''}, 
+                            ${shippingAddresses[selectedAddressIndex]?.barangay || ''}, 
+                            ${shippingAddresses[selectedAddressIndex]?.city || ''}, 
+                            ${shippingAddresses[selectedAddressIndex]?.province || ''}, 
+                            ${shippingAddresses[selectedAddressIndex]?.zip || ''}`
+                            .replace(/\s+/g, ' ')
+                            .trim()}
+                        </Text>
+                        <Image
+                            source={require('../assets/images/arrow_right.png')}
+                            style={{ width: 30, height: 30 }}
+                          />
+                        
+                      </View>
+                    ) : (
+                      <Text className="text-sm text-gray-500">
+                        Error loading address. Please select again.
+                      </Text>
+                    )}
+                  </TouchableOpacity>
                 ) : (
-                  <Text className="text-sm text-gray-400">
-                    No address added
-                  </Text>
+                  <TouchableOpacity
+                    className="border border-gray-200 p-4 rounded-lg w-full bg-white flex-row justify-center items-center"
+                    onPress={() => {
+                      console.log('No addresses, navigating to add address');
+                      router.push("/addresses");
+                    }}
+                  >
+                    <Text className="text-sm text-gray-500">
+                      + Add Shipping Address
+                    </Text>
+                  </TouchableOpacity>
                 )}
+              </View>
 
+              <View className="w-full ">
+                <Text className="text-black font-semibold mb-2 text-base">
+                  Shipping Method
+                </Text>
                 <TouchableOpacity
-                  className="border border-gray-200 p-4 rounded-lg w-full bg-white flex-row justify-center items-center"
-                  onPress={() => setModalVisible(true)}
+                  className="border border-gray-200 p-4 rounded-lg bg-white"
+                  onPress={() => setShippingModalVisible(true)}
                 >
-                  <Text className="text-sm text-gray-500">
-                    + Add Another Address
-                  </Text>
+                  <View className="flex-row items-center justify-between">
+                    <View>
+                      <Text className="text-black font-semibold">
+                        {getSelectedShippingDetails()?.name.charAt(0).toUpperCase() + 
+                        getSelectedShippingDetails()?.name.slice(1)}
+                      </Text>
+                      <Text className="text-gray-500 text-sm">
+                        Expected delivery is within {getSelectedShippingDetails()?.duration}
+                      </Text>
+                    </View>
+                    <View className="flex-row items-center">
+                      <Text className="text-black font-semibold mr-2">
+                        ₱{getSelectedShippingDetails()?.price}
+                      </Text>
+                      <Image
+                        source={require('../assets/images/arrow_right.png')}
+                        style={{ width: 20, height: 20 }}
+                      />
+                    </View>
+                  </View>
                 </TouchableOpacity>
               </View>
+
+              <Modal
+                animationType="slide"
+                transparent={true}
+                visible={shippingModalVisible}
+                onRequestClose={() => setShippingModalVisible(false)}
+              >
+                <View className="flex-1 justify-end bg-black/50">
+                  <View className="bg-white rounded-t-3xl p-6">
+                    <View className="flex-row justify-between items-center mb-4">
+                      <Text className="text-xl font-bold">Select Shipping Method</Text>
+                      <TouchableOpacity onPress={() => setShippingModalVisible(false)}>
+                        <Text className="text-xl">✕</Text>
+                      </TouchableOpacity>
+                    </View>
+                    
+                    {shippingCost.map((option) => (
+                      <TouchableOpacity
+                        key={option.name}
+                        className={`border rounded-lg p-4 mb-2 ${
+                          selectedShipping === option.name
+                            ? "border-[#FDCB07] bg-[#FDCB07]/10"
+                            : "border-gray-200"
+                        }`}
+                        onPress={() => {
+                          setSelectedShipping(option.name);
+                          setShippingModalVisible(false);
+                        }}
+                      >
+                        <View className="flex-row justify-between items-center">
+                          <View>
+                            <Text className="font-semibold capitalize">
+                              {option.name}
+                            </Text>
+                            <Text className="text-gray-500 text-sm">
+                            Expected delivery is within {option.duration}
+                            </Text>
+                          </View>
+                          <Text className="font-semibold">₱{option.price}</Text>
+                        </View>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+              </Modal>
             </View>
           </View>
 
@@ -164,80 +294,7 @@ export default function Shipping() {
             </Text>
           </TouchableOpacity>
         </View>
-      </View>
-
-      {/* Address Modal */}
-      <Modal visible={modalVisible} transparent={true} animationType="slide">
-      <View className="flex-1 justify-end bg-black/30">
-          <View className="bg-white w-full h-[600px] p-6 rounded-t-2xl">
-            <Text className="text-base font-semibold mb-9 text-center">
-              Add Address
-            </Text>
-
-            {/* Street Input */}
-            <View className="w-full mb-2">
-              <InputField
-                label="St./Purok/Sitio/Subd."
-                placeholder="Enter your street"
-                value={street}
-                onChangeText={setStreet}
-              />
-            </View>
-
-            {/* Barangay Input */}
-            <View className="w-full mb-2">
-              <InputField
-                label="Barangay"
-                placeholder="Enter your barangay"
-                value={barangay}
-                onChangeText={setBarangay}
-              />
-            </View>
-
-            {/* City Input */}
-            <View className="w-full mb-2">
-              <InputField
-                label="City/Municipality"
-                placeholder="Enter your city"
-                value={city}
-                onChangeText={setCity}
-              />
-            </View>
-
-            {/* Province Input */}
-            <View className="w-full mb-2">
-              <InputField
-                label="Province"
-                placeholder="Enter your province"
-                value={province}
-                onChangeText={setProvince}
-              />
-            </View>
-
-            {/* ZIP Code Input */}
-            <View className="w-full mb-2">
-              <InputField
-                label="ZIP Code"
-                placeholder="Enter your ZIP code"
-                value={zipCode}
-                onChangeText={setZipCode}
-                type="number"
-              />
-            </View>
-
-            <View className="w-full">
-              <TouchableOpacity
-                className="bg-[#FDCB07] px-4 pt-4 rounded items-center w-full h-12"
-                onPress={handleAddAddress}
-              >
-                <Text className="text-white text-center font-semibold">
-                  Add Address
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      </View>      
     </KeyboardAvoidingView>
   );
 }

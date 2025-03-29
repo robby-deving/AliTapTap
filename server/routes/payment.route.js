@@ -130,4 +130,40 @@ router.post("/payment-methods", async (req, res) => {
     }
 });
 
+// Retrieve payment intent
+router.get("/payment-intents/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const response = await fetch(`https://api.paymongo.com/v1/payment_intents/${id}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Authorization': `Basic ${Buffer.from(PAYMONGO_SECRET_KEY).toString('base64')}`
+            }
+        });
+
+        const paymentIntent = await response.json();
+        
+        if (!paymentIntent.data) {
+            return res.status(404).json({
+                success: false,
+                message: "Payment intent not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: paymentIntent.data
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Error retrieving payment intent",
+            error: error.message
+        });
+    }
+});
+
 module.exports = router;

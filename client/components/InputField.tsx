@@ -6,7 +6,7 @@ interface InputFieldProps {
   placeholder: string;
   value: string;
   onChangeText: (text: string) => void;
-  type?: 'text' | 'email' | 'number' | 'card' | 'date';
+  type?: 'text' | 'email' | 'number' | 'card' | 'date' | 'password';
   maxLength?: number;
 }
 

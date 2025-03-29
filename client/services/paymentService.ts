@@ -13,7 +13,7 @@ interface PaymentMethodDetails {
 }
 
 // Replace localhost with your computer's IP address
-const BASE_URL = 'http://192.168.137.1:5000';
+const BASE_URL = 'http://192.168.137.1:4000';
 
 export const createPaymentIntent = async (amount: number, description: string) => {
   try {
@@ -81,6 +81,22 @@ export const attachPaymentMethod = async (intentId: string, methodId: string) =>
     return response.data;
   } catch (error: any) {
     console.error('Payment method attachment failed:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const retrievePaymentIntent = async (paymentIntentId: string) => {
+  console.log('Retrieving payment intent:', paymentIntentId);
+
+  try {
+    const response = await axios.get(
+      `${BASE_URL}/api/v1/pay/payment-intents/${paymentIntentId}`
+    );
+
+    console.log('Payment intent retrieved:', response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error('Payment intent retrieval failed:', error.response?.data || error.message);
     throw error;
   }
 };

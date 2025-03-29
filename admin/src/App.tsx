@@ -1,22 +1,44 @@
-import { useState } from 'react'
-import './App.css'
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+import Sidebar from './components/sidebar';
+import Chats from './pages/Chats';
+import Dashboard from './pages/Dashboard';
+import Orders from './pages/Orders';
+import Products from './pages/Products';
+import Login from './pages/Login';
+import Topbar from './components/Topbar';
+import Profile from './pages/Profile';
+import EditProfile from './pages/EditProfile';
+import {  useAuth } from './context/AuthContext';
 
 function App() {
+    const { isAuthenticated } = useAuth();
 
-  return (
-    <>
-      <div className="h-full">
-        <div className="grid grid-cols-12 grid-rows-8 gap-4 h-full">
-          <div className="col-span-2 row-span-8 h-full">1</div>
-          <div className="col-span-10 col-start-3">2</div>
-          <div className="col-span-5 row-span-4 col-start-3 row-start-2">3</div>
-          <div className="col-span-5 row-span-3 col-start-8 row-start-2">5</div>
-          <div className="col-span-5 row-span-4 col-start-8 row-start-5">6</div>
-          <div className="col-span-5 row-span-3 col-start-3 row-start-6">10</div>
-        </div>
-      </div>
-    </>
-  )
+    return (
+            <Router>
+                {isAuthenticated ? (
+                    <div className="flex flex-row h-screen overflow-hidden">
+                        <Sidebar />
+                        <div className="flex-grow flex flex-col">
+                            <Topbar />
+                            <div className="flex-grow overflow-auto h-full">
+                                <Routes>
+                                    <Route path="/dashboard" element={<Dashboard />} />
+                                    <Route path="/orders" element={<Orders />} />
+                                    <Route path="/products" element={<Products />} />
+                                    <Route path="/chats" element={<Chats />} />
+                                    <Route path="/profile" element={<Profile />} />
+                                    <Route path="/edit-profile" element={<EditProfile />} />
+
+                                </Routes>
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <Login />
+                )}
+            </Router>
+    );
 }
 
-export default App
+export default App;
