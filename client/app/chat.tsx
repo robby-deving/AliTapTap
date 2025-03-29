@@ -182,19 +182,15 @@ export default function ChatScreen() {
         allowsEditing: true,
         quality: 1,
       });
-
+  
       if (!result.canceled) {
-        const uri = result.assets[0].uri; // ✅ Correct way to get image URI
-
+        const uri = result.assets[0].uri; // ✅ Get correct URI
+  
         if (uri && senderId) {
           console.log("Image URI:", uri);
-
-          const uploadedUrl = await uploadImageToChat(
-            uri,
-            senderId,
-            receiverId
-          );
-
+  
+          const uploadedUrl = await uploadImageToChat(uri, senderId, receiverId);
+  
           if (uploadedUrl) {
             console.log("Image uploaded:", uploadedUrl);
             submitImageMessage(uploadedUrl);

@@ -1,7 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { captureRef } from 'react-native-view-shot';
 import axios from 'axios';
-import { ViewStyle } from 'react-native';
+import { ViewStyle, Platform } from 'react-native';
+import * as FileSystem from "expo-file-system";
 
 // Define interface for order details
 export type ShippingMethod = {
@@ -55,7 +56,7 @@ interface UserDetails {
   // Add other user properties as needed
 }
 
-const Base_Url = 'http://192.168.137.1:4000';
+const Base_Url = 'http://192.168.1.7:4000';
 
 const saveCardAsImage = async (cardRef: React.RefObject<ViewStyle>, side: 'front' | 'back'): Promise<void> => {
   try {
@@ -250,17 +251,30 @@ const uploadImageToChat = async (imageUri: string, senderId: string, receiverId:
   try {
     const formData = new FormData();
 
-    // ✅ Convert URI to Blob
-    const response = await fetch(imageUri);
-    const blob = await response.blob();
+    if (Platform.OS !== "web") {
+      // Read the file as a base64 string
+      const fileInfo = await FileSystem.getInfoAsync(imageUri);
+      if (!fileInfo.exists) {
+        throw new Error("File not found");
+      }
+      
+      const base64 = await FileSystem.readAsStringAsync(imageUri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
 
-    formData.append("file", blob, `chat_${Date.now()}.jpg`); // ✅ Correct format
-    formData.append("upload_preset", "messages"); // ✅ Ensure preset is valid
+      const blob = `data:image/jpeg;base64,${base64}`;
+
+      formData.append("file", blob);
+    } else {
+      const response = await fetch(imageUri);
+      const blob = await response.blob();
+      formData.append("file", blob);
+    }
+
+    formData.append("upload_preset", "messages");
 
     const uploadResponse = await axios.post("https://api.cloudinary.com/v1_1/ddye8veua/image/upload", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+      headers: { "Content-Type": "multipart/form-data" },
     });
 
     console.log("Cloudinary response:", uploadResponse.data);
