@@ -491,7 +491,7 @@ export default function Chats() {
                             isAdmin
                               ? "bg-yellow-100 text-black"
                               : "bg-gray-100 text-black"
-                          } py-2 px-4 rounded-lg max-w-[75%]`}
+                          } py-2 px-4 rounded-lg max-w-[75%] whitespace-pre-wrap`}
                         >
                           {msg.message}
                         </p>
