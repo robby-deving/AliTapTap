@@ -20,7 +20,7 @@ import { launchImageLibrary } from "react-native-image-picker";
 import * as ImagePicker from "expo-image-picker";
 
 // Define constants for IP address and host
-const SERVER_IP = "192.168.1.9"; // Change this when needed
+const SERVER_IP = "192.168.1.7"; // Change this when needed
 const SERVER_PORT = "4000";
 const API_BASE_URL = `http://${SERVER_IP}:${SERVER_PORT}`;
 const SOCKET_URL = `http://${SERVER_IP}:${SERVER_PORT}`;
@@ -269,6 +269,7 @@ export default function ChatScreen() {
             }}
             contentContainerStyle={{ flexGrow: 1, justifyContent: "flex-end" }}
             keyboardShouldPersistTaps="handled"
+            inverted
           />
 
           {/* Message Input & Send Button */}

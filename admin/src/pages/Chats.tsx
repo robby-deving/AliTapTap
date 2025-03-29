@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { io } from "socket.io-client";
 import { uploadImageToChat } from "../hooks/cloudinary.ts";
 
@@ -34,8 +34,17 @@ export default function Chats() {
     name: string;
   } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const userId = localStorage.getItem("userId"); // Logged-in user's ID
+
+  useEffect(() => {
+    setTimeout(() => {
+      if (messagesEndRef.current) {
+        messagesEndRef.current.scrollIntoView({ block: "end" });
+      }
+    }, 50);
+  }, [messages]);
 
   useEffect(() => {
     if (!userId) {
@@ -428,43 +437,47 @@ export default function Chats() {
           )}
 
           {/* Chat Content */}
-          <div className="flex-1 p-4 overflow-y-auto">
+          <div className="flex-1 p-4 overflow-y-auto max-h-[70vh]">
             {!selectedSender ? (
               <div className="flex items-center justify-center h-full">
                 <p className="text-center text-gray-500">Select a chat</p>
               </div>
             ) : (
-              messages.map((msg, index) => {
-                const isAdmin = msg.fromAdmin;
-                const isImage = msg.message.startsWith("http"); // ✅ Check if it's an image URL
+              <>
+                {messages.map((msg, index) => {
+                  const isAdmin = msg.fromAdmin;
+                  const isImage = msg.message.startsWith("http");
 
-                return (
-                  <div
-                    key={index}
-                    className={`flex ${
-                      isAdmin ? "justify-end" : "justify-start"
-                    } mb-2`}
-                  >
-                    {isImage ? (
-                      <img
-                        src={msg.message}
-                        alt="Sent Image"
-                        className="max-w-xs rounded-lg"
-                      />
-                    ) : (
-                      <p
-                        className={`${
-                          isAdmin
-                            ? "bg-yellow-100 text-black"
-                            : "bg-gray-100 text-black"
-                        } py-2 px-4 rounded-lg max-w-[75%]`}
-                      >
-                        {msg.message}
-                      </p>
-                    )}
-                  </div>
-                );
-              })
+                  return (
+                    <div
+                      key={index}
+                      className={`flex ${
+                        isAdmin ? "justify-end" : "justify-start"
+                      } mb-2`}
+                    >
+                      {isImage ? (
+                        <img
+                          src={msg.message}
+                          alt="Sent Image"
+                          className="max-w-xs rounded-lg"
+                        />
+                      ) : (
+                        <p
+                          className={`${
+                            isAdmin
+                              ? "bg-yellow-100 text-black"
+                              : "bg-gray-100 text-black"
+                          } py-2 px-4 rounded-lg max-w-[75%]`}
+                        >
+                          {msg.message}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+                {/* Invisible div at the bottom to auto-scroll */}
+                <div ref={messagesEndRef} />
+              </>
             )}
           </div>
 
