@@ -33,9 +33,9 @@ export default function ForgotPassword() {
   const windowHeight = Dimensions.get('window').height;
 
   // State for managing the UI steps
-  const [step, setStep] = useState(1); // 1: Email input, 2: Pin code, 3: New password
+  const [step, setStep] = useState(1); 
   const [email, setEmail] = useState('');
-  const [pinCode, setPinCode] = useState(['', '', '', '', '']); // Array for 5-digit pin code
+  const [pinCode, setPinCode] = useState(['', '', '', '', '']);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -76,7 +76,7 @@ export default function ForgotPassword() {
   const handleFocus = (index) => {
     if (pinCode[index] === '') {
       const newPinCode = [...pinCode];
-      newPinCode[index] = ''; // Ensure the field is empty when focused
+      newPinCode[index] = ''; 
       setPinCode(newPinCode);
     }
   };
@@ -106,9 +106,9 @@ const handleForgotPassword = async () => {
     }
 
     // If email was sent successfully, transition to step 2 (pin code input)
-    setStep(2); // Transition to step 2 (Pin code)
+    setStep(2); 
   } catch (err) {
-    setError(err.message || "An error occurred."); // Display error message if user is not found
+    setError(err.message || "An error occurred."); 
   }
 };
 
@@ -117,7 +117,7 @@ const handleSetNewPassword = async () => {
   let hasError = false;
   setNewPasswordError('');
   setConfirmPasswordError('');
-  setSuccessMessage(''); // Clear any previous success message
+  setSuccessMessage(''); 
 
   // Check if fields are empty or passwords do not match
   if (!newPassword) {
@@ -147,7 +147,7 @@ const handleSetNewPassword = async () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email,
-          pinCode: pinCode.join(""), // Join the pin code array into a string
+          pinCode: pinCode.join(""), 
           newPassword,
         }),
       });
@@ -164,8 +164,6 @@ const handleSetNewPassword = async () => {
     }
   }
 };
-
-
   return (
     <View className="flex-1 bg-[#2C2C2C]">
       <KeyboardAvoidingView

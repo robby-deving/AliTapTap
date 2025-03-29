@@ -59,7 +59,7 @@ const userModel = new Schema(
       type: Date,
       default: null,
     },
-    // New fields for password reset functionality
+    // New fields
     resetPinCode: {
       type: String, 
       default: null,

@@ -7,7 +7,7 @@ router.post("/register", register);
 router.post("/login", login);
 
 // Forgot Password and Reset Password routes
-router.post("/forgot-password", forgotPassword); // Send reset pin code to email
-router.post("/reset-password", resetPassword); // Reset password using pin code
+router.post("/forgot-password", forgotPassword); 
+router.post("/reset-password", resetPassword);
 
 module.exports = router;

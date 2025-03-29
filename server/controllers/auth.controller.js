@@ -9,8 +9,8 @@ const crypto = require("crypto"); // For generating secure random pin codes
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: process.env.SMTP_USER,  // Your email address (from .env)
-    pass: process.env.SMTP_PASS,  // Your email password (from .env)
+    user: process.env.SMTP_USER,  
+    pass: process.env.SMTP_PASS,  
   },
 });
 
@@ -112,18 +112,17 @@ const forgotPassword = async (req, res) => {
     }
 
     // Generate a 5-digit pin code and set expiration (15 minutes)
-    const pinCode = crypto.randomInt(10000, 99999).toString(); // 5-digit pin code
-    const formattedPinCode = pinCode.split('').join(' '); // Inserts space between each digit
+    const pinCode = crypto.randomInt(10000, 99999).toString(); 
+    const formattedPinCode = pinCode.split('').join(' ');
 
     const expirationTime = new Date();
-    expirationTime.setMinutes(expirationTime.getMinutes() + 15); // Pin code expires in 15 minutes
+    expirationTime.setMinutes(expirationTime.getMinutes() + 15); 
 
     // Save pin code and expiration to user's record
     user.resetPinCode = pinCode;
     user.resetPinCodeExpiration = expirationTime;
     await user.save();
 
-    // Send pin code via email with HTML design
 // Send pin code via email with HTML design
 const mailOptions = {
   from: process.env.SMTP_USER,  
@@ -243,8 +242,8 @@ const resetPassword = async (req, res) => {
     // Hash new password and update user record
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
-    user.resetPinCode = null; // Clear the reset pin code
-    user.resetPinCodeExpiration = null; // Clear expiration time
+    user.resetPinCode = null; 
+    user.resetPinCodeExpiration = null;
     await user.save();
 
     res.json({ message: "Password reset successful" });
