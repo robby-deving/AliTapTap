@@ -30,3 +30,28 @@ export const uploadImageToCloudinary = async (file: File) => {
     }
   };
   
+  
+  export const uploadImageToChat = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "messages"); // Ensure this preset exists in Cloudinary
+
+    try {
+        const response = await fetch("https://api.cloudinary.com/v1_1/ddye8veua/image/upload", {
+            method: "POST",
+            body: formData,
+        });
+
+        const result = await response.json(); // Get full Cloudinary response
+        console.log("Cloudinary Response:", result); // Log the error details
+
+        if (!response.ok) {
+            throw new Error(`Upload failed: ${result.error?.message || response.statusText}`);
+        }
+
+        return result.secure_url ?? ""; // Return image URL or empty string
+    } catch (error) {
+        console.error("Error uploading image to Cloudinary:", error);
+        return "";
+    }
+};

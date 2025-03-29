@@ -71,6 +71,7 @@ export default function login() {
         }
     
         await AsyncStorage.setItem("userData", JSON.stringify(userData));
+        await AsyncStorage.setItem("userId", userData._id); // Store userId separately
         await AsyncStorage.setItem("token", userData.token);
 
     

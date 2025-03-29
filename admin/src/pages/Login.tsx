@@ -27,11 +27,11 @@ export default function Login() {
         throw new Error(data.message || "Login failed");
       }
 
-    //   if (data.data.isAdmin !== true) {
-    //     setError("Email or password is incorrect");
-    //     setIsLoading(false);
-    //     return
-    // } implement when done developing
+      if (data.data.isAdmin !== true) {
+        setError("Email or password is incorrect");
+        setIsLoading(false);
+        return
+    }
 
       login(data.data); // Store user in context
       navigate("/dashboard");

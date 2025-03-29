@@ -1,7 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { captureRef } from 'react-native-view-shot';
 import axios from 'axios';
-import { ViewStyle } from 'react-native';
+import { ViewStyle, Platform } from 'react-native';
+import * as FileSystem from 'expo-file-system';
 
 // Define interface for order details
 export type ShippingMethod = {
@@ -246,5 +247,43 @@ const saveOrderAndTransaction = async () => {
     throw error; // Re-throw to handle in calling code
   }
 };
+const uploadImageToChat = async (imageUri: string, senderId: string, receiverId: string): Promise<string | null> => {
+  try {
+    const formData = new FormData();
 
-export { saveCardAsImage, uploadImageToCloudinary, updateOrderDetails, orderSummary, saveOrderAndTransaction };
+    if (Platform.OS !== "web") {
+      // For mobile platforms
+      const fileInfo = await FileSystem.getInfoAsync(imageUri);
+      if (!fileInfo.exists) {
+        throw new Error("File not found");
+      }
+      
+      const base64 = await FileSystem.readAsStringAsync(imageUri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      const blob = `data:image/jpeg;base64,${base64}`;
+      formData.append("file", blob);
+    } else {
+      // For web platform
+      const response = await fetch(imageUri);
+      const blob = await response.blob();
+      formData.append("file", blob);
+    }
+
+    formData.append("upload_preset", "messages");
+
+    const uploadResponse = await axios.post("https://api.cloudinary.com/v1_1/ddye8veua/image/upload", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    console.log("Cloudinary response:", uploadResponse.data);
+    return uploadResponse.data.secure_url;
+  } catch (error) {
+    console.error("Cloudinary Upload Error:", error);
+    return null;
+  }
+};
+
+export { saveCardAsImage, uploadImageToCloudinary, updateOrderDetails, orderSummary, saveOrderAndTransaction, uploadImageToChat };
+

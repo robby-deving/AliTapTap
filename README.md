@@ -35,6 +35,10 @@ npm install
 npm install socket.io-client
 npm install axios
 npx expo install expo-router
+npx expo install @react-native-async-storage/async-storage
+npm install react-native-svg
+npm install --save-dev react-native-svg-transformer
+npm install react-native-image-picker
 =======
  npm install
  npx expo install expo-linear-gradient
