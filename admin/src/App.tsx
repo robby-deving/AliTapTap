@@ -10,6 +10,7 @@ import Topbar from './components/Topbar';
 import Profile from './pages/Profile';
 import EditProfile from './pages/EditProfile';
 import {  useAuth } from './context/AuthContext';
+import ForgotPassword from './pages/ForgotPassword';
 
 function App() {
     const { isAuthenticated } = useAuth();
@@ -35,7 +36,11 @@ function App() {
                         </div>
                     </div>
                 ) : (
-                    <Login />
+                    <Routes>
+                        <Route path="/" element={<Login />} />
+                        <Route path="/login" element={<Login />} />
+                        <Route path="/forgot-password" element={<ForgotPassword />} />
+                    </Routes>
                 )}
             </Router>
     );
