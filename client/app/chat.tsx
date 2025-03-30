@@ -20,7 +20,7 @@ import { launchImageLibrary } from "react-native-image-picker";
 import * as ImagePicker from "expo-image-picker";
 
 // Define constants for IP address and host
-const SERVER_IP = "192.168.137.1"; // Change this when needed
+const SERVER_IP = "192.168.1.7"; // Change this when needed
 const SERVER_PORT = "4000";
 const API_BASE_URL = `http://${SERVER_IP}:${SERVER_PORT}`;
 const SOCKET_URL = `http://${SERVER_IP}:${SERVER_PORT}`;
@@ -188,23 +188,34 @@ export default function ChatScreen() {
         allowsEditing: true,
         quality: 1,
       });
-
+  
       if (!result.canceled) {
-        const uri = result.assets[0].uri; // ✅ Get correct URI
-
-        if (uri && senderId) {
-          console.log("Image URI:", uri);
-
-          const uploadedUrl = await uploadImageToChat(
-            uri,
-            senderId,
-            receiverId
-          );
-
-          if (uploadedUrl) {
-            console.log("Image uploaded:", uploadedUrl);
-            submitImageMessage(uploadedUrl);
+        if (!senderId) {
+          console.error("Sender ID is null. Make sure the user is logged in.");
+          return;
+        }
+  
+        const uri = result.assets[0].uri;
+        console.log("Selected image URI:", uri);
+  
+        setSendingImage(true); // Show "Sending image..."
+  
+        try {
+          console.log("Uploading image...");
+          const uploadedUrl = await uploadImageToChat(uri, senderId, receiverId);
+          console.log("Uploaded image URL:", uploadedUrl);
+  
+          if (!uploadedUrl) {
+            console.error("Upload failed: No URL returned");
+            setSendingImage(false);
+            return;
           }
+  
+          setSendingImage(false); // Remove "Sending image..." indicator
+          submitImageMessage(uploadedUrl);
+        } catch (error) {
+          console.error("Image upload failed:", error);
+          setSendingImage(false); // Remove indicator on failure
         }
       } else {
         console.log("User cancelled image picker");
