@@ -193,7 +193,14 @@ export default function Chats() {
       const selectedFile = e.target.files[0];
       console.log("Selected file:", selectedFile);
 
-      setPendingImage("Sending image..."); // Show placeholder text
+      // Add temporary message to show sending status
+      const tempMessageId = Date.now().toString(); // Unique ID for temporary message
+      setMessages(prev => [...prev, {
+        senderId: userId || '',
+        message: 'Sending image...',
+        fromAdmin: true,
+        tempId: tempMessageId // Add temporary ID to identify this message
+      }]);
 
       try {
         console.log("Uploading image...");
@@ -202,15 +209,20 @@ export default function Chats() {
 
         if (!imageUrl) {
           console.error("Upload failed: No URL returned");
-          setPendingImage(null); // Remove placeholder if upload fails
+          // Remove temporary message on failure
+          setMessages(prev => prev.filter(msg => !('tempId' in msg) || msg.tempId !== tempMessageId));
           return;
         }
 
-        setPendingImage(null); // Remove placeholder
+        // Remove temporary message only
+        setMessages(prev => prev.filter(msg => !('tempId' in msg) || msg.tempId !== tempMessageId));
+        
+        // Send the message with image URL through socket only
         sendMessage(imageUrl);
       } catch (error) {
         console.error("Image upload failed:", error);
-        setPendingImage(null); // Remove placeholder on failure
+        // Remove temporary message on failure
+        setMessages(prev => prev.filter(msg => !('tempId' in msg) || msg.tempId !== tempMessageId));
       }
     }
   };
@@ -244,6 +256,7 @@ export default function Chats() {
 
       if (!response.ok) throw new Error("Failed to send message");
 
+      // Don't update messages locally, let the socket handle it
       socket.emit("message", chatMessage);
       setMessage(""); // Clear message input
       setImage(null);
