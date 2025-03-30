@@ -184,8 +184,11 @@ const deleteCardProduct = async (req, res) => {
       return res.status(404).json({ message: "Card product not found" });
     }
 
-    const io = req.app.get('io');
-    io.emit('product_deleted', deletedCardProduct);  
+    // Check if Socket.IO instance exists before emitting
+    const io = req.io || req.app.get('io');
+    if (io) {
+      io.emit('product_deleted', deletedCardProduct);
+    }
 
     res.status(200).json({
       message: "Card product marked as deleted",

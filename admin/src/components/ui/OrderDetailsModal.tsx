@@ -2,7 +2,6 @@
 "use client";
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/ordersDialog";
-import { Button } from "@/components/ui/button";
 import { Order } from "./ordersColumns";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";

@@ -302,7 +302,6 @@ export const cardColumns: ColumnDef<CardDesign>[] = [
               onClose={() => setIsEditOpen(false)}
               onSuccess={() => {
                 setIsEditOpen(false);
-                onUpdate(); // refresh list after success
               }}
             />
           )}

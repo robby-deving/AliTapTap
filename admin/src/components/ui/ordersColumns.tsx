@@ -1,6 +1,6 @@
 "use client";
 
-import { ColumnDef } from "@tanstack/react-table";
+import { ColumnDef, CellContext } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 import { ArrowUpDown } from "lucide-react"
@@ -21,6 +21,11 @@ export type Order = {
   front_image: string;
   back_image: string;
 };
+
+// Define a custom context type that includes updateOrderInTable
+export interface OrderCellContext extends CellContext<Order, unknown> {
+  updateOrderInTable?: (orderId: string, updatedData: Partial<Order>) => void;
+}
 
 export const columns: ColumnDef<Order>[] = [
   {
@@ -129,16 +134,19 @@ export const columns: ColumnDef<Order>[] = [
   {
     id: "actions",
     header: "More Details",
-    cell: ({ row, updateOrderInTable }) => (
-      <OrderDetailsModal 
-        order={row.original} 
-        updateOrderInTable={updateOrderInTable}
-      >
-        <button className="p-1 bg-transparent hover:bg-gray-200 cursor-pointer rounded-md">
-          <MoreHorizontal className="w-5 h-5 text-gray-500" />
-        </button>
-      </OrderDetailsModal>
-    ),
+    cell: (context: OrderCellContext) => {
+      // Now TypeScript knows updateOrderInTable might exist on context
+      return (
+        <OrderDetailsModal 
+          order={context.row.original} 
+          updateOrderInTable={context.updateOrderInTable}
+        >
+          <button className="p-1 bg-transparent hover:bg-gray-200 cursor-pointer rounded-md">
+            <MoreHorizontal className="w-5 h-5 text-gray-500" />
+          </button>
+        </OrderDetailsModal>
+      );
+    },
   },
 ];
 

@@ -2,6 +2,10 @@
 
 import styled from 'styled-components';
 
+interface ModalOverlayProps {
+  zIndex: number;
+}
+
 export const Dropzone = styled.div`
   border: 2px dashed #ddd;
   border-radius: 10px;
@@ -29,14 +33,14 @@ export const UploadText = styled.p`
   
 `;
 
-export const ModalOverlay = styled.div<{ zIndex: number }>`
+export const ModalOverlay = styled.div<ModalOverlayProps>`
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.6);
-  z-index: ${(props) => props.zIndex};
+  z-index: ${(props: ModalOverlayProps) => props.zIndex};
   display: flex;
   justify-content: center;
   align-items: center;

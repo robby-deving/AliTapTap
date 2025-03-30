@@ -94,8 +94,8 @@ const Modal: React.FC<ModalProps> = ({ isOpen, closeModal }) => {
       } else {
         throw new Error(`Error creating product: ${data.message || 'Unknown error'}`);
       }
-    } catch (error) {
-      console.error('Error uploading product:', error);
+    } catch (err: any) {
+      console.error('Error uploading product:', err);
       setError('Error uploading the product');  
     } finally {
       setLoading(false);  
@@ -127,10 +127,10 @@ const Modal: React.FC<ModalProps> = ({ isOpen, closeModal }) => {
                 color: '#FFFFFF',
                 transition: 'background-color 0.3s ease',
               }}
-              onMouseEnter={(e) => {
+              onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => {
                 e.currentTarget.style.backgroundColor = '#333'; 
               }}
-              onMouseLeave={(e) => {
+              onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => {
                 e.currentTarget.style.backgroundColor = '#E4E4E7'; 
               }}
             >

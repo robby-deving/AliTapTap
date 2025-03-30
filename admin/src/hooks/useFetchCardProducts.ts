@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import io from "socket.io-client";
-
+import { CardDesign } from "@/pages/Products"; // Adjust the import path as necessary
 const useFetchCardProducts = () => {
   const [data, setData] = useState<CardDesign[] | null>(null);
   const [loading, setLoading] = useState(true);

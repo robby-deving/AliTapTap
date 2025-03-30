@@ -13,7 +13,7 @@ interface Material {
   price_per_unit: number;
 }
 
-interface CardDesign {
+export interface CardDesign {
   _id: string;
   front_image: string;
   back_image: string;
