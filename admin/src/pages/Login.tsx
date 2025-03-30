@@ -114,7 +114,7 @@ export default function Login() {
                 </div>
                 <div className="flex justify-between items-center mb-6">
                     <div></div>
-                    <a href="#" className="text-[#949494] hover:text-[#505050]">
+                    <a href="/forgot-password" className="text-[#949494] hover:text-[#505050]">
                         Forgot your password?
                     </a>
                 </div>
