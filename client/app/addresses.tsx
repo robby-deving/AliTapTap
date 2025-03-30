@@ -11,7 +11,7 @@ import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Header } from "../components/Header";
 import InputField from "../components/InputField";
-
+import { base_url } from "@env";
 type Address = {
   _id?: string;
   street: string;
@@ -43,7 +43,7 @@ export default function Addresses() {
   const [zipCode, setZipCode] = useState("");
 
   const router = useRouter();
-  const Base_URL = 'http://192.168.137.1:4000';
+  const Base_URL = `http://${base_url}:4000`;
 
   const loadAddresses = async () => {
     try {

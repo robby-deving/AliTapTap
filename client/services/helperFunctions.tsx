@@ -3,6 +3,7 @@ import { captureRef } from 'react-native-view-shot';
 import axios from 'axios';
 import { ViewStyle, Platform } from 'react-native';
 import * as FileSystem from 'expo-file-system';
+import { base_url } from '@env';
 
 // Define interface for order details
 export type ShippingMethod = {
@@ -57,7 +58,7 @@ interface UserDetails {
   // Add other user properties as needed
 }
 
-const Base_Url = 'http://192.168.137.1:4000';
+const Base_Url = `http://${base_url}:4000`;
 
 const saveCardAsImage = async (cardRef: React.RefObject<ViewStyle>, side: 'front' | 'back'): Promise<void> => {
   try {

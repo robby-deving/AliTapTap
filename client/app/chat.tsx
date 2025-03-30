@@ -18,9 +18,11 @@ import axios from "axios";
 import { uploadImageToChat } from "@/services/helperFunctions";
 import { launchImageLibrary } from "react-native-image-picker";
 import * as ImagePicker from "expo-image-picker";
+import { base_url } from "@env";
+
 
 // Define constants for IP address and host
-const SERVER_IP = "192.168.137.1"; // Change this when needed
+const SERVER_IP = base_url; // Change this when needed
 const SERVER_PORT = "4000";
 const API_BASE_URL = `http://${SERVER_IP}:${SERVER_PORT}`;
 const SOCKET_URL = `http://${SERVER_IP}:${SERVER_PORT}`;

@@ -10,6 +10,7 @@ import { useRouter } from "expo-router";
 import { Header } from "../components/Header";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { base_url } from "@env";
 
 
 interface FormattedOrder {
@@ -32,7 +33,7 @@ export default function Orders() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'To Received' | 'Completed'>('To Received');
-  const Base_Url = 'http://192.168.137.1:4000';
+  const Base_Url = `http://${base_url}:4000`;
 
   useEffect(() => {
     const initializeUser = async () => {

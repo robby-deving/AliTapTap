@@ -16,6 +16,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import Modal from "react-native-modal";
 import { Ionicons } from "@expo/vector-icons";
+import { base_url } from "@env";
 
 // Add this interface at the top of the file, after the imports
 interface User {
@@ -56,7 +57,7 @@ export default function EditProfile() {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [isGenderModalVisible, setIsGenderModalVisible] = useState(false);
-  const Base_Url = 'http://192.168.137.1:4000';
+  const Base_Url = `http://${base_url}:4000`;
 
   useEffect(() => {
     const initializeUser = async () => {

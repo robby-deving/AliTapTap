@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { updateOrderDetails, saveOrderAndTransaction  } from "@/services/helperFunctions";
 import { Svg, Path } from 'react-native-svg';  // Add this import at the top
+import { base_url } from "@env";
 
 type Product = {
   front_image?: string;
@@ -31,7 +32,7 @@ const CardDetails = ({ product }: CardDetailsProps) => {
   const [totalPrice, setTotalPrice] = useState(0);
   const [reviews, setReviews] = useState<Review[]>([]);
   const router = useRouter();
-  const Base_Url = 'http://192.168.137.1:4000';
+  const Base_Url = `http://${base_url}:4000`;
 
 
   // Calculate total price when quantity or material changes

@@ -17,6 +17,7 @@ import { useRouter } from "expo-router";
 import InputField from "../components/InputField";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from 'expo-linear-gradient';
+import { base_url } from '@env';
 
 export default function login() {
     const router = useRouter();
@@ -27,7 +28,7 @@ export default function login() {
     const [checkingAuth, setCheckingAuth] = useState(true);
     const windowHeight = Dimensions.get('window').height;
 
-    const Base_Url = 'http://192.168.137.1:4000';
+    const Base_Url = `http://${base_url}:4000`;
 
     useEffect(() => {
       const checkAuth = async () => {

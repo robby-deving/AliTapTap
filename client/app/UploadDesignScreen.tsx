@@ -4,6 +4,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Header } from "@/components/Header";
 import { saveCardAsImage , updateOrderDetails } from "@/services/helperFunctions";
 import { useRouter } from "expo-router";
+import { base_url } from "@env";
 
 interface Product {
   _id: string;
@@ -27,7 +28,7 @@ const UploadDesignScreen = () => {
 
   const router = useRouter();
 
-  const Base_Url = 'http://192.168.137.1:4000';
+  const Base_Url = `http://${base_url}:4000`;
 
 
   useEffect(() => {

@@ -3,6 +3,7 @@ import {Text, View, Image, TouchableOpacity, KeyboardAvoidingView, Platform, Scr
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { base_url } from '@env';
 
 const InputField = ({ label, placeholder, value, onChangeText, secureTextEntry, toggleSecureEntry, showToggle, error }) => (
   <View className="mb-4">
@@ -92,7 +93,7 @@ export default function ForgotPassword() {
 // Handle email submission for forgot password
 const handleForgotPassword = async () => {
   try {
-    const response = await fetch("http://192.168.137.1:4000/api/v1/auth/forgot-password", {
+    const response = await fetch(`http://${base_url}:4000/api/v1/auth/forgot-password`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email }),
@@ -140,7 +141,7 @@ const handleSetNewPassword = async () => {
   // If no errors, proceed to reset password
   if (!hasError) {
     try {
-      const response = await fetch("http://192.168.137.1:4000/api/v1/auth/reset-password", {
+      const response = await fetch(`http://${base_url}:4000/api/v1/auth/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

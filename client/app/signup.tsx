@@ -17,6 +17,7 @@ import TermsContent from "../components/TermsContent";
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons'; // For the eye icon
 import Modal from 'react-native-modal';
+import { base_url } from '@env';
 
 LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
 
@@ -59,7 +60,7 @@ export default function SignupScreen() {
 
   const router = useRouter();
   const windowHeight = Dimensions.get('window').height;
-  const Base_Url = 'http://192.168.137.1:4000';
+  const Base_Url = `http://${base_url}:4000`;
 
   const handleSignup = async () => {
     if (!isTermsAccepted) {
