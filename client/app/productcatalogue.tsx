@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, FlatList, ScrollView, ActivityIndicator, Modal } from "react-native";
+import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, FlatList, ScrollView, ActivityIndicator, Modal, KeyboardAvoidingView, Platform} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router"; 
 import { HomePageHeader } from "../components/HomePageHeader"; 
@@ -89,6 +89,12 @@ const ProductCatalogue: React.FC = () => {
   }
 
   return (
+    <View className="flex-1 ">
+    <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
+            className="flex-1"
+          >
     <View style={styles.container}>
       {/* Use HomePageHeader here */}
       <HomePageHeader />
@@ -140,7 +146,9 @@ const ProductCatalogue: React.FC = () => {
               ) : (
                 <>
                   {/* Render only the front image */}
-                  <Image source={{ uri: item.front_image }} style={styles.productImage} resizeMode="contain" />
+                  <View className="py-8 px-3 bg-[#F5F5F5] rounded-lg">
+                    <Image source={{ uri: item.front_image }} style={styles.productImage}  />
+                  </View>
                   <View style={styles.productInfo}>
                     <Text style={styles.productName}>{item.name}</Text>
                     <View style={styles.ratingContainer}>
@@ -178,18 +186,21 @@ const ProductCatalogue: React.FC = () => {
         </View>
       </Modal>
     </View>
+    </KeyboardAvoidingView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F5F5" },
+  container: { flex: 1, backgroundColor: "#FFFFFF" },
   centerContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
   searchSection: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginHorizontal: 10,
-    marginVertical: 10,
+    marginHorizontal: 20,
+    marginTop: 20,
+    marginBottom: 10,
   },
   searchContainer: {
     flexDirection: "row",
@@ -222,28 +233,28 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   scrollContainer: { paddingBottom: 20 },
-  banner: { width: "100%", height: 150, alignSelf: "center", marginVertical: 10 },
+  banner: { width: "90%", height: 200, alignSelf: "center", marginVertical: 10, borderRadius: 10 },
   productList: { paddingHorizontal: 15 },
   productCard: {
     width: "45%", 
-    backgroundColor: "#FFF",
+    //backgroundColor: "#FFF",
     margin: 10,
     borderRadius: 12,
-    padding: 20,
+
     justifyContent: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
+    //shadowColor: "#000",
+   // shadowOpacity: 0.1,
+    //shadowOffset: { width: 0, height: 2 },
+    //elevation: 2,
     minHeight: 220, 
   },
   uploadContainer: { height: 100, justifyContent: "center", alignItems: "center" },
   uploadText: { fontSize: 15, fontWeight: "bold", textAlign: "center", marginTop: 8 },
-  productImage: { width: "100%", height: 110, borderRadius: 12 },
+  productImage: { width: "100%", height: 110, borderRadius: 10, resizeMode: "contain"},
   productInfo: { marginTop: 12 },
   productName: { fontSize: 15, fontWeight: "bold", textAlign: "left" },
   ratingContainer: { flexDirection: "row", marginTop: 4 },
-  productPrice: { fontSize: 13, color: "#777", textAlign: "left", marginTop: 2 },
+  productPrice: { fontSize: 14, color: "#777", textAlign: "left", marginTop: 5},
 
   /* Modal Styles */
   modalBackground: {
