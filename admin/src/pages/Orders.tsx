@@ -1,5 +1,4 @@
 // In Orders.js
-import React from 'react';
 import { useEffect, useState } from "react";
 import { Order, columns } from "../components/ui/ordersColumns";
 import { DataTable } from "../components/ui/DataTable";

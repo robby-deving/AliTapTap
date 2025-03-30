@@ -147,6 +147,11 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({ card, onClose, onS
           </div>
 
           <form onSubmit={handleSubmit}>
+            {error && (
+              <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-md">
+                {error}
+              </div>
+            )}
             <div className="mb-4">
               <label className="block text-sm font-medium mb-1 text-left">Product Name</label>
               <Input

@@ -143,20 +143,26 @@ export default function CardDesigns() {
           <h1 className="text-[2.25rem] font-bold">Products</h1>
           <div className="relative flex gap-4">
             {/* Export Button */}
-            <DropdownMenu>
+            <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
               <DropdownMenuTrigger asChild>
                 <ButtonOutline text="Export" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="bg-white border-[#E4E4E7]">
                 <DropdownMenuItem 
-                    onClick={exportToCSV}
-                    className="cursor-pointer hover:bg-gray-100"
+                  onClick={() => {
+                    exportToCSV();
+                    setIsDropdownOpen(false);
+                  }}
+                  className="cursor-pointer hover:bg-gray-100"
                 >
                   Export as CSV
                 </DropdownMenuItem>
                 <DropdownMenuItem 
-                    onClick={exportToPDF}
-                    className="cursor-pointer hover:bg-gray-00"
+                  onClick={() => {
+                    exportToPDF();
+                    setIsDropdownOpen(false);
+                  }}
+                  className="cursor-pointer hover:bg-gray-100"
                 >
                   Export as PDF
                 </DropdownMenuItem>

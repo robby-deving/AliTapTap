@@ -36,9 +36,7 @@ export default function Chats() {
     name: string;
   } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
-  const [pendingImage, setPendingImage] = useState<string | null>(null);
   const { user } = useAuth();
 
 
@@ -259,7 +257,6 @@ export default function Chats() {
       // Don't update messages locally, let the socket handle it
       socket.emit("message", chatMessage);
       setMessage(""); // Clear message input
-      setImage(null);
     } catch (error) {
       console.error("Error sending message:", error);
     }
@@ -477,13 +474,7 @@ export default function Chats() {
               </div>
             ) : (
               <>
-                {pendingImage && (
-                  <div className="flex justify-end mb-2">
-                    <p className="bg-yellow-100 text-black py-2 px-4 rounded-lg max-w-[75%]">
-                      {pendingImage}
-                    </p>
-                  </div>
-                )}
+                
 
                 {messages.map((msg, index) => {
                   const isAdmin = msg.fromAdmin;

@@ -150,6 +150,11 @@ const Modal: React.FC<ModalProps> = ({ isOpen, closeModal }) => {
           </div>
 
           <form onSubmit={handleSubmit}>
+            {error && (
+              <div className="mb-4 p-4 text-red-600 bg-red-100 rounded-md">
+                {error}
+              </div>
+            )}
             <div className="mb-4">
               <label className="block text-sm font-medium mb-1">Product Name</label>
               <Input
