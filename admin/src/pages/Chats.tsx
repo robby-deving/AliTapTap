@@ -8,7 +8,6 @@ const socket = io("http://localhost:4000"); // Backend URL
 
 export default function Chats() {
   const [message, setMessage] = useState("");
-  const [image, setImage] = useState<File | null>(null);
   const [messages, setMessages] = useState<
     {
       senderId: string;
