@@ -111,15 +111,15 @@ const CardDetails = ({ product }: CardDetailsProps) => {
           <Image
             source={{ uri: product?.front_image || "https://via.placeholder.com/300" }} 
             style={styles.productImage}
-            resizeMode="contain"
+            resizeMode="cover" // Use cover to maintain aspect ratio
           />
         </View>
 
         {/* Product Details */}
         
         <View style={styles.detailsContainer}>
-        <Text className="text-2xl pb-2 font-bold">{ product.name}</Text>
-          <Text className="text-xl font-semibold">₱ {totalPrice.toLocaleString()}</Text>
+        <Text className="text-3xl pb-2 font-bold">{ product.name}</Text>
+          <Text className="text-xl font-normal mb-5">₱ {totalPrice.toLocaleString()}</Text>
           <View style={styles.separator} />
 
           {/* Material Selection */}
@@ -158,7 +158,7 @@ const CardDetails = ({ product }: CardDetailsProps) => {
                 <View key={review._id} style={styles.reviewItem}>
                   <Image 
                     source={require('../assets/images/profile-icon.png')} 
-                    style={{ width: 25, height: 25, marginRight: 20, }} />
+                    style={{ width: 30.2, height: 30, marginRight: 15, }} />
                   <View style={styles.reviewContent}>
                     <View style={styles.reviewHeader}>
                       <Text style={styles.reviewerName}>{review.customer_name}</Text>
@@ -216,15 +216,18 @@ const styles = StyleSheet.create({
   imageContainer: { 
     alignItems: "center",  // Center image horizontally
     justifyContent: "center", // Center image vertically
-    marginVertical: 50, 
+    marginVertical: 80,
+    backgroundColor: "#F5F5F5",
     height: 220, // Set a fixed height for the container if necessary
     width: "100%",  // Ensure the container takes full width
+    borderRadius: 10,
+    overflow: "hidden",  // Ensure the image doesn't overflow the container
   },
 
   productImage: { 
-    width: "100%",  // Ensure the image takes up full width of the container
+    width: "90%",  // Ensure the image takes up full width of the container
     height: "100%",  // Image scales to the container's height
-    borderRadius: 12,
+    borderRadius: 10,
   },
 
   detailsContainer: {
@@ -243,7 +246,7 @@ const styles = StyleSheet.create({
 
   /* Yellow Separator */
   separator: {
-    height: 2,
+    height: 1,
     backgroundColor: "#FFE300",
     opacity: 0.5,
     width: "100%",
@@ -252,7 +255,7 @@ const styles = StyleSheet.create({
 
   /* Material Selection */
   label: { 
-    fontSize: 16, 
+    fontSize: 18, 
     fontWeight: "600", 
     marginTop: 10 
   },
@@ -312,7 +315,7 @@ quantityButton: {
 
 
 quantityText: { 
-  fontSize: 16,  
+  fontSize: 18,  
   fontWeight: "bold", 
   minWidth: 60,  
   textAlign: "center",
@@ -335,20 +338,23 @@ editButtonContainer: {
 },
 
   /* Edit Design Button */
-  editButton: {
-    backgroundColor: "#FFC107",
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: "center",
-    width: '100%',
-    height: 50,
-  },
+ editButton: {
+  backgroundColor: "#FFC107",
+  paddingVertical: 12,
+  borderRadius: 8,
+  alignItems: "center", // Centers horizontally
+  justifyContent: "center", // Centers vertically
+  width: '100%',
+  height: 50,
+},
 
-  editButtonText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "white",
-  },
+editButtonText: {
+  fontSize: 16,
+  fontWeight: "bold",
+  color: "white",
+  textAlign: "center", // Ensures text is centered
+},
+
 
   reviewsContainer: {
     width: '100%',
@@ -357,9 +363,9 @@ editButtonContainer: {
     width: '100%',
   },
   reviewsTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '600',
-    marginBottom: 10,
+    marginBottom: 20,
     marginTop: 10,
 
   },
@@ -367,11 +373,12 @@ editButtonContainer: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     width: '100%',
-    marginTop: 10,
+
   },
 
   reviewContent: {
     flex: 1,
+    paddingBottom: 20,
   },
   reviewHeader: {
     flexDirection: 'row',
@@ -380,6 +387,7 @@ editButtonContainer: {
   },
   reviewerName: {
     fontWeight: '500',
+    fontSize: 16,
   },
   reviewDate: {
     color: '#666',
@@ -387,6 +395,7 @@ editButtonContainer: {
 
   reviewText: {
     color: '#333',
+    fontSize: 14,
   },
 });
 
