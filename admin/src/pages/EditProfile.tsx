@@ -29,7 +29,7 @@ export default function AdminProfile() {
         setLoading(true);
         try {
             const token = localStorage.getItem("authToken") || "";
-            const response = await fetch(`http://localhost:4000/api/v1/users/update-admin/${user?._id}`, {
+            const response = await fetch(`https://api.alitaptap.me/api/v1/users/update-admin/${user?._id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",

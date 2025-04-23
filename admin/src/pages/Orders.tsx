@@ -17,7 +17,7 @@ export default function Orders() {
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const response = await axios.get("http://localhost:4000/api/v1/orders/get-user-orders");
+                const response = await axios.get("https://api.alitaptap.me/api/v1/orders/get-user-orders");
                 setData(response.data);
             } catch (err) {
                 setError("Failed to load orders.");

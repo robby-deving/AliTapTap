@@ -15,7 +15,7 @@ export default function ForgotPassword() {
   const handleEmailSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:4000/api/v1/auth/forgot-password", { email });
+      await axios.post("https://api.alitaptap.me/api/v1/auth/forgot-password", { email });
       setStep(2);
     } catch (error) {
       console.error("Error sending password reset email:", error);
@@ -53,7 +53,7 @@ export default function ForgotPassword() {
 
     const pinCode = pin.join("");
     try {
-      await axios.post("http://localhost:4000/api/v1/auth/reset-password", {
+      await axios.post("https://api.alitaptap.me/api/v1/auth/reset-password", {
         email,
         pinCode,
         newPassword: password,

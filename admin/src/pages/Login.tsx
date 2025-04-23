@@ -15,7 +15,7 @@ export default function Login() {
     setIsLoading(true);
     setError("");
     try {
-      const response = await fetch("http://localhost:4000/api/v1/auth/login", {
+      const response = await fetch("https://api.alitaptap.me/api/v1/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
