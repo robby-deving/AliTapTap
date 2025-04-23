@@ -79,7 +79,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, closeModal }) => {
         },
       };
 
-      const response = await fetch('http://localhost:4000/api/v1/card-designs/admin/create', {
+      const response = await fetch('https://api.alitaptap.me/api/v1/card-designs/admin/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -28,7 +28,7 @@ const useFetchCardProducts = () => {
     fetchData();
 
 
-    const socket = io("http://localhost:4000"); 
+    const socket = io("https://api.alitaptap.me"); 
     socket.on("product_deleted", (deletedProduct) => {
       setData((prevData) =>
         prevData ? prevData.filter((product) => product._id !== deletedProduct._id) : prevData
