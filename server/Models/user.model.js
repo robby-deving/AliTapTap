@@ -41,11 +41,11 @@ const userModel = new Schema(
     },
     address: [
       {
-        street: { type: String, required: true },
-        barangay: { type: String, required: true },
-        city: { type: String, required: true },
-        province: { type: String, required: true },
-        zip: { type: String, required: true },
+        street: { type: String, required: false },
+        barangay: { type: String, required: false },
+        city: { type: String, required: false },
+        province: { type: String, required: false },
+        zip: { type: String, required: false },
       },
     ],
     payment_method: [
