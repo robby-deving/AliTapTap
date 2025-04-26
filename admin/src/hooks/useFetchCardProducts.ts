@@ -10,7 +10,7 @@ const useFetchCardProducts = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("http://localhost:4000/api/v1/card-designs/admin/get-card-products");
+        const response = await axios.get("https://api.alitaptap.me/api/v1/card-designs/admin/get-card-products");
 
         const cleanedData = response.data.data.map((product: CardDesign) => {
           const { deleted_at, ...rest } = product; 
@@ -28,7 +28,7 @@ const useFetchCardProducts = () => {
     fetchData();
 
 
-    const socket = io("http://localhost:4000"); 
+    const socket = io("https://api.alitaptap.me"); 
     socket.on("product_deleted", (deletedProduct) => {
       setData((prevData) =>
         prevData ? prevData.filter((product) => product._id !== deletedProduct._id) : prevData

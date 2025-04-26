@@ -1,4 +1,4 @@
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from "@/context/AuthContext";
 
 
@@ -9,6 +9,7 @@ export default function Sidebar() {
     const isProducts = location.pathname === '/products';
     const isChats = location.pathname === '/chats';
     const isLogout = location.pathname === '/logout';
+    const navigate = useNavigate(); // Initialize navigate
     const { logout } = useAuth();
     
 
@@ -95,7 +96,10 @@ export default function Sidebar() {
                     <li className='flex items-center gap-8'>
                         <div className={`h-[60px] w-[6px] rounded-r-lg ${isLogout ? 'bg-[#FEE803]' : 'bg-white'}`}></div>
                         <button 
-                            onClick={logout}
+                            onClick={() => {
+                                logout(); // Call logout function
+                                navigate('/login'); // Redirect to login page
+                            }}
                             className='flex gap-5 cursor-pointer hover:opacity-80'
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25" fill="none">

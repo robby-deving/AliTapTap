@@ -49,7 +49,7 @@ const SalesLineChart = () => {
   useEffect(() => {
     const fetchSalesData = async () => {
       try {
-        const response = await axios.get<SalesData[]>("http://localhost:4000/api/v1/dashboard/sales");
+        const response = await axios.get<SalesData[]>("https://api.alitaptap.me/api/v1/dashboard/sales");
         const fetchedData = response.data;
   
         // Merge fetched data with default months, setting sales to null if missing

@@ -74,7 +74,7 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({ card, onClose, onS
         },
       };
 
-      const res = await fetch(`http://localhost:4000/api/v1/card-designs/admin/update-card-product/${card._id}`, {
+      const res = await fetch(`https://api.alitaptap.me/api/v1/card-designs/admin/update-card-product/${card._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

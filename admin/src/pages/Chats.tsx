@@ -4,7 +4,7 @@ import { uploadImageToChat } from "../hooks/cloudinary.ts";
 import { useAuth } from "@/context/AuthContext";
 
 
-const socket = io("http://localhost:4000"); // Backend URL
+const socket = io("https://api.alitaptap.me/api/v1"); // Backend URL
 
 export default function Chats() {
   const [message, setMessage] = useState("");
@@ -67,7 +67,7 @@ export default function Chats() {
     const fetchSenders = async () => {
       try {
         const response = await fetch(
-          `http://localhost:4000/api/v1/chat/senders/${userId}`
+          `https://api.alitaptap.me/api/v1/chat/senders/${userId}`
         );
         if (!response.ok) throw new Error("Failed to fetch senders");
 
@@ -109,7 +109,7 @@ export default function Chats() {
           data.senders.map(async (sender: any) => {
             console.log("Sender data:", sender); // Debug the sender data to check the timestamp field
             const latestMessageResponse = await fetch(
-              `http://localhost:4000/api/v1/chat/latest/${sender._id}/${userId}`
+              `https://api.alitaptap.me/api/v1/chat/latest/${sender._id}/${userId}`
             );
             const latestMessageData = await latestMessageResponse.json();
 
@@ -156,7 +156,7 @@ export default function Chats() {
         );
 
         const response = await fetch(
-          `http://localhost:4000/api/v1/chat/messages/${selectedSender._id}/${userId}`
+          `https://api.alitaptap.me/api/v1/chat/messages/${selectedSender._id}/${userId}`
         );
 
         if (!response.ok) throw new Error("Failed to fetch messages");
@@ -245,7 +245,7 @@ export default function Chats() {
     };
 
     try {
-      const response = await fetch("http://localhost:4000/api/v1/chat/send", {
+      const response = await fetch("https://api.alitaptap.me/api/v1/chat/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(chatMessage),

@@ -37,7 +37,7 @@ export default function OrderDetailsModal({ order, children, updateOrderInTable 
     try {
       // Call API to update the status
       await axios.put(
-        `http://localhost:4000/api/v1/orders/update-order-status/${order.orderId}/status`,
+        `https://api.alitaptap.me/api/v1/orders/update-order-status/${order.orderId}/status`,
         { order_status: newStatus },
         { headers: { "Content-Type": "application/json" } }
       );
