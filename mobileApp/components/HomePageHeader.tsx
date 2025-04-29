@@ -1,6 +1,6 @@
 // components/HomePageHeader.tsx
 import React from "react";
-import { View, TouchableOpacity, Image, SafeAreaView } from "react-native";
+import { View, TouchableOpacity, Image, SafeAreaView, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import Svg, { Path } from 'react-native-svg';
 
@@ -39,25 +39,27 @@ export const HomePageHeader = () => {
   const router = useRouter();
 
   const handleProfilePress = () => {
-    // Placeholder function for now
     router.push("/profile");
   };
 
   const handleChatPress = () => {
-    // Placeholder function for now
     router.push("/chat");
   };
 
   return (
-    <SafeAreaView style={{ backgroundColor: "#231F20" }}>
-      <View style={{ width: "100%",  backgroundColor: "#231F20", flexDirection: "row", alignItems: "center", justifyContent: "space-between"}} className="p-5 ">
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
         {/* Profile Icon */}
         <TouchableOpacity onPress={handleProfilePress}>
           <ProfileIcon />
         </TouchableOpacity>
 
         {/* Logo */}
-        <Image source={require("../assets/images/logo.png")} style={{ width: 27.61, height: 38 }} resizeMode="contain" />
+        <Image 
+          source={require("../assets/images/logo.png")} 
+          style={styles.logo} 
+          resizeMode="contain" 
+        />
 
         {/* Chat Icon */}
         <TouchableOpacity onPress={handleChatPress}>
@@ -67,3 +69,22 @@ export const HomePageHeader = () => {
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  safeArea: {
+    backgroundColor: "#231F20"
+  },
+  container: {
+    width: "100%",
+    backgroundColor: "#231F20",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 20,
+    paddingTop: 10,
+    paddingBottom: 10},
+  logo: {
+    width: 27.61,
+    height: 38
+  }
+});
