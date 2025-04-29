@@ -14,7 +14,6 @@ import {
 import io, { Socket } from "socket.io-client";
 import { Header } from "../components/Header";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import Vector1 from "../assets/images/Vector1.svg";
 import axios from "axios";
 import { uploadImageToChat } from "@/services/helperFunctions";
 import { launchImageLibrary } from "react-native-image-picker";
@@ -186,29 +185,33 @@ export default function ChatScreen() {
         allowsEditing: true,
         quality: 1,
       });
-  
+
       if (!result.canceled) {
         if (!senderId) {
           console.error("Sender ID is null. Make sure the user is logged in.");
           return;
         }
-  
+
         const uri = result.assets[0].uri;
         console.log("Selected image URI:", uri);
-  
+
         setSendingImage(true); // Show "Sending image..."
-  
+
         try {
           console.log("Uploading image...");
-          const uploadedUrl = await uploadImageToChat(uri, senderId, receiverId);
+          const uploadedUrl = await uploadImageToChat(
+            uri,
+            senderId,
+            receiverId
+          );
           console.log("Uploaded image URL:", uploadedUrl);
-  
+
           if (!uploadedUrl) {
             console.error("Upload failed: No URL returned");
             setSendingImage(false);
             return;
           }
-  
+
           setSendingImage(false); // Remove "Sending image..." indicator
           submitImageMessage(uploadedUrl);
         } catch (error) {
@@ -243,22 +246,27 @@ export default function ChatScreen() {
             keyExtractor={(item, index) => index.toString()}
             renderItem={({ item }) => {
               const isLeftAligned = item.fromAdmin;
-              const isImageMessage = item.isImage || item.message.startsWith("http");
+              const isImageMessage =
+                item.isImage || item.message.startsWith("http");
 
               return (
-                <View style={[
-                  styles.messageRow,
-                  isLeftAligned ? styles.leftAligned : styles.rightAligned
-                ]}>
+                <View
+                  style={[
+                    styles.messageRow,
+                    isLeftAligned ? styles.leftAligned : styles.rightAligned,
+                  ]}
+                >
                   {isImageMessage ? (
-                    <View style={[
-                      styles.imageMessageContainer,
-                      isLeftAligned ? styles.leftMessage : styles.rightMessage
-                    ]}>
+                    <View
+                      style={[
+                        styles.imageMessageContainer,
+                        isLeftAligned
+                          ? styles.leftMessage
+                          : styles.rightMessage,
+                      ]}
+                    >
                       {item.message === "sending" ? (
-                        <Text style={styles.sendingText}>
-                          Sending Image...
-                        </Text>
+                        <Text style={styles.sendingText}>Sending Image...</Text>
                       ) : (
                         <Image
                           source={{ uri: item.message }}
@@ -267,10 +275,14 @@ export default function ChatScreen() {
                       )}
                     </View>
                   ) : (
-                    <Text style={[
-                      styles.messageText,
-                      isLeftAligned ? styles.leftMessage : styles.rightMessage
-                    ]}>
+                    <Text
+                      style={[
+                        styles.messageText,
+                        isLeftAligned
+                          ? styles.leftMessage
+                          : styles.rightMessage,
+                      ]}
+                    >
                       {item.message}
                     </Text>
                   )}
@@ -287,8 +299,18 @@ export default function ChatScreen() {
           />
 
           <View style={styles.inputContainer}>
-            <TouchableOpacity style={styles.attachButton} onPress={handleImagePicker}>
-              <Vector1 width={24} height={20} fill="black" />
+            <TouchableOpacity
+              style={styles.attachButton}
+              onPress={handleImagePicker}
+            >
+              <Image
+                source={require("../assets/images/Vector1.png")} // Use an existing image
+                style={{
+                  width: 24,
+                  height: 20,
+                  resizeMode: "contain", // This preserves aspect ratio
+                }}
+              />
             </TouchableOpacity>
 
             <TextInput
@@ -300,7 +322,10 @@ export default function ChatScreen() {
               onSubmitEditing={submitChatMessage}
             />
 
-            <TouchableOpacity onPress={submitChatMessage} style={styles.sendButton}>
+            <TouchableOpacity
+              onPress={submitChatMessage}
+              style={styles.sendButton}
+            >
               <Image
                 source={require("../assets/images/Vector.png")}
                 style={styles.sendIcon}
@@ -316,53 +341,53 @@ export default function ChatScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
-    position: 'relative'
+    backgroundColor: "white",
+    position: "relative",
   },
   headerContainer: {
-    backgroundColor: '#231F20'
+    backgroundColor: "#231F20",
   },
   keyboardView: {
-    flex: 1
+    flex: 1,
   },
   chatContainer: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     padding: 20,
     paddingBottom: 12,
-    paddingTop: 0
+    paddingTop: 0,
   },
   messageRow: {
-    flexDirection: 'row',
-    marginBottom: 8
+    flexDirection: "row",
+    marginBottom: 8,
   },
   leftAligned: {
-    justifyContent: 'flex-start'
+    justifyContent: "flex-start",
   },
   rightAligned: {
-    justifyContent: 'flex-end'
+    justifyContent: "flex-end",
   },
   imageMessageContainer: {
     padding: 8,
     borderRadius: 16,
-    maxWidth: '75%'
+    maxWidth: "75%",
   },
   leftMessage: {
-    backgroundColor: '#E5E7EB'
+    backgroundColor: "#E5E7EB",
   },
   rightMessage: {
-    backgroundColor: '#FEF9C3'
+    backgroundColor: "#FEF9C3",
   },
   sendingText: {
-    color: '#6B7280',
-    fontStyle: 'italic'
+    color: "#6B7280",
+    fontStyle: "italic",
   },
   chatImage: {
     width: 200,
     height: 200,
-    resizeMode: 'contain',
-    backgroundColor: '#f3f3f3',
-    borderRadius: 12
+    resizeMode: "contain",
+    backgroundColor: "#f3f3f3",
+    borderRadius: 12,
   },
   messageText: {
     padding: 12,
@@ -370,39 +395,39 @@ const styles = StyleSheet.create({
     minHeight: 48,
     fontSize: 20,
     paddingHorizontal: 16,
-    maxWidth: '75%',
-    color: 'black'
+    maxWidth: "75%",
+    color: "black",
   },
   flatListContent: {
     flexGrow: 1,
-    justifyContent: 'flex-end'
+    justifyContent: "flex-end",
   },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '100%',
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
     padding: 8,
     paddingBottom: 0,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB'
+    borderTopColor: "#E5E7EB",
   },
   attachButton: {
-    marginRight: 12
+    marginRight: 12,
   },
   input: {
     flex: 1,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: "#E5E7EB",
     padding: 8,
     borderRadius: 4,
     height: 48,
-    color: '#4B5563'
+    color: "#4B5563",
   },
   sendButton: {
-    marginLeft: 8
+    marginLeft: 8,
   },
   sendIcon: {
     width: 24,
-    height: 20
-  }
+    height: 20,
+  },
 });
