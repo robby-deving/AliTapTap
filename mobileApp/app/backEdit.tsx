@@ -263,7 +263,7 @@ export default function backEdit() {
                 alignItems: 'center',
               }}
             >
-              <Image source={require('../assets/images/delete.png')} className='h-[18px] w-[18px]' />
+              <Image source={require('../assets/images/delete.png')} style={{ width: 18, height: 18 }} />
             </TouchableOpacity>
             {item.text && (
               <TouchableOpacity
@@ -280,7 +280,7 @@ export default function backEdit() {
                   alignItems: 'center',
                 }}
               >
-                <Image source={require('../assets/images/edit.png')} className='h-[15px] w-[15px]' />
+                <Image source={require('../assets/images/edit.png')} style={{width: 15,height: 15,}} className='h-[15px] w-[15px]' />
               </TouchableOpacity>
             )}
             <Animated.View
@@ -297,7 +297,7 @@ export default function backEdit() {
                 alignItems: 'center',
               }}
             >
-              <Image source={require('../assets/images/resize.png')} className='h-[15px] w-[15px]' />
+              <Image source={require('../assets/images/resize.png')} style={{width: 15,height: 15,}} />
             </Animated.View>
           </>
         )}

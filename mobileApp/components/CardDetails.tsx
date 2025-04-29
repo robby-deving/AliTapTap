@@ -118,8 +118,8 @@ const CardDetails = ({ product }: CardDetailsProps) => {
         {/* Product Details */}
         
         <View style={styles.detailsContainer}>
-        <Text className="text-2xl pb-2 font-bold">{ product.name}</Text>
-          <Text className="text-xl font-semibold">₱ {totalPrice.toLocaleString()}</Text>
+          <Text style={styles.productTitle}>{product.name}</Text>
+          <Text style={styles.productPrice}>₱ {totalPrice.toLocaleString()}</Text>
           <View style={styles.separator} />
 
           {/* Material Selection */}
@@ -158,14 +158,15 @@ const CardDetails = ({ product }: CardDetailsProps) => {
                 <View key={review._id} style={styles.reviewItem}>
                   <Image 
                     source={require('../assets/images/profile-icon.png')} 
-                    style={{ width: 25, height: 25, marginRight: 20, }} />
+                    style={styles.reviewerImage} 
+                  />
                   <View style={styles.reviewContent}>
                     <View style={styles.reviewHeader}>
                       <Text style={styles.reviewerName}>{review.customer_name}</Text>
                       <Text style={styles.reviewDate}>{formatDate(review.created_at)}</Text>
                     </View>
-                    <View className="flex-row mb-2" >
-                    {[...Array(5)].map((_, index) => (
+                    <View style={styles.ratingContainer}>
+                      {[...Array(5)].map((_, index) => (
                         <Svg 
                           key={index} 
                           width={12} 
@@ -350,44 +351,63 @@ editButtonContainer: {
     color: "white",
   },
 
+  productTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    paddingBottom: 8
+  },
+  productPrice: {
+    fontSize: 20,
+    fontWeight: '600'
+  },
+  reviewerImage: {
+    width: 25,
+    height: 25,
+    marginRight: 20
+  },
+  ratingContainer: {
+    flexDirection: 'row',
+    marginBottom: 8,
+    gap: 4
+  },
   reviewsContainer: {
-    width: '100%',
+    width: '100%'
   },
   reviewsWrapper: {
-    width: '100%',
+    width: '100%'
   },
   reviewsTitle: {
     fontSize: 16,
     fontWeight: '600',
-    marginBottom: 10,
-    marginTop: 10,
-
+    marginVertical: 10
   },
   reviewItem: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     width: '100%',
-    marginTop: 10,
+    marginTop: 10
   },
-
   reviewContent: {
-    flex: 1,
+    flex: 1
   },
   reviewHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
+    marginBottom: 4
   },
   reviewerName: {
     fontWeight: '500',
+    fontSize: 14
   },
   reviewDate: {
     color: '#666',
+    fontSize: 14
   },
-
   reviewText: {
     color: '#333',
-  },
+    fontSize: 14
+  }
 });
 
 export default CardDetails;

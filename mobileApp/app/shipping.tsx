@@ -306,9 +306,10 @@ const styles = StyleSheet.create({
     marginTop: 20
   },
   stepperText: {
-    marginTop: 20,
-    marginBottom: 20,
-    color: '#696969'
+    marginTop: 5,
+    marginBottom: 5,
+    color: '#696969',
+    fontSize: 12
   },
   inputContainer: {
     width: '100%',
@@ -317,8 +318,7 @@ const styles = StyleSheet.create({
   labelText: {
     color: 'black',
     fontWeight: '600',
-    marginBottom: 8,
-    fontSize: 16
+    fontSize: 14
   },
   addressButton: {
     borderWidth: 1,
@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    justifyContent: 'end',
+    justifyContent: 'flex-end',
     backgroundColor: 'rgba(0, 0, 0, 0.5)'
   },
   modalContent: {
