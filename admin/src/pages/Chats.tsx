@@ -4,7 +4,7 @@ import { uploadImageToChat } from "../hooks/cloudinary.ts";
 import { useAuth } from "@/context/AuthContext";
 
 
-const socket = io("https://api.alitaptap.me/api/v1"); // Backend URL
+//const socket = io("https://api.alitaptap.me/api/v1"); // Backend URL
 
 export default function Chats() {
   const [message, setMessage] = useState("");
@@ -37,7 +37,7 @@ export default function Chats() {
   const [searchQuery, setSearchQuery] = useState("");
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
   const { user } = useAuth();
-
+  const [socket, setSocket] = useState<any>(null);
 
   const userId = user?._id // Logged-in user's ID
   console.log("userId:", userId); // Debugging
@@ -51,6 +51,34 @@ export default function Chats() {
       });
     }
   };
+
+  useEffect(() => {
+    // Keep the same URL
+    const newSocket = io("https://api.alitaptap.me/api/v1", {
+      transports: ['websocket', 'polling'], // Try WebSocket first, fallback to polling
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+      timeout: 10000
+    });
+    
+    // Add event handlers
+    newSocket.on('connect', () => {
+      console.log('Socket connected:', newSocket.id);
+    });
+    
+    newSocket.on('connect_error', (error) => {
+      console.error('Socket connection error:', error);
+      // You could set a state here to show a connection error UI
+    });
+    
+    // Store socket in state
+    setSocket(newSocket);
+    
+    // Clean up on unmount
+    return () => {
+      newSocket.disconnect();
+    };
+  }, []);
 
   // Run effect when messages update
   useEffect(() => {
@@ -218,55 +246,78 @@ export default function Chats() {
     }
   };
 
-  const sendMessage = async (uploadedImageUrl: string = "") => {
+    const sendMessage = async (uploadedImageUrl: string = "") => {
     console.log("Sending message with image URL:", uploadedImageUrl);
-
+  
     const trimmedMessage = message.trim();
     const finalMessage = trimmedMessage || uploadedImageUrl; // Use image URL if no text
-
+  
     if (!finalMessage) return; // Prevent sending empty messages
-
+  
     if (!selectedSender?._id || !userId) {
       console.error("Missing sender or receiver ID");
       return;
     }
-
+  
+    // Keep these IDs as they are - this is correct based on your explanation
     const chatMessage = {
-      senderId: selectedSender._id,
-      receiverId: userId,
-      message: finalMessage, // Ensure message always has content
-      fromAdmin: true,
+      senderId: selectedSender._id, // Mobile user is sender
+      receiverId: userId,          // Admin is receiver
+      message: finalMessage,        
+      fromAdmin: true,             // This flag indicates message is from admin
+      timestamp: new Date().toISOString() // Add timestamp for ordering
     };
-
+  
+    // 👇 THIS IS THE CRITICAL FIX - OPTIMISTIC UI UPDATE
+    // Add message to UI immediately, so you see it right away
+    setMessages(prevMessages => [
+      ...prevMessages, 
+      {
+        ...chatMessage,
+        // Invert the "fromAdmin" flag for display purposes
+        // Since the API uses "fromAdmin: true" to indicate message is FROM admin
+        // But in your UI, we need to know if it's TO BE DISPLAYED as an admin message
+        fromAdmin: true  
+      }
+    ]);
+    
+    // Clear input immediately for better UX
+    setMessage("");
+  
     try {
       const response = await fetch("https://api.alitaptap.me/api/v1/chat/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(chatMessage),
       });
-
+  
       if (!response.ok) throw new Error("Failed to send message");
-
-      // Don't update messages locally, let the socket handle it
-      socket.emit("message", chatMessage);
-      setMessage(""); // Clear message input
+  
+      // Still emit to socket if available, but UI is already updated
+      if (socket) {
+        socket.emit("message", chatMessage);
+      }
     } catch (error) {
       console.error("Error sending message:", error);
+      // Optionally: Add error handling like showing a failed indicator on the message
     }
   };
 
   useEffect(() => {
-    socket.on("message", (msg) => {
-      console.log("New message received via socket:", msg); // Debugging
-      if (!msg || typeof msg !== "object" || (!msg.message && !msg.imageUrl))
-        return;
+    if (!socket) return;
+    
+    const handleMessage = (msg: any) => {
+      console.log("New message received via socket:", msg);
+      if (!msg || typeof msg !== "object" || (!msg.message && !msg.imageUrl)) return;
       setMessages((prevMessages) => [...prevMessages, msg]);
-    });
-
-    return () => {
-      socket.off("message");
     };
-  }, []);
+    
+    socket.on("message", handleMessage);
+    
+    return () => {
+      socket.off("message", handleMessage);
+    };
+  }, [socket]);
 
   //   const testUpload = async () => {
   //   const input = document.createElement("input");

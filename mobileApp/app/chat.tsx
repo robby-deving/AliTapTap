@@ -39,7 +39,7 @@ export default function ChatScreen() {
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const [sendingImage, setSendingImage] = useState(false);
 
-  useEffect(() => {
+    useEffect(() => {
     const fetchMessages = async () => {
       try {
         const storedSenderId = await AsyncStorage.getItem("userId");
@@ -48,43 +48,56 @@ export default function ChatScreen() {
           return;
         }
         setSenderId(storedSenderId);
-
+    
         const response = await fetch(
           `${API_BASE_URL}/api/v1/chat/messages/${storedSenderId}/${receiverId}`
         );
         const data = await response.json();
+        
         if (response.ok) {
           setMessages(data.messages);
+        } else if (response.status === 404) {
+          // This is normal for new users - no existing messages
+          console.log("No previous messages found. Start a new conversation!");
+          
+          // Add welcome message immediately for new users
+          setMessages([{
+            senderId: receiverId,
+            receiverId: storedSenderId,
+            message: "Welcome to AliTapTap! How can we help you today?",
+            fromAdmin: true
+          }]);
         } else {
-          console.error("Failed to fetch messages:", data);
+          console.error("Error fetching messages:", data.message);
         }
       } catch (error) {
-        console.error("Error fetching messages:", error);
+        console.error("Network error fetching messages:", error);
       }
     };
-
+  
     fetchMessages();
-
+  
+    // Set up interval to fetch messages but with a reasonable delay
+    const intervalId = setInterval(() => {
+      fetchMessages();
+    }, 5000); // Changed to 5 seconds to reduce API load
+  
     const newSocket = io(SOCKET_URL);
     setSocket(newSocket);
-
+  
     newSocket.on("connect", () => {
       console.log("✅ Connected to server");
     });
-
+  
+    // Handle incoming socket messages
     newSocket.on("message", (msg) => {
       console.log("Received message:", msg);
-
-      // Ensure the message is not already in the state
-      setMessages((prevMessages) => {
-        if (!prevMessages.some((m) => m.message === msg.message)) {
-          return [...prevMessages, msg];
-        }
-        return prevMessages;
-      });
+      // Add new messages from socket to our messages array
+      setMessages(prevMessages => [...prevMessages, msg]);
     });
-
+  
     return () => {
+      clearInterval(intervalId);
       newSocket.disconnect();
     };
   }, []);
