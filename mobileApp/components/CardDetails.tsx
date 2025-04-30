@@ -341,6 +341,7 @@ editButtonContainer: {
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: "center",
+    justifyContent: "center",
     width: '100%',
     height: 50,
   },
@@ -349,6 +350,8 @@ editButtonContainer: {
     fontSize: 16,
     fontWeight: "bold",
     color: "white",
+    textAlign: "center",  
+    textAlignVertical: "center", 
   },
 
   productTitle: {
