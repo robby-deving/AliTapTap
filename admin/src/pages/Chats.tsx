@@ -144,33 +144,27 @@ export default function Chats() {
 
   // Fetch chat messages when a sender is selected
   useEffect(() => {
-    if (!selectedSender) return;
-
+    if (!selectedSender || !userId) return;
+  
     const fetchMessages = async () => {
       try {
-        console.log(
-          "Fetching messages for sender:",
-          selectedSender._id,
-          "and receiver:",
-          userId
-        );
-
         const response = await fetch(
           `https://api.alitaptap.me/api/v1/chat/messages/${selectedSender._id}/${userId}`
         );
-
+  
         if (!response.ok) throw new Error("Failed to fetch messages");
-
+  
         const data = await response.json();
-        console.log("Fetched messages:", data);
-
         setMessages(data.messages || []);
       } catch (error) {
         console.error("Error fetching messages:", error);
       }
     };
-
-    fetchMessages();
+  
+    fetchMessages(); // initial fetch
+    const interval = setInterval(fetchMessages, 1000); // fetch every second
+  
+    return () => clearInterval(interval); // cleanup
   }, [selectedSender, userId]);
 
   // Function to handle search input changes
