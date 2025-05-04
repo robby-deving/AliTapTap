@@ -163,23 +163,15 @@ export default function ForgotPassword() {
 
   return (
     <View style={styles.container}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
-        style={styles.keyboardView}
-      >
-        <ScrollView
-          contentContainerStyle={[
-            styles.scrollContent,
-            { minHeight: windowHeight }
-          ]}
-          keyboardShouldPersistTaps="handled"
-          bounces={false}
-        >
-          <LinearGradient
-            colors={['#FFE300', '#FFFFFF', '#FFFFFF', '#FFFFFF']}
-            style={styles.gradient}
-          >
+      <ScrollView
+    contentContainerStyle={styles.scrollContent}
+    keyboardShouldPersistTaps="handled"
+    keyboardDismissMode="on-drag"
+  >
+    <LinearGradient
+      colors={['#FFE300', '#FFFFFF', '#FFFFFF', '#FFFFFF']}
+      style={styles.gradient}
+    >
             <View style={styles.contentContainer}>
               <Image
                 source={require('../assets/images/logo_b.png')}
@@ -324,7 +316,6 @@ export default function ForgotPassword() {
             </View>
           </LinearGradient>
         </ScrollView>
-      </KeyboardAvoidingView>
     </View>
   );
 }
@@ -333,9 +324,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#2C2C2C'
-  },
-  keyboardView: {
-    flex: 1
   },
   scrollContent: {
     flexGrow: 1
